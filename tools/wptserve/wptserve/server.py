@@ -668,6 +668,9 @@ class H2Headers(Dict[bytes, bytes]):
     def getallmatchingheaders(self, header):
         return ['dummy function']
 
+    def get_all(self, header):
+        return ['dummy function']
+
 
 class H2HandlerCopy:
     def __init__(self, handler, req_frame, rfile):
