@@ -29,16 +29,34 @@ def recursive_compare(expected: Any, actual: Any) -> None:
     assert expected == actual
 
 
-def any_string(actual: Any) -> None:
-    assert isinstance(actual, str)
+def any_bool(actual: Any) -> None:
+    assert isinstance(actual, bool)
+
+
+def any_dict(actual: Any) -> None:
+    assert isinstance(actual, dict)
 
 
 def any_int(actual: Any) -> None:
     assert isinstance(actual, int)
 
 
+def any_int_or_null(actual: Any) -> None:
+    if actual is not None:
+        any_int(actual)
+
+
 def any_list(actual: Any) -> None:
     assert isinstance(actual, list)
+
+
+def any_string(actual: Any) -> None:
+    assert isinstance(actual, str)
+
+
+def any_string_or_null(actual: Any) -> None:
+    if actual is not None:
+        any_string(actual)
 
 
 def int_interval(start: int, end: int) -> Callable[[Any], None]:
@@ -49,6 +67,10 @@ def int_interval(start: int, end: int) -> Callable[[Any], None]:
     return _
 
 
+def positive_int(actual: Any) -> None:
+    assert isinstance(actual, int) and actual > 0
+
+
 async def create_console_api_message(bidi_session, context, text):
     await bidi_session.script.call_function(
         function_declaration="""(text) => console.log(text)""",
@@ -57,3 +79,43 @@ async def create_console_api_message(bidi_session, context, text):
         target=ContextTarget(context["context"]),
     )
     return text
+
+
+async def get_device_pixel_ratio(bidi_session, context):
+    """Get the DPR of the context.
+
+    :param bidi_session: BiDiSession
+    :param context: Browsing context ID
+    :returns: (float) devicePixelRatio.
+    """
+    result = await bidi_session.script.call_function(
+        function_declaration="""() => {
+        return window.devicePixelRatio;
+    }""",
+        target=ContextTarget(context["context"]),
+        await_promise=False)
+    return result["value"]
+
+
+async def get_viewport_dimensions(bidi_session, context):
+    expression = """
+        ({
+          height: window.innerHeight || document.documentElement.clientHeight,
+          width: window.innerWidth || document.documentElement.clientWidth,
+        });
+    """
+    result = await bidi_session.script.evaluate(
+        expression=expression,
+        target=ContextTarget(context["context"]),
+        await_promise=False,
+    )
+
+    return remote_mapping_to_dict(result["value"])
+
+
+def remote_mapping_to_dict(js_object):
+    obj = {}
+    for key, value in js_object:
+        obj[key] = value["value"]
+
+    return obj

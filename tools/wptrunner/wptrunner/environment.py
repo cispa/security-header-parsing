@@ -93,7 +93,8 @@ class TestEnvironment:
     websockets servers"""
     def __init__(self, test_paths, testharness_timeout_multipler,
                  pause_after_test, debug_test, debug_info, options, ssl_config, env_extras,
-                 enable_webtransport=False, mojojs_path=None, inject_script=None):
+                 enable_webtransport=False, mojojs_path=None, inject_script=None,
+                 suppress_handler_traceback=None):
 
         self.test_paths = test_paths
         self.server = None
@@ -117,6 +118,7 @@ class TestEnvironment:
         self.enable_webtransport = enable_webtransport
         self.mojojs_path = mojojs_path
         self.inject_script = inject_script
+        self.suppress_handler_traceback = suppress_handler_traceback
 
     def __enter__(self):
         server_log_handler = self.server_logging_ctx.__enter__()
@@ -213,6 +215,9 @@ class TestEnvironment:
         config.doc_root = serve_path(self.test_paths)
         config.inject_script = self.inject_script
 
+        if self.suppress_handler_traceback is not None:
+            config.logging["suppress_handler_traceback"] = self.suppress_handler_traceback
+
         return config
 
     def get_routes(self):
@@ -223,7 +228,7 @@ class TestEnvironment:
 
         for path, format_args, content_type, route in [
                 ("testharness_runner.html", {}, "text/html", "/testharness_runner.html"),
-                ("print_reftest_runner.html", {}, "text/html", "/print_reftest_runner.html"),
+                ("print_pdf_runner.html", {}, "text/html", "/print_pdf_runner.html"),
                 (os.path.join(here, "..", "..", "third_party", "pdf_js", "pdf.js"), None,
                  "text/javascript", "/_pdf_js/pdf.js"),
                 (os.path.join(here, "..", "..", "third_party", "pdf_js", "pdf.worker.js"), None,

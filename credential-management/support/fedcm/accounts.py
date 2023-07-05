@@ -10,6 +10,8 @@ def main(request, response):
   if request.headers.get(b"Origin"):
     return (534, [], "Should not have Origin")
 
+  response.headers.set(b"Content-Type", b"application/json")
+
   return """
 {
  "accounts": [{
@@ -18,7 +20,8 @@ def main(request, response):
    "name": "John Doe",
    "email": "john_doe@idp.example",
    "picture": "https://idp.example/profile/123",
-   "approved_clients": ["123", "456", "789"]
+   "approved_clients": ["123", "456", "789"],
+   "login_hints": ["john_doe"]
   }]
 }
 """

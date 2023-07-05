@@ -48,17 +48,24 @@ class PrefetchAgent extends RemoteContext {
     return new Promise(resolve => this.t.step_timeout(resolve, 2000));
   }
 
-  async navigate(url) {
+  // `url` is the URL to navigate.
+  //
+  // `expectedDestinationUrl` is the expected URL after navigation.
+  // When omitted, `url` is used.
+  async navigate(url, {expectedDestinationUrl} = {}) {
     await this.execute_script((url) => {
       window.executor.suspend(() => {
         location.href = url;
       });
     }, [url]);
-    url.username = '';
-    url.password = '';
+    if (!expectedDestinationUrl) {
+      expectedDestinationUrl = url;
+    }
+    expectedDestinationUrl.username = '';
+    expectedDestinationUrl.password = '';
     assert_equals(
         await this.execute_script(() => location.href),
-        url.toString(),
+        expectedDestinationUrl.toString(),
         "expected navigation to reach destination URL");
     await this.execute_script(() => {});
   }
@@ -115,11 +122,6 @@ function getPrefetchUrlList(n) {
   return Array.from({ length: n }, () => getPrefetchUrl());
 }
 
-function getRedirectUrl() {
-  let params = new URLSearchParams({uuid: token()});
-  return new URL(`redirect.py?${params}`, SR_PREFETCH_UTILS_URL);
-}
-
 async function isUrlPrefetched(url) {
   let response = await fetch(url, {redirect: 'follow'});
   assert_true(response.ok);
@@ -129,7 +131,7 @@ async function isUrlPrefetched(url) {
 // Must also include /common/utils.js and /common/dispatcher/dispatcher.js to use this.
 async function spawnWindow(t, options = {}, uuid = token()) {
   let agent = new PrefetchAgent(uuid, t);
-  let w = window.open(agent.getExecutorURL(options), options);
+  let w = window.open(agent.getExecutorURL(options), '_blank', options);
   t.add_cleanup(() => w.close());
   return agent;
 }
@@ -157,6 +159,7 @@ function insertDocumentRule(predicate, extra_options={}) {
   insertSpeculationRules({
     prefetch: [{
       source: 'document',
+      eagerness: 'eager',
       where: predicate,
       ...extra_options
     }]
