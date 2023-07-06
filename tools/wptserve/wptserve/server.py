@@ -346,7 +346,8 @@ class Http2WebTestRequestHandler(BaseWebTestRequestHandler):
         time, a UUID is created for each so that it is easier to tell them apart in the logs.
         """
 
-        config = H2Configuration(client_side=False)
+        # config = H2Configuration(client_side=False,validate_outbound_headers=False,normalize_outbound_headers=False)
+        config = H2Configuration(client_side=False,validate_outbound_headers=False,validate_inbound_headers=False)
         self.conn = H2ConnectionGuard(H2Connection(config=config))
         self.close_connection = False
 
