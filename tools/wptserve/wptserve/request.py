@@ -332,7 +332,7 @@ class Request:
             params = parse_qsl(self.url_parts.query, **kwargs)
             self._GET = MultiDict()
             for key, value in params:
-                self._GET.add(isomorphic_encode(key), isomorphic_encode(value))
+                self._GET.add(key, value)
         return self._GET
 
     @property
