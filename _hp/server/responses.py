@@ -2,13 +2,10 @@
 from wptserve.handlers import handler
 from _hp.tools.models import Response, Session, SECRET
 
-def get_response(params):
+def get_response(resp_id):
     with Session() as session:
-        uid_header = params['pair']
-        header_name = params['test']
-        print(uid_header)
         try:
-            response = session.query(Response).filter_by(id=uid_header).first()
+            response = session.query(Response).filter_by(id=resp_id).first()
             print(response.raw_header)
         except Exception as e:
             print(e)
@@ -19,14 +16,15 @@ def get_response(params):
 def main(request, response):
     params = request.GET
     print(params)
-    response = get_response(params)
-    header_name = params['test']
+    response = get_response(params["resp_id"])
+    # Which response content to load?
+    feature_group = params['feature_group']
 
     file = open("_hp/common/iframes.html","rb")
-    if header_name in ['rp','pp','coop']:
-        file = open(f"{header_name}/{header_name}.html","rb")
-    elif header_name in ['coep','oac']:
-        file = open(f"{header_name}/{header_name}test.html","rb")
-    elif header_name=='corp':
+    if feature_group in ['rp','pp','coop']:
+        file = open(f"{feature_group}/{feature_group}.html","rb")
+    elif feature_group in ['coep','oac']:
+        file = open(f"{feature_group}/{feature_group}test.html","rb")
+    elif feature_group=='corp':
         file = open("corp/swag.jpg","rb")
     return response.status_code, response.raw_header, file

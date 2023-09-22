@@ -1,8 +1,8 @@
 {
     "ports": {
-        "http": [1234, "auto"],
+        "http": [8080, "auto"],
         "https": [8443, 8444],
-        "h2": [5678]
+        "h2": [9000]
       },
       "browser_host": "headers.websec.saarland",
       "alternate_hosts": {

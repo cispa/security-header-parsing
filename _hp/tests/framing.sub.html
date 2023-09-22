@@ -53,9 +53,9 @@ function xfo_test({ url, response, message }) {
 
 
 for (var test of test_declarations) {
-	const url = document.location.origin + '/_hp/server/responses.py?test=xfo&pair=';
-	const suburl = `http://{{domains[sub]}}:{{ports[http][0]}}/_hp/server/responses.py?test=xfo&pair=`;
-	const randomurl = `http://{{hosts[alt][]}}:{{ports[http][0]}}/_hp/server/responses.py?test=xfo&pair=`;
+	const url = document.location.origin + '/_hp/server/responses.py?feature_group=framing&resp_id=';
+	const suburl = `http://{{domains[sub]}}:{{ports[http][0]}}/_hp/server/responses.py?feature_group=framing&resp_id=`;
+	const randomurl = `http://{{hosts[alt][]}}:{{ports[http][0]}}/_hp/server/responses.py?feature_group=framing&resp_id=`;
 	// TODO: decide which responses to run on, ...
 	var response = 1;
 	for (var u of [url, suburl, randomurl]) {

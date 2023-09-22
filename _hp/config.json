@@ -1,8 +1,4 @@
 {
-    "SAME_ORIGIN": "headers.websec.saarland",
-    "SUB_SAME_ORIGIN": "sub.headers.websec.saarland",
-    "CROSS_ORIGIN": "headers.webappsec.eu",
-    "SUB_CROSS_ORIGIN": "sub.headers.webappsec.eu",
     "DB_URL": "postgresql+psycopg2://sectec@localhost:5432/http_header",
     "SECRET": "swagisthebest",
     "HEADERS": [

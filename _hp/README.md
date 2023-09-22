@@ -5,7 +5,34 @@
 - Run `./wpt serve --config _hp/wpt_config.json`
 - DB setup: `cd _hp/tools`, `python models.py`
 - ...
-- Visit: http://headers.websec.saarland:1234/_hp/tests/framing.sub.html
+- Visit: http://headers.websec.saarland:8080/_hp/tests/framing.sub.html
+    - (HTTPS: 8443, HTTP2: 9000)
+- TODOs:
+    - setup container on 01 + rules to forward the traffic there
+    - implement tests for each feature group
+    - ...
+
+- Inventory:
+    - config.json: DB connection and co.
+    - wpt-config.json: Ports, Domains, .. TODO: How to configure subdomains and certs? currently hardcoded in tools/serve/serve.py
+    - common/: Shared files for the tests (images, html, ...)
+    - ressources/: Shared javascript files for the tests (testharness, save_results, ...)
+    - server/
+        - responses.py: Serves the correct responses from the db (responses.py?resp_id=<int>&feature_group=<str>)
+        - store_results.py: Stores the test results in the db (expects JSON with {tests: [...], browser=browser_id})
+    - tests/
+        - One file for each feature group to test
+        - Create one testcase for everything one wants to test
+        - Then run these for all corresponding responses and relevant origin configurations
+        - TODO: decide/fix how to provide parameters to the tests: Maybe http://headers.websec.saarland:1234/_hp/tests/framing.sub.html?browser=browser_id&start_id=start_id&end_id=end_id 
+        - TODO: find out how to save test metadata (e.g., resp_id) and how to also store that in the db
+    - tools/
+        - Non Web files
+        - crawler/ The code for the crawlers that visit the tests
+        - models.py: Defines the database models (results, rseponses, ...); creates dummy date if run directly
+        - TODO: create_responses.py
+            - First create two responses for each feature group: "deny" and "allow" for testing the tests
+            - Later create useful data for responses
 
 Old stuff below, TODO: update?
 ---
