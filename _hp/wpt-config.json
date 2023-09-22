@@ -1,0 +1,11 @@
+{
+    "ports": {
+        "http": [1234, "auto"],
+        "https": [8443, 8444],
+        "h2": [5678]
+      },
+      "browser_host": "headers.websec.saarland",
+      "alternate_hosts": {
+          "alt": "headers.webappsec.eu"
+      }
+}

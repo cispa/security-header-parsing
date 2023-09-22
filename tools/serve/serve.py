@@ -970,7 +970,7 @@ _subdomains = {"www",
                "www2",
                "天気の良い日",
                "élève"}
-# TODO override in config file?
+# TODO: how to override subdomains in the config file?
 _subdomains = {"sub"}
 
 _not_subdomains = {"nonexistent"}
@@ -987,10 +987,9 @@ class ConfigBuilder(config.ConfigBuilder):
     """
 
     _default = {
-        # TODO: figure out how to override this with a config file instead of hardcoding?
-        "browser_host": "headers.websec.saarland", #"web-platform.test",
+        "browser_host": "web-platform.test",
         "alternate_hosts": {
-            "alt": "headers.webappsec.eu", #"not-web-platform.test"
+            "alt": "not-web-platform.test"
         },
         "doc_root": repo_root,
         "ws_doc_root": os.path.join(repo_root, "websockets", "handlers"),
@@ -1020,7 +1019,7 @@ class ConfigBuilder(config.ConfigBuilder):
                 "base_conf_path": None
             },
             "pregenerated": {
-                # TODO: fix certs?!
+                # TODO: fix certs?! how to override them?
                 "host_key_path": os.path.join(repo_root, "tools", "certs", "web-platform.test.key"),
                 "host_cert_path": os.path.join(repo_root, "tools", "certs", "web-platform.test.pem")
             },

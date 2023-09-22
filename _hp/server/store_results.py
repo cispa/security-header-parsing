@@ -1,7 +1,7 @@
 from wptserve.handlers import json_handler
 import json
-from models import Result
-from models import Session, SECRET
+from _hp.tools.models import Result
+from _hp.tools.models import Session, SECRET
 
     
 @json_handler

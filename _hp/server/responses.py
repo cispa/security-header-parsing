@@ -1,6 +1,6 @@
 # These need to be called in this specific order... as there are conflicting functions in both the classes
 from wptserve.handlers import handler
-from models import Response, Session, SECRET
+from _hp.tools.models import Response, Session, SECRET
 
 def get_response(params):
     with Session() as session:
@@ -22,7 +22,7 @@ def main(request, response):
     response = get_response(params)
     header_name = params['test']
 
-    file = open("../testing_server/static/iframes.html","rb")
+    file = open("_hp/common/iframes.html","rb")
     if header_name in ['rp','pp','coop']:
         file = open(f"{header_name}/{header_name}.html","rb")
     elif header_name in ['coep','oac']:

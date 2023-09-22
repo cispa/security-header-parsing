@@ -1,9 +1,9 @@
 # HTTP Header Security
 
 - Install WPT
-- Run `./wpt serve --config _hp/wpt_config.json
 - Update config files
-- Visit: https://headers.websec.saarland/_hp_tests/framing.html
+- Run `./wpt serve --config _hp/wpt_config.json``
+- Visit: https://headers.websec.saarland:8443/_hp/tests/framing.html
 
 Old stuff below, TODO: update?
 ---
