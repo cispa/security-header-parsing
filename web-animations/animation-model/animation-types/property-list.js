@@ -575,6 +575,12 @@ const gCSSProperties1 = {
       { type: 'discrete', options: [ [ 'full-width', 'proportional-width' ] ] }
     ]
   },
+  'font-variant-emoji': {
+    // https://drafts.csswg.org/css-fonts/#propdef-font-variant-emoji
+    types: [
+      { type: 'discrete', options: [ [ 'text', 'emoji' ] ] }
+    ]
+  },
   'font-variant-ligatures': {
     // https://drafts.csswg.org/css-fonts-3/#propdef-font-variant-ligatures
     types: [
@@ -1282,7 +1288,7 @@ const gCSSProperties2 = {
   'text-autospace': {
     // https://drafts.csswg.org/css-text-4/#text-spacing-property
     types: [
-      { type: 'discrete', options: [ [ 'auto', 'no-autospace' ] ] }
+      { type: 'discrete', options: [ [ 'normal', 'no-autospace' ] ] }
     ]
   },
   'text-decoration-color': {
