@@ -2,8 +2,10 @@
 
 - Install WPT
 - Update config files
-- Run `./wpt serve --config _hp/wpt_config.json``
-- Visit: https://headers.websec.saarland:8443/_hp/tests/framing.html
+- Run `./wpt serve --config _hp/wpt_config.json`
+- DB setup: `cd _hp/tools`, `python models.py`
+- ...
+- Visit: http://headers.websec.saarland:1234/_hp/tests/framing.sub.html
 
 Old stuff below, TODO: update?
 ---

@@ -1,16 +1,21 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Framing Tests</title>
+  <script src="/_hp/ressources/testharness.js"></script>
+  <script src="/_hp/ressources/testharnessreport.js"></script>
+  <script src="/_hp/ressources/store_results.sub.js"></script>
+</head>
 
-{% block test_declarations %}
-// TODO: better put in an a js file and load it into the template rather then extending the base?
-function simple_framing(testcase, url) {
-    const ifr = document.createElement('iframe');
-    ifr.src = url + testcase;
-    ifr.style = "display: none";
-    document.body.appendChild(ifr);
-}
+<body>
 
-//var test_declarations = [simple_framing];
+</body>
 
+
+<script>
 function xfo_test({ url, response, message }) {
     console.log(url, response, message);
     async_test(t => {
@@ -46,4 +51,18 @@ function xfo_test({ url, response, message }) {
   
   var test_declarations = [xfo_test];
 
-{% endblock %}
+
+for (var test of test_declarations) {
+	const url = document.location.origin + '/_hp/server/responses.py?test=xfo&pair=';
+	const suburl = `http://{{domains[sub]}}:{{ports[http][0]}}/_hp/server/responses.py?test=xfo&pair=`;
+	const randomurl = `http://{{hosts[alt][]}}:{{ports[http][0]}}/_hp/server/responses.py?test=xfo&pair=`;
+	// TODO: decide which responses to run on, ...
+	var response = 1;
+	for (var u of [url, suburl, randomurl]) {
+		test({url: u, response: response, message: `XFO-${u}-${response}`});
+	}
+}
+
+
+</script>
+</html>
