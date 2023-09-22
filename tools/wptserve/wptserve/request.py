@@ -8,7 +8,7 @@ from http.cookies import BaseCookie
 from io import BytesIO
 from typing import Dict, List, TypeVar
 from urllib.parse import parse_qsl, urlsplit
-
+import requests
 from . import stash
 from .utils import HTTPException, isomorphic_encode, isomorphic_decode
 
@@ -294,7 +294,6 @@ class Request:
             self.url = "%s://%s:%s%s" % (
                 scheme, host, port, self.request_path)
         self.url_parts = urlsplit(self.url)
-
         self.request_line = request_handler.raw_requestline
 
         self.raw_input = InputFile(request_handler.rfile,
@@ -329,7 +328,8 @@ class Request:
                 "keep_blank_values": True,
                 "encoding": "iso-8859-1",
             }
-            params = parse_qsl(self.url_parts.query, **kwargs)
+            final_query =requests.utils.unquote(self.url_parts.query)
+            params = parse_qsl(final_query, **kwargs)
             self._GET = MultiDict()
             for key, value in params:
                 self._GET.add(key, value)
