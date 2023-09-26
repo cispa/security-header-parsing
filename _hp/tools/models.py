@@ -10,9 +10,9 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 # Setup the config
 try:
-    proj_config= json.load(open("../config.json"))
+    proj_config= json.load(open("config.json"))
 except OSError:
-    proj_config= json.load(open("_hp/config.json"))
+    proj_config= json.load(open("_hp/tools/config.json"))
 
 DB_URL = proj_config['DB_URL']
 SECRET = proj_config['SECRET']

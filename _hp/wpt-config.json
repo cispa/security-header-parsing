@@ -13,5 +13,6 @@
             "host_key_path": "_hp/tools/certs/headers.websec.saarland.key",
             "host_cert_path": "_hp/tools/certs/headers.websec.saarland.pem"
         }
-    }
+    },
+    "server_host": "0.0.0.0"
 }
