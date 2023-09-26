@@ -50,3 +50,7 @@ scratch
 
 # w3c-test.org PR-branch mirroring
 /submissions/
+
+# Cert files
+*.key
+*.pem
