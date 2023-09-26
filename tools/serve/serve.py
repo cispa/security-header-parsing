@@ -970,7 +970,7 @@ _subdomains = {"www",
                "www2",
                "天気の良い日",
                "élève"}
-# TODO: how to override subdomains in the config file?
+# TODO: how to override subdomains in the config file? (does not seem possible)
 _subdomains = {"sub"}
 
 _not_subdomains = {"nonexistent"}
@@ -1019,7 +1019,6 @@ class ConfigBuilder(config.ConfigBuilder):
                 "base_conf_path": None
             },
             "pregenerated": {
-                # TODO: fix certs?! how to override them?
                 "host_key_path": os.path.join(repo_root, "tools", "certs", "web-platform.test.key"),
                 "host_cert_path": os.path.join(repo_root, "tools", "certs", "web-platform.test.pem")
             },

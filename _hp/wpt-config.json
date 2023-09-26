@@ -3,12 +3,12 @@
         "http": [80, "auto"],
         "https": [443, 8443],
         "h2": [9000]
-      },
-      "browser_host": "headers.websec.saarland",
-      "alternate_hosts": {
-          "alt": "headers.webappsec.eu"
-      },
-      "ssl": {
+    },
+    "browser_host": "headers.websec.saarland",
+    "alternate_hosts": {
+        "alt": "headers.webappsec.eu"
+    },
+    "ssl": {
         "pregenerated": {
             "host_key_path": "_hp/tools/certs/headers.websec.saarland.key",
             "host_cert_path": "_hp/tools/certs/headers.websec.saarland.pem"
