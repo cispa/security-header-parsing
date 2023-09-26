@@ -1,0 +1,6 @@
+127.0.0.1       headers.websec.saarland
+127.0.0.1       sub.headers.websec.saarland
+127.0.0.1       sub.sub.headers.websec.saarland
+127.0.0.1       headers.webappsec.eu
+127.0.0.1       sub.headers.webappsec.eu
+127.0.0.1       sub.sub.headers.webappsec.eu

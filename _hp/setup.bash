@@ -1,0 +1,26 @@
+# Update /etc/hosts (include custom hosts)
+cat host-config.txt | sudo tee -a /etc/hosts
+
+# Update apt and install dependencies
+sudo apt update
+sudo apt install build-essential libssl-dev zlib1g-dev \
+libbz2-dev libreadline-dev libsqlite3-dev curl \
+libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev -y
+
+# Install pyenv + python 3.11
+curl https://pyenv.run | bash
+echo 'export PYENV_ROOT="$HOME/.pyenv"' | tee -a  ~/.bashrc ~/.install-conf
+echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' | tee -a  ~/.bashrc ~/.install-conf
+echo 'eval "$(pyenv init -)"' | tee -a  ~/.bashrc ~/.install-conf
+source ~/.install-conf
+pyenv install 3.11
+
+# Install poetry and requirements (with python 3.11)
+curl -sSL https://install.python-poetry.org | python3 -
+echo 'export PATH="$HOME/.local/bin:$PATH"' | tee -a  ~/.bashrc ~/.install-conf
+source ~/.install-conf
+poetry env use 3.11
+poetry install
+
+# (Alternative) Run with pip
+# pip install --user -r requirements.txt

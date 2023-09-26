@@ -1,17 +1,19 @@
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker, mapped_column, Mapped
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, UniqueConstraint, Enum, create_engine
-from sqlalchemy.dialects.postgresql import JSONB
-from datetime import datetime
 from typing import List
+
+from datetime import datetime
 import json
 
+from sqlalchemy.orm import mapped_column, Mapped, declarative_base, relationship, sessionmaker
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, UniqueConstraint, Enum, create_engine
+from sqlalchemy.dialects.postgresql import JSONB
+
+
 # Setup the config
-proj_config= json.load(open("../config.json"))
-SAME_ORIGIN = proj_config['SAME_ORIGIN']
-SUB_SAME_ORIGIN = proj_config['SUB_SAME_ORIGIN']
-CROSS_ORIGIN = proj_config['CROSS_ORIGIN']
-SUB_CROSS_ORIGIN = proj_config["SUB_CROSS_ORIGIN"]
-SERVER_URL = f"http://{SAME_ORIGIN}"
+try:
+    proj_config= json.load(open("../config.json"))
+except OSError:
+    proj_config= json.load(open("_hp/config.json"))
+
 DB_URL = proj_config['DB_URL']
 SECRET = proj_config['SECRET']
 
