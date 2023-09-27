@@ -77,7 +77,7 @@ class Response(BaseModel):
     # The status code WPT should use
     status_code = Column(Integer, default=200)
     # HTTP version of the response;
-    # TODO: We cannot change the http_ver of a response but have to decide earlier which server/endpoint we are using?
+    # TODO: We cannot change the http_ver of a response but have to decide earlier which server/endpoint we are using based on port + scheme?
     http_ver = Column(String, default="1.1")
     # TODO: additional information about a response
     # E.g., for framing we have different "groups" of responses we test: XFO only, CSP-FA only, XFO vs. CSP-FA, ...

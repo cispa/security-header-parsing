@@ -14,14 +14,12 @@
     - Manual: Visit http://headers.websec.saarland:80/_hp/tests/framing.sub.html (HTTPS: 443, HTTP2: 9000)
     - ...
 - TODOs:
-    - setup container on 01 + rules to forward the traffic there
     - implement tests for each feature group
     - ...
 - Inventory (of _hp):
-    - config.json: DB connection and co.
     - wpt-config.json: Ports, Domains, .. TODO: How to configure subdomains and certs? currently hardcoded in tools/serve/serve.py
     - common/: Shared non-js files for the tests (images, html, ...)
-    - ressources/: Shared javascript files for the tests (testharness, save_results, ...)
+    - resources/: Shared javascript files for the tests (testharness, save_results, ...)
     - server/
         - responses.py: Serves the correct responses from the db (responses.py?resp_id=<int>&feature_group=<str>)
         - store_results.py: Stores the test results in the db (expects JSON with {tests: [...], browser=browser_id})
@@ -32,6 +30,7 @@
         - TODO: decide/fix how to provide parameters to the tests: Maybe http://headers.websec.saarland:1234/_hp/tests/framing.sub.html?browser=browser_id&start_id=start_id&end_id=end_id 
         - TODO: find out how to save test metadata (e.g., resp_id) and how to also store that in the db
     - tools/
+        - config.json: DB connection and co.
         - Non Web files
         - crawler/ The code for the crawlers that visit the tests
         - models.py: Defines the database models (results, rseponses, ...); creates dummy date if run directly
