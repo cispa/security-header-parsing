@@ -18,6 +18,30 @@ async_test(t => {
 
 async_test(t => {
   const iframe = document.createElement("iframe");
+  iframe.src = "data://";
+  iframe.onload = () => t.done();
+  iframe.onerror = t.unreached_func("error event must not fire");
+  document.body.append(iframe);
+}, "new iframe: incorrect data URL");
+
+async_test(t => {
+  const iframe = document.createElement("iframe");
+  iframe.src = "xyz://abc";
+  iframe.onload = () => t.done();
+  iframe.onerror = t.unreached_func("error event must not fire");
+  document.body.append(iframe);
+}, "new iframe: non-existing scheme");
+
+async_test(t => {
+  const iframe = document.createElement("iframe");
+  iframe.src = "../resources/not-embeddable2.html";
+  iframe.onload = () => t.done();
+  iframe.onerror = t.unreached_func("error event must not fire");
+  document.body.append(iframe);
+}, "new iframe: CSP FA prevents embedding");
+
+async_test(t => {
+  const iframe = document.createElement("iframe");
   iframe.src = "../resources/not-embeddable.html";
   iframe.onload = () => t.done();
   iframe.onerror = t.unreached_func("error event must not fire");

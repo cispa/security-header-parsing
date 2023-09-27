@@ -18,6 +18,14 @@ async_test(t => {
 
 async_test(t => {
   const embed = document.createElement("embed");
+  embed.src = "data://";
+  embed.onload = () => t.done();
+  embed.onerror = t.unreached_func("error event must not fire");
+  document.body.append(embed);
+}, "new embed: incorrect data URL");
+
+async_test(t => {
+  const embed = document.createElement("embed");
   embed.src = "../resources/not-embeddable.html";
   embed.onload = () => t.done();
   embed.onerror = t.unreached_func("error event must not fire");
