@@ -14,7 +14,9 @@
     - Manual: Visit http://headers.websec.saarland:80/_hp/tests/framing.sub.html (HTTPS: 443, HTTP2: 9000)
     - ...
 - TODOs:
-    - implement tests for each feature group
+    - implement test cases for each feature group
+    - create useful responses for each feature group
+    - allow invalid responses for H2?
     - ...
 - Inventory (of _hp):
     - wpt-config.json: Ports, Domains, Certs, ... (Subdomains currently hardcoded in tools/serve/serve.py)

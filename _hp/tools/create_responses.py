@@ -39,4 +39,38 @@ header_allow = [("Content-Security-Policy", "frame-ancestors *"), ('X-Frame-Opti
 label = "CSPvsXFO"
 create_responses(header_deny, header_allow, label)
 
+# Subresource loading/CORP
+header_deny = [("Cross-Origin-Resource-Policy", "same-origin")]
+header_allow = [("Cross-Origin-Resource-Policy", "cross-origin")]
+label = "CORP"
+create_responses(header_deny, header_allow, label)
+
+# COEP?
+# TODO: what do we want to test here? which feature?
+# CrossOriginIsolation is working? No non-corp ressources allowed while COEP is there?, ...
+
+# Window References/COOP
+header_deny = [("Cross-Origin-Opener-Policy", "same-origin")]
+header_allow = [("Cross-Origin-Opener-Policy", "cross-origin")]
+label = "COOP"
+create_responses(header_deny, header_allow, label)
+
+# TODO: CORS and co.
+# ACAC
+# ACEH
+# ....
+
+# TODO: CSP XSS
+
+# TODO: Maybe CSP subresource loading
+
+# TODO: HSTS enforcement
+
+# TODO: document.domain and site isolation?/OAC
+
+# TODO: Permission access/PP
+
+# TODO: Referer/Referrer-Policy
+
+# TODO: PerformanceAPI timing/TAO
 
