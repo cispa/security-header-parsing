@@ -1,0 +1,1 @@
+# TODO: fill the Browser table with all browsers used!

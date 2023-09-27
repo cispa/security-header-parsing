@@ -102,17 +102,18 @@ class Result(BaseModel):
     # Result of the test
     # outcome_type: Type of result value (e.g., Int, undefined, ..)
     outcome_type = Column(String)
-    # outcome_value: JSONB result value (TODO: not sure if this is the best idea?!)
+    # outcome_value: JSONB result value 
+    # TODO: not sure if this is the best idea?!, if we save JSONB with format_value we do not need outcome_type anymore?
     outcome_value = Column(JSONB)
 
     # Provided by testharness.js
-    test_name = Column(String)   # TODO: Alternative for testcase_id? Otherwise we need to figure out how each wpt-test knows it's own testcase_id
+    test_name = Column(String)   # TODO: Alternative for testcase_id? Otherwise we need to figure out how each wpt-test knows it's own testcase_id, problem: includes resp_id?
     test_status = Column(Integer)
     test_message = Column(String)
     test_stack = Column(String)  # Is String the best for this column?
 
-    # TODO: add the origin relations maybe? Simple framing is the same test and the difference is from which origin the response is coming?
-
+    # TODO: add the origin relations maybe? 
+    # Simple framing is the same TestCase/test function (simple_framing_test) and the difference is from which origin the response is coming?
 
     # Foreign keys
     browser_id: Mapped[int] = mapped_column(ForeignKey("Browser.id"))
@@ -143,6 +144,7 @@ Session = sessionmaker(bind=engine)
 # Create dummy data entries
 if __name__ == "__main__":
     with Session() as session:
+        # Always make sure that the unknown browser exist with ID=1!
         b: Browser = Browser(name="Unknown", version="Unknown", os="Unknown")
         t: TestCase = TestCase(feature_group="Unknown", test_file="Unknown", test_name="Unknown")
         r: Response = Response(raw_header=[("X-Frame-Options", "SAMEORIGIN"), ("Content-Type", "text/html")], status_code=200, http_ver="1.1", label="Unknown")

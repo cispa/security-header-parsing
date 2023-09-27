@@ -17,7 +17,7 @@
     - implement tests for each feature group
     - ...
 - Inventory (of _hp):
-    - wpt-config.json: Ports, Domains, .. TODO: How to configure subdomains and certs? currently hardcoded in tools/serve/serve.py
+    - wpt-config.json: Ports, Domains, Certs, ... (Subdomains currently hardcoded in tools/serve/serve.py)
     - common/: Shared non-js files for the tests (images, html, ...)
     - resources/: Shared javascript files for the tests (testharness, save_results, ...)
     - server/
@@ -27,13 +27,13 @@
         - One file for each feature group to test
         - Create one testcase for everything one wants to test
         - Then run these for all corresponding responses and relevant origin configurations
-        - TODO: decide/fix how to provide parameters to the tests: Maybe http://headers.websec.saarland:1234/_hp/tests/framing.sub.html?browser=browser_id&start_id=start_id&end_id=end_id 
-        - TODO: find out how to save test metadata (e.g., resp_id) and how to also store that in the db
+        - TODO: decide/fix how to provide parameters to the tests
+            - Maybe http://headers.websec.saarland:1234/_hp/tests/framing.sub.html?browser=browser_id&start_id=start_id&end_id=end_id
     - tools/
+        - Non web files
         - config.json: DB connection and co.
-        - Non Web files
         - crawler/ The code for the crawlers that visit the tests
-        - models.py: Defines the database models (results, rseponses, ...); creates dummy date if run directly
+        - models.py: Defines the database models (results, responses, ...); creates dummy data if run directly
         - TODO: create_responses.py
             - First create two responses for each feature group: "deny" and "allow" for testing the tests
             - Later create useful data for responses

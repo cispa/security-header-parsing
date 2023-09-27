@@ -1,4 +1,3 @@
-# These need to be called in this specific order... as there are conflicting functions in both the classes
 from wptserve.handlers import handler
 from _hp.tools.models import Response, Session, SECRET
 
@@ -16,15 +15,17 @@ def get_response(resp_id):
 def main(request, response):
     params = request.GET
     print(params)
+    # Get the correct response based on resp_id (headers + status code, without body)
     response = get_response(params["resp_id"])
-    # Which response content to load?
+    # Get the correct response body based on the current test/feature group
     feature_group = params['feature_group']
-
+    # Default: iframes.html
     file = open("_hp/common/iframes.html","rb")
+    # Other body for other tests
     if feature_group in ['rp','pp','coop']:
-        file = open(f"{feature_group}/{feature_group}.html","rb")
+        file = open(f"_hp/common/{feature_group}.html","rb")
     elif feature_group in ['coep','oac']:
-        file = open(f"{feature_group}/{feature_group}test.html","rb")
+        file = open(f"_hp/common/{feature_group}test.html","rb")
     elif feature_group=='corp':
-        file = open("corp/swag.jpg","rb")
+        file = open("_hp/common/swag.jpg","rb")
     return response.status_code, response.raw_header, file

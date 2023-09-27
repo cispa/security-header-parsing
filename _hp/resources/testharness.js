@@ -8,12 +8,13 @@
  {
      // default timeout is 10 seconds, test can override if needed
      var settings = {
-         output:true,
+         output: true,
          harness_timeout:{
-             "normal":10000,
-             "long":60000
+             //"normal": 10000,
+             "normal": 1000, // TODO: specify a useful timeout for our tests?!
+             "long": 60000
          },
-         test_timeout:null,
+         test_timeout: null,
          message_events: ["start", "test_state", "result", "completion"],
          debug: false,
      };
