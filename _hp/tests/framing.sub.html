@@ -61,9 +61,10 @@ for (var test of test_declarations) {
   // Run all tests for same-origin, same-site, and cross-site
   // TODO: maybe put in a helper func as this is necessary for many tests?
   const path = '/_hp/server/responses.py?feature_group=framing&resp_id=';
+  // TODO: use both http and https? what about mixed-content?, ...
 	const same_org_u = [`${document.location.origin}${path}`, "same-origin"];
-	const same_site_u = [`http://{{domains[sub]}}:{{ports[http][0]}}${path}`, "same-site"];
-	const cross_site_u = [`http://{{hosts[alt][]}}:{{ports[http][0]}}${path}`, "cross-site"];
+	const same_site_u = [`https://{{domains[sub]}}:{{ports[https][0]}}${path}`, "same-site"];
+	const cross_site_u = [`https://{{hosts[alt][]}}:{{ports[https][0]}}${path}`, "cross-site"];
 	// TODO: decide which responses to run on, ...
   // From start_id to end_id (provided by  the testrunner via query parameters &start_id=<id>&end_id=<id>)
   // TODO: put in helper script as it should be the same for all feature groups (also add the browser_id)

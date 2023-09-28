@@ -15,7 +15,7 @@ async function save_result(tests, status) {
                 message: status.message,
                 stack: status.stack,
             };
-    await fetch('http://{{host}}:{{ports[http][0]}}/_hp/server/store_results.py', {
+    await fetch('https://{{host}}:{{ports[https][0]}}/_hp/server/store_results.py', {
         method: 'POST',
         body: JSON.stringify(data),
         mode: 'no-cors',
