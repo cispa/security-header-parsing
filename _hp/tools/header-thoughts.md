@@ -69,7 +69,7 @@ More thoughts:
         - simple framing (cross-site)
         - double framing (how exactly?)
         - others?:
-            - XFO on redirect? (how to implement? seperate test? same tests but in addition also use responses with redirect codes+location?, ...)
+            - XFO on redirect? (how to implement?: ~~seperate test?~~ same tests but in addition also use responses with redirect codes+location)
             - framing control for non-iframe objects (e.g., object, embed, ...)?
             - service-worker stuff? FA
             - sandboxed parent frame

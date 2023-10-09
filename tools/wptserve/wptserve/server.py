@@ -345,9 +345,9 @@ class Http2WebTestRequestHandler(BaseWebTestRequestHandler):
         Because there can be multiple H2 connections active at the same
         time, a UUID is created for each so that it is easier to tell them apart in the logs.
         """
+        # Allow invalid H2 responses?!
         config = H2Configuration(client_side=False, validate_outbound_headers=False, normalize_outbound_headers=False)
-        # TODO: allow invalid H2 responses?!
-        config = H2Configuration(client_side=False) #, validate_outbound_headers=False, normalize_outbound_headers=False)
+        # config = H2Configuration(client_side=False)
 
         self.conn = H2ConnectionGuard(H2Connection(config=config))
         self.close_connection = False

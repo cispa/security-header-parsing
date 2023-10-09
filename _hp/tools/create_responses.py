@@ -72,7 +72,7 @@ create_responses(header_deny, header_allow, label)
 
 # WPT tests?: https://wpt.fyi/results/content-security-policy/frame-ancestors?label=master&label=experimental&aligned&q=frame
 # Simple framing: same-origin, cross-origin, nested (cross-cross, cross-same, same-cross, same-same)
-# Special stuff: service workers, overwrite XFO, sandboxed iframe parent (direct + nested), report fired for violations
+# Special stuff: service workers, overwrite XFO, sandboxed iframe parent, report fired for violations
 
 # WPT values?
 wpt_values = {"frame-ancestors 'none'", "frame-ancestors 'self'", "frame-ancestors *", "frame-ancestors http://www1.wpt.live:8000", "frame-ancestors https://wpt.live:443"}

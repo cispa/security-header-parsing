@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inject Content into Sandbox Iframe</title>
+</head>
+<body>
+    <iframe id="sandboxedIframe" sandbox="allow-scripts" srcdoc="ABC"></iframe>
+
+    <script>
+        const iframe = document.getElementById('sandboxedIframe');
+
+        // Create content to inject
+        const paragraph = document.createElement('p');
+        paragraph.textContent = 'This is content injected into the iframe!';
+
+        // Append content to the iframe's document
+        const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+        iframeDocument.body.appendChild(paragraph);
+    </script>
+</body>
+</html>
