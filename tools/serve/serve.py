@@ -970,7 +970,7 @@ _subdomains = {"www",
                "www2",
                "天気の良い日",
                "élève"}
-# TODO: how to override subdomains in the config file? (does not seem possible)
+# Override subdomains (seems impossible via the config file)
 _subdomains = {"sub"}
 
 _not_subdomains = {"nonexistent"}

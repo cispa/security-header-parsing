@@ -4,7 +4,7 @@
 - For some headers/directive the used origins are important
 - The test results should be saved in a database
 - The test should be self-contained such that the test runner only needs to open a single URL and wait for some time
-- Issue timeout/crash vs test result in no outcome (e.g., as CSP blocked code execution)? -> repeat tests?, use screenshots?
+- Potential issue timeout/crash vs test result in no outcome (e.g., as CSP blocked code execution)? -> repeat tests?, use screenshots?
 - Test runner: 
   - should support many browsers
   - including mobile browsers

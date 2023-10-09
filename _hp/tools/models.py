@@ -78,6 +78,7 @@ class Response(BaseModel):
     status_code = Column(Integer, default=200)
     # HTTP version of the response;
     # TODO: We cannot change the http_ver of a response but have to decide earlier which server/endpoint we are using based on port + scheme?
+    # HTTPS vs HTTP is also decided by the scheme of the URL and not by the response parameter, in addition we might want to test from both http and https and http from https (mixed content?!)
     http_ver = Column(String, default="1.1")
     # TODO: additional information about a response
     # E.g., for framing we have different "groups" of responses we test: XFO only, CSP-FA only, XFO vs. CSP-FA, ...
@@ -107,7 +108,7 @@ class Result(BaseModel):
     outcome_value = Column(JSONB)
 
     # Provided by testharness.js
-    test_name = Column(String)   # TODO: Alternative for testcase_id? Otherwise we need to figure out how each wpt-test knows it's own testcase_id, problem: includes resp_id?
+    test_name = Column(String)   # TODO: Alternative for testcase_id? Otherwise we need to figure out how each wpt-test knows it's own testcase_id, problem: includes resp_id and URL?
     test_status = Column(Integer)
     test_message = Column(String)
     test_stack = Column(String)  # Is String the best for this column?
