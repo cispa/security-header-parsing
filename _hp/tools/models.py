@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 
 # Setup the config
-try:
+try:    
     proj_config= json.load(open("config.json"))
 except OSError:
     proj_config= json.load(open("_hp/tools/config.json"))
@@ -76,10 +76,6 @@ class Response(BaseModel):
     raw_header = Column(JSONB)
     # The status code WPT should use
     status_code = Column(Integer, default=200)
-    # HTTP version of the response;
-    # TODO: We cannot change the http_ver of a response but have to decide earlier which server/endpoint we are using based on port + scheme?
-    # HTTPS vs HTTP is also decided by the scheme of the URL and not by the response parameter, in addition we might want to test from both http and https and http from https (mixed content?!)
-    http_ver = Column(String, default="1.1")
     # TODO: additional information about a response
     # E.g., for framing we have different "groups" of responses we test: XFO only, CSP-FA only, XFO vs. CSP-FA, ...
     # We have to define somewhere which label responses we use for which test_file tests?
@@ -90,7 +86,7 @@ class Response(BaseModel):
      
     # Combination of header, status_code, http_ver, label should be unique
     __table_args__ = (
-        UniqueConstraint('raw_header', 'status_code', 'http_ver', 'label', name='uq_response'),
+        UniqueConstraint('raw_header', 'status_code', 'label', name='uq_response'),
     )
 
 # All the above tables get created before we run the tests
@@ -101,20 +97,23 @@ class Result(BaseModel):
     __tablename__ = 'Result'
     id = Column(Integer, primary_key=True)
     # Result of the test
-    # outcome_type: Type of result value (e.g., Int, undefined, ..)
+    # outcome_type: Type of result value (e.g., Int, undefined, ..) (mostly object as the outcome should be JSON)
     outcome_type = Column(String)
     # outcome_value: JSONB result value 
-    # TODO: not sure if this is the best idea?!, if we save JSONB with format_value we do not need outcome_type anymore?
     outcome_value = Column(JSONB)
 
     # Provided by testharness.js
     test_name = Column(String)   # TODO: Alternative for testcase_id? Otherwise we need to figure out how each wpt-test knows it's own testcase_id, problem: includes resp_id and URL?
     test_status = Column(Integer)
     test_message = Column(String)
-    test_stack = Column(String)  # Is String the best for this column?
+    test_stack = Column(String)
 
-    # TODO: add the origin relations maybe? 
-    # Simple framing is the same TestCase/test function (simple_framing_test) and the difference is from which origin the response is coming?
+    # Origin relations 
+    org_scheme = Column(Enum('http', 'https', 'http2', name='scheme'))
+    org_host = Column(String) # Should always be sub.headers.websec.saarland!
+    resp_scheme = Column(Enum('http', 'https', 'http2', name='scheme'))
+    resp_host = Column(String) # Should be one of sub.headers.websec.saarland (same-orgin), headers.websec.saarland (parent-domain; same-site), sub.sub.headers.websec.saarland (sub-domain; same-site), or headers.webappsec.eu (cross-site)
+    relation_info = Column(String) # E.g., direct, sandbox/srcdoc, nested (chain), nested (parent), nested (top-level)
 
     # Foreign keys
     browser_id: Mapped[int] = mapped_column(ForeignKey("Browser.id"))
@@ -148,6 +147,6 @@ if __name__ == "__main__":
         # Always make sure that the unknown browser exist with ID=1!
         b: Browser = Browser(name="Unknown", version="Unknown", os="Unknown")
         t: TestCase = TestCase(feature_group="Unknown", test_file="Unknown", test_name="Unknown")
-        r: Response = Response(raw_header=[("X-Frame-Options", "SAMEORIGIN"), ("Content-Type", "text/html")], status_code=200, http_ver="1.1", label="Unknown")
+        r: Response = Response(raw_header=[("X-Frame-Options", "SAMEORIGIN"), ("Content-Type", "text/html")], status_code=200, label="Unknown")
         session.add_all([b,t,r])
         session.commit()

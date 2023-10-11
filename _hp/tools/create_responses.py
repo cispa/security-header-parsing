@@ -5,13 +5,11 @@ from sqlalchemy.exc import IntegrityError
 
 # TODO: initially create two responses for each feature group (one always activating the feature, one always blocking the feature)
 
-def create_responses(header_deny, header_allow, label):
-    status_code = 200
-    http_ver = "1.1"
+def create_responses(header_deny, header_allow, label, status_code=200):
     with Session() as session:
         for header in [header_deny, header_allow]:
             try:
-                r = Response(raw_header=header, status_code=status_code, http_ver=http_ver, label=label)
+                r = Response(raw_header=header, status_code=status_code, label=label)
                 session.add(r)
                 session.commit()
             except IntegrityError as e:
