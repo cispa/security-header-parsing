@@ -20,6 +20,15 @@
         // console.log(url, response_id, message);
         var final_url = url + response_id;
         promise_test(t => {
+            // Reset HSTS after every request
+            // TODO: We need the origin of URL instead of hard-coding it here
+            const reset = "https://sub.headers.websec.saarland/_hp/resources/empty.html";
+            t.add_cleanup(async () => {
+                return new Promise((resolve, reject) => {
+                  // Use WPT pipes to echo responses we need: https://web-platform-tests.org/writing-tests/server-pipes.html?highlight=status%20code
+                  fetch(reset + "?pipe=header(strict-transport-security,max-age=0)|status(200)", {mode: "no-cors"}).then(resolve).catch(() => reject(new Error("Cleanup failed")))
+                });
+              });
             return fetch(final_url, {
                 "method": "GET",
             }).then(function (resp) {
@@ -28,11 +37,11 @@
                 t.report_outcome({ "response.redirected": resp.redirected, "response.url.protocol": resp.url.startsWith("https://") });
                 assert_equals(null, null);
             });
+
         }, message);
     
     
-        // Reset HSTS after every request
-    //   t.add_cleanup(() => i.remove());
+
         
     }
 
