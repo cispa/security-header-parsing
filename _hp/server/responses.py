@@ -22,6 +22,8 @@ def main(request, response):
     # Default: iframes.html
     file = open("_hp/common/iframes.html","rb")
     # Other body for other tests
+    if feature_group in ['accessapi']:
+        file = open(f"_hp/common/iframe-api.html","rb")
     if feature_group in ['rp','pp','coop']:
         file = open(f"_hp/common/{feature_group}.html","rb")
     elif feature_group in ['coep','oac']:
