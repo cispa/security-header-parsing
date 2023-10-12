@@ -19,6 +19,7 @@
 function simple_framing_test({ url, response_id, message }) {
     console.log(url, response_id, message);
     async_test(t => {
+      t.set_test_info(url, 'direct');
       const i = document.createElement("iframe");
       i.src = url + response_id;
   
@@ -54,24 +55,21 @@ function simple_framing_test({ url, response_id, message }) {
   }
   
   // TODO: add other more advanced tests?, double framing, object/embed, ..., sandboxed frame, service workers, ...
+  // We have the following parameters: dom element: iframe/object/embed
+  // We have 
   var test_declarations = [simple_framing_test];
 
 
 for (var test of test_declarations) {
-  // Run all tests for same-origin, same-site, and cross-site
-  // TODO: maybe put in a helper func as this is necessary for many tests?
+  // Run all tests for origin relations and similar!
+  const origins = get_test_origins();
   const path = '/_hp/server/responses.py?feature_group=framing&resp_id=';
-  // TODO: use both http and https? what about mixed-content?, ...
-	const same_org_u = [`${document.location.origin}${path}`, "same-origin"];
-	const same_site_u = [`https://{{domains[sub]}}:{{ports[h2][0]}}${path}`, "same-site"];
-	const cross_site_u = [`https://{{hosts[alt][]}}:{{ports[h2][0]}}${path}`, "cross-site"];
 	// TODO: decide which responses to run on, ...
   // From start_id to end_id (provided by  the testrunner via query parameters &start_id=<id>&end_id=<id>)
-  // TODO: put in helper script as it should be the same for all feature groups (also add the browser_id)
   // TODO: Load tests for a specific test group label?! 2, 3 is "XFO"
   for (var response_id of [2, 3]){
-    for (var [u, site] of [same_org_u, same_site_u, cross_site_u]) {
-      test({url: u, response_id: response_id, message: `${test.name}|${site}|${response_id}`});
+    for (var origin of origins) {
+      test({url: `${origin}${path}`, response_id: response_id, message: `${test.name}|${origin}|${response_id}`});
     }
   }
 }

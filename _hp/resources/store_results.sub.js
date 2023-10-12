@@ -1,19 +1,45 @@
+// More helper functions here!
+var org_scheme = location.protocol; // TODO: set it correctly to http, https, http2
+var org_host = location.host;
+
+// We always visit the testpages at http://sub.headers.websec.saarland or https://sub.headers.websec.saarland
+// We then create tests for http, https, and http2 for the following cases:
+// same-org, 2x same-site (parent-domain + sub-domain), cross-site
+function get_test_origins() {
+    const same_host = 'sub.{{host}}';
+    const parent = '{{host}}';
+    const sub = 'sub.sub.{{host}}';
+    const alt_host = '{{hosts[alt][]}}';
+
+    origins = [];
+    for (let host of [same_host, parent, sub, alt_host]) {
+        origins.push(`http://${host}`);
+        origins.push(`https://${host}`);
+        origins.push(`https://${host}:{{ports[h2][0]}}`);
+    }
+    return origins;
+};
+
+// Store result helpers!
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(decodeURIComponent(queryString));
 async function save_result(tests, status) {
-    //console.log(tests);
+    console.log(tests);
     var test_results = tests.map(function(x) {
-        return {name: x.name, outcome: x.outcome, status: x.status, message: x.message, stack: x.stack}
+        return {name: x.name, outcome: x.outcome, status: x.status, message: x.message, stack: x.stack,
+                resp_scheme: x.resp_scheme, resp_host: x.resp_host, relation: x.relation}
     });
     var data = {
                 // Results for the individual tests + metainfo (which browser)
                 tests: test_results,
                 browser_id: urlParams.get('browser_id') || 1, // One is the unknown browser!
-                // Currently unused other metadata (status etc. of the complete test file run)
+                // Other metadata (status etc. of the complete test file run)
                 test: window.location.href,
                 status: status.status,
                 message: status.message,
                 stack: status.stack,
+                org_scheme: org_scheme,
+                org_host: org_host
             };
     await fetch('https://{{host}}:{{ports[https][0]}}/_hp/server/store_results.py', {
         method: 'POST',
@@ -23,5 +49,5 @@ async function save_result(tests, status) {
             'Content-Type': 'application/json',
         }
     });
-}
+};
 add_completion_callback(save_result);

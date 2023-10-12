@@ -2467,6 +2467,11 @@
 
          /** The test outcome. */
          this.outcome = null;
+
+         /** The test meta info */
+         this.resp_host = null;
+         this.resp_scheme = null;
+         this.relation = null;
  
          this.properties = properties || {};
          this.timeout_length = settings.test_timeout;
@@ -2553,11 +2558,17 @@
                  name:String(this.name),
                  properties:merge({}, this.properties),
                  phases:merge({}, this.phases),
-                 outcome:merge({}, this.outcome)
+                 outcome:merge({}, this.outcome),
+                 resp_host:merge({}, this.resp_host),
+                 resp_scheme:merge({}, this.resp_scheme),
+                 relation:merge({}, this.relation)
              }, Test.statuses);
          }
          this._structured_clone.status = this.status;
          this._structured_clone.outcome = this.outcome;
+         this._structured_clone.resp_host = this.resp_host;
+         this._structured_clone.resp_scheme = this.resp_scheme;
+         this._structured_clone.relation = this.relation;
          this._structured_clone.message = this.message;
          this._structured_clone.stack = this.stack;
          this._structured_clone.index = this.index;
@@ -2571,6 +2582,17 @@
      Test.prototype.report_outcome = function(outcome)
      {
         this.outcome = outcome;
+     }
+
+     /**
+      * Set the resp_scheme, resp_host, and relation of a test
+      */
+     Test.prototype.set_test_info = function(url, relation)
+     {
+        let u = new URL(url);
+        this.resp_scheme = u.protocol;
+        this.resp_host = u.host;
+        this.relation = relation;
      }
  
      /**

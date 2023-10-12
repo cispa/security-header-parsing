@@ -20,8 +20,8 @@ def create_responses(header_deny, header_allow, label, status_code=200):
 #region Framing
 
 ## XFO only
-header_deny = [("X-Frame-Options", "DENY")]
-header_allow = [("X-Frame-Options", "INVALID")]
+header_deny = [("x-frame-options", "DENY")]
+header_allow = [("x-frame-options", "INVALID")]
 label = "XFO"
 create_responses(header_deny, header_allow, label)
 
