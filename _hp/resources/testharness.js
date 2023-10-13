@@ -2590,8 +2590,8 @@
      Test.prototype.set_test_info = function(url, relation)
      {
         let u = new URL(url);
-        this.resp_scheme = u.protocol;
-        this.resp_host = u.host;
+        this.resp_scheme = u.port == 9000? "http2": u.protocol == "http:" ? "http": "https";
+        this.resp_host = u.hostname;
         this.relation = relation;
      }
  

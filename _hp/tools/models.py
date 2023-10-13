@@ -109,10 +109,10 @@ class Result(BaseModel):
     test_stack = Column(String)
 
     # Origin relations 
-    org_scheme = Column(Enum('http:', 'https:', 'http2', name='scheme'))
-    org_host = Column(String) # Should always be sub.headers.websec.saarland!
-    resp_scheme = Column(Enum('http:', 'https:', 'http2', name='scheme'))
-    resp_host = Column(String) # Should be one of sub.headers.websec.saarland (same-orgin), headers.websec.saarland (parent-domain; same-site), sub.sub.headers.websec.saarland (sub-domain; same-site), or headers.webappsec.eu (cross-site)
+    org_scheme = Column(Enum('http', 'https', 'http2', name='scheme'))
+    org_host = Column(Enum('sub.headers.websec.saarland', '', name='ohost')) # Should always be sub.headers.websec.saarland!
+    resp_scheme = Column(Enum('http', 'https', 'http2', name='scheme'))
+    resp_host = Column(Enum('sub.headers.websec.saarland', 'sub.sub.headers.websec.saarland', 'headers.websec.saarland', 'headers.webappsec.eu', name='rhost')) # Should be one of sub.headers.websec.saarland (same-orgin), headers.websec.saarland (parent-domain; same-site), sub.sub.headers.websec.saarland (sub-domain; same-site), or headers.webappsec.eu (cross-site)
     relation_info = Column(String) # E.g., direct, sandbox/srcdoc, nested (chain), nested (parent), nested (top-level)
 
     # Foreign keys

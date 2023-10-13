@@ -1,6 +1,6 @@
 // More helper functions here!
-var org_scheme = location.protocol; // TODO: set it correctly to http, https, http2
-var org_host = location.host;
+var org_scheme = location.port == 9000? "http2": location.protocol == "http:" ? "http": "https";
+var org_host = location.hostname;
 
 // We always visit the testpages at http://sub.headers.websec.saarland or https://sub.headers.websec.saarland
 // We then create tests for http, https, and http2 for the following cases:
