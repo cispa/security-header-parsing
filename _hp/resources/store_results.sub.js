@@ -21,8 +21,7 @@ function get_test_origins() {
 };
 
 // Store result helpers!
-const queryString = window.location.search;
-const urlParams = new URLSearchParams(decodeURIComponent(queryString));
+let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
 async function save_result(tests, status) {
     console.log(tests);
     var test_results = tests.map(function(x) {
@@ -49,5 +48,15 @@ async function save_result(tests, status) {
             'Content-Type': 'application/json',
         }
     });
+
+    // Self-driving test!
+    const start_id = parseInt(urlParams.get("start_id"), 10) || 0;
+    const chunk_size = parseInt(urlParams.get("chunk_size"), 10) || 1;
+    const end_id = parseInt(urlParams.get("end_id"), 10) || 1;
+    console.log(start_id, chunk_size, end_id);
+    if (start_id + chunk_size < end_id) {
+        urlParams.set('start_id', start_id + chunk_size);
+        window.location.href = window.location.pathname + '?' + urlParams.toString();
+    }
 };
 add_completion_callback(save_result);

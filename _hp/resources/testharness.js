@@ -10,8 +10,8 @@
      var settings = {
          output: true,
          harness_timeout:{
-             //"normal": 10000,
-             "normal": 1000, // TODO: specify a useful timeout for our tests?!
+             "normal": 5000,
+             //"normal": 1000, // TODO: specify a useful timeout for our tests?!
              "long": 60000
          },
          test_timeout: null,
