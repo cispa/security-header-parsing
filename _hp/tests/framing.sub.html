@@ -96,6 +96,12 @@ for (var test of test_declarations) {
 }
 
 
+// TODO: try the polling idea: poll until either access possible or SOP exception
+// Then log access possible/not possible + number of frames in the document? (Does that work for object, embed?)
+// Problem how to use it for nested cases?
+// Maybe only do the polling in the parent of the final response? other frames just pass the results as postMessages up?
+
+
 // Alternative idea without postMessages: wait for "load" and access number of frames or similar?
 // Iframes should always fire a load event
 // Sadly this is broken in Firefox for CSP-FA https://bugzilla.mozilla.org/show_bug.cgi?id=1552504 and other network errors: https://bugzilla.mozilla.org/show_bug.cgi?id=929899
