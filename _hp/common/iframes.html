@@ -4,10 +4,9 @@
 	</head>
 	<body>
 		<script>
-		// only execute if we re in an iframe :)
+		// only execute if we are in an iframe :)
 		if(window !== parent)
-			window.parent.postMessage(window.location.href,'*');
+			window.parent.postMessage("loaded", '*');
 		</script>
-		<iframe></iframe>
 	</body>
 </html>

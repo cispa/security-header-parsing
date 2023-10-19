@@ -4,13 +4,15 @@
 /* Documentation: https://web-platform-tests.org/writing-tests/testharness-api.html
  * (../docs/_writing-tests/testharness-api.md) */
 
+test_timeout = 5000;
+
  (function (global_scope)
  {
      // default timeout is 10 seconds, test can override if needed
      var settings = {
          output: true,
          harness_timeout:{
-             "normal": 5000,
+             "normal": test_timeout,
              //"normal": 1000, // TODO: specify a useful timeout for our tests?!
              "long": 60000
          },
