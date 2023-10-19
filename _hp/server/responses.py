@@ -16,7 +16,11 @@ def main(request, response):
     params = request.GET
     print(params)
     # Get the correct response based on resp_id (headers + status code, without body)
-    response = get_response(params["resp_id"])
+    if int(params["nest"]) == 0:
+        response = get_response(params["resp_id"])
+    else:
+        response.status_code = 200
+        response.raw_header = []
     # Get the correct response body based on the current test/feature group
     feature_group = params['feature_group']
     # Default: iframes.html

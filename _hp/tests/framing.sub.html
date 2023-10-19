@@ -21,15 +21,15 @@ function simple_framing_test({ url, response_id, message }) {
     console.log(url, response_id, message);
     async_test(t => {
       t.set_test_info(url, 'direct');
-      //const i = document.createElement("iframe");
+      const i = document.createElement("iframe");
       //const i = document.createElement("object");
-      const i = document.createElement("embed");
+      //const i = document.createElement("embed");
       
       count = count + 1;
       i.id = count;
-      i.src = url + response_id + `&count=${i.id}`;
+      i.src = url + response_id + `&count=${i.id}&nest=0`;
       // for object
-      i.data = url + response_id + `&count=${i.id}`;
+      i.data = url + response_id + `&count=${i.id}&nest=0`;
   
       // Wait for 90% of test_timeout; then report that no message was received!
       let timer = t.step_timeout(() => {
@@ -57,11 +57,42 @@ function simple_framing_test({ url, response_id, message }) {
       }));
     });
   }
+
+  function nested_framing_test({ url, response_id, message }) {
+    console.log(url, response_id, message);
+    async_test(t => {
+      t.set_test_info(url, 'nested');
+      const i = document.createElement("iframe");
+      //const i = document.createElement("object");
+      //const i = document.createElement("embed");
+      
+      count = count + 1;
+      i.id = count;
+      i.src = url + response_id + `&count=${i.id}&nest=2&origin=${location.origin}`;
+      // for object
+      i.data = url + response_id + `&count=${i.id}&nest=2&origin=${location.origin}`;
+  
+      // Wait for 90% of test_timeout; then report that no message was received!
+      let timer = t.step_timeout(() => {
+        t.report_outcome({"message": null});
+        t.done();
+      }, 0.9 * test_timeout);
+
+      // Report that a message was received
+      waitForMessageFrom(i, t).then(t.step_func_done(e => {
+        clearTimeout(timer);
+        t.report_outcome({"message": e.data});
+      }));
+  
+      document.body.append(i);
+      //t.add_cleanup(() => i.remove());
+    }, message);
+  }
   
   // TODO: add other more advanced tests?, double framing, object/embed, ..., sandboxed frame, service workers, ...
   // We have the following parameters: dom element: iframe/object/embed
   // We have 
-  var test_declarations = [simple_framing_test];
+  var test_declarations = [nested_framing_test];
 
 
 for (var test of test_declarations) {
@@ -86,27 +117,5 @@ for (var test of test_declarations) {
     }
   });
 }
-
-
-// TODO: try the polling idea: poll until either access possible or SOP exception
-// Then log access possible/not possible + number of frames in the document? (Does that work for object, embed?)
-// Problem how to use it for nested cases?
-// Maybe only do the polling in the parent of the final response? other frames just pass the results as postMessages up?
-
-
-// Alternative idea without postMessages: wait for "load" and access number of frames or similar?
-// Iframes should always fire a load event
-// Sadly this is broken in Firefox for CSP-FA https://bugzilla.mozilla.org/show_bug.cgi?id=1552504 and other network errors: https://bugzilla.mozilla.org/show_bug.cgi?id=929899
-// For XFO this would work though
-// Alternative option: https://github.com/web-platform-tests/wpt/commit/eef4b22afc49a1fac410559d6101e8fda942ce31
-if (false) {
-i.onload = t.step_func_done(() => {
-  //assert_equals(i.contentDocument, null);
-  t.report_outcome({"frames.length": i.contentWindow.frames.length, "res": format_value([null, undefined, "null", "undefined", -0])});
-  assert_equals(null, null);
-});
-}
-
-
 </script>
 </html>

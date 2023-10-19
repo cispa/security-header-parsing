@@ -4,10 +4,26 @@
 	</head>
 	<body>
 		<script>
-		// only execute if we are in an iframe :)
-		if(window !== parent)
-			var urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
-			window.parent.postMessage(urlParams.get("count"), "*");
+		var urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+		var id = urlParams.get("count");
+		if (urlParams.get("nest") == 0) {
+			window.parent.postMessage(id, "*");
+		} else {
+			window.addEventListener("message", (e) => {
+				window.parent.postMessage(e.data, "*");
+			  });
+			const i = document.createElement("iframe");
+			//const i = document.createElement("object");
+			//const i = document.createElement("embed");
+			let url = urlParams.get("origin") + '/_hp/server/responses.py?feature_group=framing&resp_id=';
+			let origin = urlParams.get("origin");
+			let nest = urlParams.get("nest") -1;
+			let response_id = urlParams.get("resp_id");
+			i.src = url + response_id + `&count=${id}&nest=${nest}&origin=${origin}`;
+			// for object
+			i.data = url + response_id + `&count=${id}&nest=${nest}&origin=${origin}`;
+			document.body.append(i);
+		}
 		</script>
 	</body>
 </html>
