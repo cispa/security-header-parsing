@@ -16,18 +16,20 @@
 
 
 <script>
+var count = 0;
 function simple_framing_test({ url, response_id, message }) {
     console.log(url, response_id, message);
     async_test(t => {
       t.set_test_info(url, 'direct');
-      const i = document.createElement("iframe");
-      // Object do not work with postMessages, need to have an alternative approach with load/error events or similar?
+      //const i = document.createElement("iframe");
       //const i = document.createElement("object");
-      // Embed always sends a postMessage? ignores XFO and CSP-FA?
-      //const i = document.createElement("embed");
-      i.src = url + response_id;
+      const i = document.createElement("embed");
+      
+      count = count + 1;
+      i.id = count;
+      i.src = url + response_id + `&count=${i.id}`;
       // for object
-      i.data = url + response_id;
+      i.data = url + response_id + `&count=${i.id}`;
   
       // Wait for 90% of test_timeout; then report that no message was received!
       let timer = t.step_timeout(() => {
@@ -42,9 +44,6 @@ function simple_framing_test({ url, response_id, message }) {
       }));
   
       document.body.append(i);
-      // Object behaves strange depending on whether or not this is present?!!
-      // https://sub.headers.websec.saarland/_hp/tests/framing.sub.html?start_id=9&chunk_size=1&end_id=10
-      // 11 pass with the cleanup, 8 pass without cleanup (same as for iframes)
       t.add_cleanup(() => i.remove());
     }, message);
   }
@@ -52,14 +51,7 @@ function simple_framing_test({ url, response_id, message }) {
   function waitForMessageFrom(frame, test) {
     return new Promise(resolve => {
       window.addEventListener("message", test.step_func(e => {
-        //console.log(e);
-        // Only works for Iframes + object, embed always has source == null?
-        // https://github.com/whatwg/html/issues/7140
-        // Problem if we remove it: one message triggers all handlers!
-        //console.log(e.srcElement)
-        //console.log(frame.window)
-        //console.log(frame.contentWindow)
-        if (e.source == frame.contentWindow) {
+        if (e.data == frame.id) {
           resolve(e);
         }
       }));
@@ -86,7 +78,7 @@ for (var test of test_declarations) {
   // Later: From start_id to end_id (provided by  the testrunner via query parameters &start_id=<id>&end_id=<id>&chunk_size=<chunk_size>)
   // TODO: iterate over the fixed ids instead of fetching them dynamically
   //for (var response_id=start_id; response_id < Math.min(end_id, start_id + chunk_size); i++){
-  fetch(`${location.origin}/_hp/server/get_resp_ids.py?label=XFO`).then(resp => resp.json()).then(ids => {
+  fetch(`${location.origin}/_hp/server/get_resp_ids.py?label=CSP-FA`).then(resp => resp.json()).then(ids => {
     for (var response_id of ids){
       for (var origin of origins) {
         test({url: `${origin}${path}`, response_id: response_id, message: `${test.name}|${origin}|${response_id}`});

@@ -6,7 +6,8 @@
 		<script>
 		// only execute if we are in an iframe :)
 		if(window !== parent)
-			window.parent.postMessage("loaded", '*');
+			var urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+			window.parent.postMessage(urlParams.get("count"), "*");
 		</script>
 	</body>
 </html>

@@ -4,7 +4,7 @@
 /* Documentation: https://web-platform-tests.org/writing-tests/testharness-api.html
  * (../docs/_writing-tests/testharness-api.md) */
 
-test_timeout = 5000;
+test_timeout = 1000;
 
  (function (global_scope)
  {
