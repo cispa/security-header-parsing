@@ -15,7 +15,9 @@ function get_test_origins() {
     for (let host of [same_host, parent, sub, alt_host]) {
         origins.push(`http://${host}`);
         origins.push(`https://${host}`);
-        origins.push(`https://${host}:{{ports[h2][0]}}`);
+        // H2 has a process leak? after a while 7k+ processes are open and everything crashes
+        // Occurs for both with/without settings to allow for invalid responses
+        //origins.push(`https://${host}:{{ports[h2][0]}}`);
     }
     return origins;
 };

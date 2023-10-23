@@ -85,7 +85,7 @@ function simple_framing_test({ url, response_id, message }) {
       }));
   
       document.body.append(i);
-      //t.add_cleanup(() => i.remove());
+      t.add_cleanup(() => i.remove());
     }, message);
   }
   
