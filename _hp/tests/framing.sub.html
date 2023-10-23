@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Framing Tests</title>
   <script src="/_hp/resources/testharness.js"></script>
-  <script src="/_hp/resources/testharnessreport.js"></script>
+  <!-- <script src="/_hp/resources/testharnessreport.js"></script> -->
   <script src="/_hp/resources/store_results.sub.js"></script>
 </head>
 
@@ -92,12 +92,12 @@ function simple_framing_test({ url, response_id, message }) {
   // TODO: add other more advanced tests?, double framing, object/embed, ..., sandboxed frame, service workers, ...
   // We have the following parameters: dom element: iframe/object/embed
   // We have 
-  var test_declarations = [nested_framing_test];
+  var test_declarations = [nested_framing_test]; // nested_framing_test, simple_framing_test
 
 
 for (var test of test_declarations) {
   // Run all tests for origin relations and similar!
-  const origins = get_test_origins();
+  let origins = get_test_origins();
   const path = '/_hp/server/responses.py?feature_group=framing&resp_id=';
   // Test self-driving tests:
   let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
@@ -111,6 +111,7 @@ for (var test of test_declarations) {
   //for (var response_id=start_id; response_id < Math.min(end_id, start_id + chunk_size); i++){
   fetch(`${location.origin}/_hp/server/get_resp_ids.py?label=CSP-FA`).then(resp => resp.json()).then(ids => {
     for (var response_id of ids){
+      // origins = ["https://sub.headers.websec.saarland"];
       for (var origin of origins) {
         test({url: `${origin}${path}`, response_id: response_id, message: `${test.name}|${origin}|${response_id}`});
       }

@@ -9,7 +9,7 @@ def main(request, response):
         # TODO: add error handling/sanity checking/...?
         # TODO: do something with the SECRET or remove it everywhere?
         req = json.loads(request.body)
-        print(req)
+        # print(req)
         browser_id = req["browser_id"]
         org_scheme = req["org_scheme"]
         org_host = req["org_host"]
@@ -41,7 +41,7 @@ def main(request, response):
                          resp_scheme=resp_scheme, resp_host=resp_host, relation_info=relation,
                          org_host=org_host, org_scheme=org_scheme)
             session.add(res)
-            print("\n Stored Successfully \n")
+            # print("\n Stored Successfully \n")
         res = {'Status': 'Success'}
         session.commit()
         return res

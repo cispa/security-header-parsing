@@ -1,8 +1,10 @@
 # mypy: allow-untyped-defs
 
+from functools import lru_cache
 import json
 import os
 from collections import defaultdict
+import threading
 
 from urllib.parse import quote, unquote, urljoin
 
@@ -276,6 +278,14 @@ class FileHandler:
 
 file_handler = FileHandler()  # type: ignore
 
+@lru_cache(maxsize=None)
+def get_environ(path):
+    print("Loaded", path, os.getpid(), threading.current_thread().ident)
+    with open(path, 'rb') as f:
+        f = compile(f.read(), path, 'exec')
+    environ = {"__file__": path}
+    exec(f, environ, environ)
+    return environ
 
 class PythonScriptHandler:
     def __init__(self, base_path=None, url_base="/"):
@@ -299,9 +309,7 @@ class PythonScriptHandler:
         path = filesystem_path(self.base_path, request, self.url_base)
 
         try:
-            environ = {"__file__": path}
-            with open(path, 'rb') as f:
-                exec(compile(f.read(), path, 'exec'), environ, environ)
+            environ = get_environ(path)
 
             if func is not None:
                 return func(request, response, environ, path)
