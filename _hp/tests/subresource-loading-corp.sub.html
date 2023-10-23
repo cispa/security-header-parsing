@@ -1,2 +1,125 @@
-# TODO: CORP tests
-# Subresource loads with CORP should not load?!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Framing Tests</title>
+  <script src="/_hp/resources/testharness.js"></script>
+  <!-- <script src="/_hp/resources/testharnessreport.js"></script> -->
+  <script src="/_hp/resources/store_results.sub.js"></script>
+</head>
+
+<body>
+
+</body>
+
+
+<script>
+var count = 0;
+function subresource_loading_test(element, sandbox, test_info, url, origin, response_id) {
+  /*
+  url: str, URL to be tested (next in the framing chain)
+  origin: str, Origin of the URL to be tested
+  response_id: int, ID of the response element (final response of the chain)
+  element: str, iframe/object/embed
+  sandbox: bool whether to add the sandbox attribute to the next frame
+  test_info: str, additional information about the test (direct, sandbox, nested (A->B->A->A))
+  */
+    test_name =  `subresourceloading_${element}|${sandbox}|${test_info}|${origin}|${response_id}`;
+    //console.log(url, response_id, test_name);
+    async_test(t => {
+      t.set_test_info(url, test_info);
+
+      if (test_info == "direct") {
+        const i = document.createElement('img')
+        i.onload = () => {
+            t.report_outcome("load");
+            t.done();
+        }
+        i.onerror = () => {
+            t.report_outcome("error");
+            t.done();
+        }
+        i.src = url + response_id + `&nest=0`;
+        t.add_cleanup(() => i.remove());
+        document.body.appendChild(i);
+      }
+      // TODO: WIP check that nested tests are working correctly?
+      else {
+        const i = document.createElement('iframe');
+        count = count + 1;
+        i.id = count;
+        let origin = location.origin; // Works for A->B and A->B(->A)->A embedding; for A->B->B we would need to use the origin of B
+        let nesting = 0;
+        if (sandbox) {
+          i.sandbox = "allow-scripts";
+          nesting = 1;
+        }
+        // A -> B -> A -> A embedding
+        if (test_info === "nested") {
+          nesting = 2;
+        }
+        let final_url = url + response_id + `&count=${i.id}&nest=${nesting}&origin=${origin}&element=${element}`
+        i.data = final_url; // Object
+        i.src = final_url; // Embed + IFrame
+    
+        // Wait for 90% of test_timeout; then report that no message was received!
+        let timer = t.step_timeout(() => {
+          t.report_outcome({"message": null});
+          t.done();
+        }, 0.9 * test_timeout);
+  
+        // Report that a message was received
+        waitForMessageFrom(i, t).then(t.step_func_done(e => {
+          clearTimeout(timer);
+          t.report_outcome({"message": e.data});
+        }));
+        // Cleanup function (remove the frame after the test)
+        t.add_cleanup(() => i.remove());
+        // Start the test
+        document.body.append(i);
+
+      }
+
+    }, test_name);
+  }
+  
+  
+  // A -> B
+  const simple_subresource_loading = subresource_loading_test.bind(null, 'img', false, "direct");
+
+  // TODO: add other more advanced tests?
+  // Other elements
+  // Nested loads?
+  // Relationship with COEP?
+  // ...
+  var test_declarations = [simple_subresource_loading];
+
+
+// TODO: put this in a helper function with variables feature group, label, test_declarations
+for (let test of test_declarations) {
+  // Run all tests for origin relations and similar!
+  let origins = get_test_origins();
+  const path = '/_hp/server/responses.py?feature_group=corp&resp_id=';
+  // Test self-driving tests:
+  let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+  const start_id = parseInt(urlParams.get("start_id"), 10) || 0;
+  const chunk_size = parseInt(urlParams.get("chunk_size"), 10) || 1;
+  const end_id = parseInt(urlParams.get("end_id"), 10) || 1;
+
+  // Currently for testing get resp_ids via the label endpoint!
+  // Later: From start_id to end_id (provided by  the testrunner via query parameters &start_id=<id>&end_id=<id>&chunk_size=<chunk_size>)
+  // TODO: iterate over the fixed ids instead of fetching them dynamically
+  //for (var response_id=start_id; response_id < Math.min(end_id, start_id + chunk_size); i++){
+  fetch(`${location.origin}/_hp/server/get_resp_ids.py?label=CORP`).then(resp => resp.json()).then(ids => {
+    for (var response_id of ids){
+      // origins = ["https://sub.headers.websec.saarland"];
+      for (var origin of origins) {
+        test(`${origin}${path}`, origin, response_id);
+      }
+    }
+  });
+}
+</script>
+</html>

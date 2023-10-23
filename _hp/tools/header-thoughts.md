@@ -64,15 +64,13 @@ More thoughts:
 
 - Framing Control:
     - Tests:
-        - simple framing (same-origin)
-        - simple framing (cross-origin/subdomain)
-        - simple framing (cross-site)
-        - double framing (how exactly?)
+        - simple framing (same-origin, cross-origin (parent, sub), cross-site)
+        - nested/double framing (A->B->A->A)
+        - sandbox framing (A->B(sandbox)->A)
+        - all with iframe, object, and embed
         - others?:
             - XFO on redirect? (how to implement?: ~~seperate test?~~ same tests but in addition also use responses with redirect codes+location)
-            - framing control for non-iframe objects (e.g., object, embed, ...)?
             - service-worker stuff? FA
-            - sandboxed parent frame
             - ...
     - Headers:
         - CSP FA:

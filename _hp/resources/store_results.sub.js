@@ -22,6 +22,16 @@ function get_test_origins() {
     return origins;
 };
 
+function waitForMessageFrom(frame, test) {
+    return new Promise(resolve => {
+      window.addEventListener("message", test.step_func(e => {
+        if (e.data == frame.id) {
+          resolve(e);
+        }
+      }));
+    });
+  }
+
 // Store result helpers!
 let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
 async function save_result(tests, status) {

@@ -65,16 +65,6 @@ function framing_test(element, sandbox, test_info, url, origin, response_id) {
     }, test_name);
   }
   
-  function waitForMessageFrom(frame, test) {
-    return new Promise(resolve => {
-      window.addEventListener("message", test.step_func(e => {
-        if (e.data == frame.id) {
-          resolve(e);
-        }
-      }));
-    });
-  }
-  
   // A -> B
   const simple_iframe = framing_test.bind(null, 'iframe', false, "direct");
   const simple_object = framing_test.bind(null, 'object', false, "direct");

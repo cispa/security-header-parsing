@@ -11,12 +11,11 @@
 - Run:
     - Start the WPT Server (from the top-most folder): `poetry run -C _hp python wpt serve --config _hp/wpt-config.json`
     - Automatic: Start the testrunners, ...
-    - Manual: Visit http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html (HTTPS: 443, HTTP2: 9000)
+    - Manual: Visit http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html (HTTPS: 443, HTTP2 (experimental): 9000)
     - ...
 - TODOs:
     - implement test cases for each feature group
     - create useful responses for each feature group
-    - allow invalid responses for H2?
     - ...
 - Inventory (of _hp):
     - wpt-config.json: Ports, Domains, Certs, ... (Subdomains currently hardcoded in tools/serve/serve.py)
@@ -29,8 +28,8 @@
         - One file for each feature group to test
         - Create one testcase for everything one wants to test
         - Then run these for all corresponding responses and relevant origin configurations
-        - TODO: decide/fix how to provide parameters to the tests
-            - Maybe http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html?browser=browser_id&start_id=start_id&end_id=end_id
+        - How to provide parameters to the tests
+            - http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html?browser=<browser_id>&start_id=<id>&end_id=<id>&chunk_size=<chunk_size>
     - tools/
         - Non web files
         - config.json: DB connection and co.
