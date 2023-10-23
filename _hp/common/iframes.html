@@ -12,16 +12,15 @@
 			window.addEventListener("message", (e) => {
 				window.parent.postMessage(e.data, "*");
 			  });
-			const i = document.createElement("iframe");
-			//const i = document.createElement("object");
-			//const i = document.createElement("embed");
 			let url = urlParams.get("origin") + '/_hp/server/responses.py?feature_group=framing&resp_id=';
 			let origin = urlParams.get("origin");
 			let nest = urlParams.get("nest") -1;
 			let response_id = urlParams.get("resp_id");
-			i.src = url + response_id + `&count=${id}&nest=${nest}&origin=${origin}`;
-			// for object
-			i.data = url + response_id + `&count=${id}&nest=${nest}&origin=${origin}`;
+			let element = urlParams.get("element");
+			const i = document.createElement(element);
+			const final_url = url + response_id + `&count=${id}&nest=${nest}&origin=${origin}&element=${element}`;
+			i.src = final_url;
+			i.data = final_url;
 			document.body.append(i);
 		}
 		</script>

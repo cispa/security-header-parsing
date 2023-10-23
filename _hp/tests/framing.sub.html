@@ -17,19 +17,35 @@
 
 <script>
 var count = 0;
-function simple_framing_test({ url, response_id, message }) {
-    console.log(url, response_id, message);
+function framing_test(element, sandbox, test_info, url, origin, response_id) {
+  /*
+  url: str, URL to be tested (next in the framing chain)
+  origin: str, Origin of the URL to be tested
+  response_id: int, ID of the response element (final response of the chain)
+  element: str, iframe/object/embed
+  sandbox: bool whether to add the sandbox attribute to the next frame
+  test_info: str, additional information about the test (direct, sandbox, nested (A->B->A->A))
+  */
+    test_name =  `framing_${element}|${sandbox}|${test_info}|${origin}|${response_id}`;
+    //console.log(url, response_id, test_name);
     async_test(t => {
-      t.set_test_info(url, 'direct');
-      const i = document.createElement("iframe");
-      //const i = document.createElement("object");
-      //const i = document.createElement("embed");
-      
+      t.set_test_info(url, test_info);
+      const i = document.createElement(element);
       count = count + 1;
       i.id = count;
-      i.src = url + response_id + `&count=${i.id}&nest=0`;
-      // for object
-      i.data = url + response_id + `&count=${i.id}&nest=0`;
+      let origin = location.origin; // Works for A->B and A->B(->A)->A embedding; for A->B->B we would need to use the origin of B
+      let nesting = 0;
+      if (sandbox) {
+        i.sandbox = "allow-scripts";
+        nesting = 1;
+      }
+      // A -> B -> A -> A embedding
+      if (test_info === "nested") {
+        nesting = 2;
+      }
+      let final_url = url + response_id + `&count=${i.id}&nest=${nesting}&origin=${origin}&element=${element}`
+      i.data = final_url; // Object
+      i.src = final_url; // Embed + IFrame
   
       // Wait for 90% of test_timeout; then report that no message was received!
       let timer = t.step_timeout(() => {
@@ -42,10 +58,11 @@ function simple_framing_test({ url, response_id, message }) {
         clearTimeout(timer);
         t.report_outcome({"message": e.data});
       }));
-  
-      document.body.append(i);
+      // Cleanup function (remove the frame after the test)
       t.add_cleanup(() => i.remove());
-    }, message);
+      // Start the test
+      document.body.append(i);
+    }, test_name);
   }
   
   function waitForMessageFrom(frame, test) {
@@ -57,45 +74,31 @@ function simple_framing_test({ url, response_id, message }) {
       }));
     });
   }
-
-  function nested_framing_test({ url, response_id, message }) {
-    console.log(url, response_id, message);
-    async_test(t => {
-      t.set_test_info(url, 'nested');
-      const i = document.createElement("iframe");
-      //const i = document.createElement("object");
-      //const i = document.createElement("embed");
-      
-      count = count + 1;
-      i.id = count;
-      i.src = url + response_id + `&count=${i.id}&nest=2&origin=${location.origin}`;
-      // for object
-      i.data = url + response_id + `&count=${i.id}&nest=2&origin=${location.origin}`;
   
-      // Wait for 90% of test_timeout; then report that no message was received!
-      let timer = t.step_timeout(() => {
-        t.report_outcome({"message": null});
-        t.done();
-      }, 0.9 * test_timeout);
+  // A -> B
+  const simple_iframe = framing_test.bind(null, 'iframe', false, "direct");
+  const simple_object = framing_test.bind(null, 'object', false, "direct");
+  const simple_embed = framing_test.bind(null, 'embed', false, "direct");
 
-      // Report that a message was received
-      waitForMessageFrom(i, t).then(t.step_func_done(e => {
-        clearTimeout(timer);
-        t.report_outcome({"message": e.data});
-      }));
-  
-      document.body.append(i);
-      t.add_cleanup(() => i.remove());
-    }, message);
-  }
-  
-  // TODO: add other more advanced tests?, double framing, object/embed, ..., sandboxed frame, service workers, ...
-  // We have the following parameters: dom element: iframe/object/embed
-  // We have 
-  var test_declarations = [nested_framing_test]; // nested_framing_test, simple_framing_test
+  // A -> B (sandboxed) -> A
+  const sandboxed_iframe = framing_test.bind(null, 'iframe', true, "sandbox");
+  const sandboxed_object = framing_test.bind(null, 'object', true, "sandbox");  // Should not exist?
+  const sandboxed_embed = framing_test.bind(null, 'embed', true, "sandbox");  // Should not exist?
+
+  // A -> B -> A -> A to test for the full inclusion chain  (testing A->B->B and A->B->A is left out for performance)
+  const nested_iframe = framing_test.bind(null, 'iframe', false, "nested");
+  const nested_object = framing_test.bind(null, 'object', false, "nested");
+  const nested_embed = framing_test.bind(null, 'embed', false, "nested");
+
+  // 8 (options for B) * 9 (tests) * 2 (responses) = 144 tests?! * 2 as we have two options for A (http/https :// sub.headers.websec.saarland)
+
+  // TODO: add other more advanced tests?service workers, ...
+  var test_declarations = [simple_iframe, simple_object, simple_embed,
+                           sandboxed_iframe, sandboxed_object, sandboxed_embed,
+                           nested_iframe, nested_object, nested_embed];
 
 
-for (var test of test_declarations) {
+for (let test of test_declarations) {
   // Run all tests for origin relations and similar!
   let origins = get_test_origins();
   const path = '/_hp/server/responses.py?feature_group=framing&resp_id=';
@@ -113,7 +116,7 @@ for (var test of test_declarations) {
     for (var response_id of ids){
       // origins = ["https://sub.headers.websec.saarland"];
       for (var origin of origins) {
-        test({url: `${origin}${path}`, response_id: response_id, message: `${test.name}|${origin}|${response_id}`});
+        test(`${origin}${path}`, origin, response_id);
       }
     }
   });
