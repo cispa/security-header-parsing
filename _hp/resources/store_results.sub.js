@@ -32,6 +32,32 @@ function waitForMessageFrom(frame, test) {
     });
   }
 
+// Run all tests
+function run_tests(test_declarations, path, label) {
+  for (let test of test_declarations) {
+    // Run all tests for origin relations and similar!
+    let origins = get_test_origins();
+    // Test self-driving tests:
+    let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+    const start_id = parseInt(urlParams.get("start_id"), 10) || 0;
+    const chunk_size = parseInt(urlParams.get("chunk_size"), 10) || 1;
+    const end_id = parseInt(urlParams.get("end_id"), 10) || 1;
+
+    // Currently for testing get resp_ids via the label endpoint!
+    // Later: From start_id to end_id (provided by  the testrunner via query parameters &start_id=<id>&end_id=<id>&chunk_size=<chunk_size>)
+    // TODO: iterate over the fixed ids instead of fetching them dynamically
+    //for (var response_id=start_id; response_id < Math.min(end_id, start_id + chunk_size); i++){
+    fetch(`${location.origin}/_hp/server/get_resp_ids.py?label=${label}`).then(resp => resp.json()).then(ids => {
+      for (var response_id of ids){
+        // origins = ["https://sub.headers.websec.saarland"];
+        for (var origin of origins) {
+          test(`${origin}${path}`, origin, response_id);
+        }
+      }
+    });
+  }
+}
+
 // Store result helpers!
 let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
 async function save_result(tests, status) {

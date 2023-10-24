@@ -83,33 +83,13 @@ function framing_test(element, sandbox, test_info, url, origin, response_id) {
   // 8 (options for B) * 9 (tests) * 2 (responses) = 144 tests?! * 2 as we have two options for A (http/https :// sub.headers.websec.saarland)
 
   // TODO: add other more advanced tests?service workers, ...
-  var test_declarations = [simple_iframe, simple_object, simple_embed,
+  const test_declarations = [simple_iframe, simple_object, simple_embed,
                            sandboxed_iframe, sandboxed_object, sandboxed_embed,
                            nested_iframe, nested_object, nested_embed];
 
-
-for (let test of test_declarations) {
-  // Run all tests for origin relations and similar!
-  let origins = get_test_origins();
   const path = '/_hp/server/responses.py?feature_group=framing&resp_id=';
-  // Test self-driving tests:
-  let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
-  const start_id = parseInt(urlParams.get("start_id"), 10) || 0;
-  const chunk_size = parseInt(urlParams.get("chunk_size"), 10) || 1;
-  const end_id = parseInt(urlParams.get("end_id"), 10) || 1;
+  const label = 'CSP-FA';
+  run_tests(test_declarations, path, label);
 
-  // Currently for testing get resp_ids via the label endpoint!
-  // Later: From start_id to end_id (provided by  the testrunner via query parameters &start_id=<id>&end_id=<id>&chunk_size=<chunk_size>)
-  // TODO: iterate over the fixed ids instead of fetching them dynamically
-  //for (var response_id=start_id; response_id < Math.min(end_id, start_id + chunk_size); i++){
-  fetch(`${location.origin}/_hp/server/get_resp_ids.py?label=CSP-FA`).then(resp => resp.json()).then(ids => {
-    for (var response_id of ids){
-      // origins = ["https://sub.headers.websec.saarland"];
-      for (var origin of origins) {
-        test(`${origin}${path}`, origin, response_id);
-      }
-    }
-  });
-}
 </script>
 </html>
