@@ -1,28 +1,32 @@
 <!DOCTYPE html>
 <html>
-	<head>
-	</head>
-	<body>
-		<script>
+
+<head>
+</head>
+
+<body>
+	<script>
 		var urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
 		var id = urlParams.get("count");
-		if (urlParams.get("nest") == 0) {
-			window.parent.postMessage({"id": id, "message": "message send"}, "*");
+		let url = urlParams.get("origin") + '/_hp/server/responses.py?feature_group=framing&resp_id=';
+		let origin = urlParams.get("origin");
+		let nest = urlParams.get("nest");
+		let response_id = urlParams.get("resp_id");
+		let element = urlParams.get("element");
+		if (nest == 0) {
+			window.parent.postMessage({ "id": id, "message": "message send" }, "*");
 		} else {
 			window.addEventListener("message", (e) => {
 				window.parent.postMessage(e.data, "*");
-			  });
-			let url = urlParams.get("origin") + '/_hp/server/responses.py?feature_group=framing&resp_id=';
-			let origin = urlParams.get("origin");
-			let nest = urlParams.get("nest") -1;
-			let response_id = urlParams.get("resp_id");
-			let element = urlParams.get("element");
+			});
+
 			const i = document.createElement(element);
-			const final_url = url + response_id + `&count=${id}&nest=${nest}&origin=${origin}&element=${element}`;
+			const final_url = url + response_id + `&count=${id}&nest=${nest - 1}&origin=${origin}&element=${element}`;
 			i.src = final_url;
 			i.data = final_url;
 			document.body.append(i);
 		}
-		</script>
-	</body>
+	</script>
+</body>
+
 </html>
