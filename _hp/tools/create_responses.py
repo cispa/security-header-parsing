@@ -148,7 +148,11 @@ create_responses(header_deny, header_allow, label)
 #region TODO: document.domain and site isolation?/OAC
 #endregion
 
-#region TODO: Permission access/PP
+#region Permission access/PP
+header_deny = [("Permissions-Policy", "fullscreen=()")]
+header_allow = [("Permissions-Policy", "fullscreen=(*)")]
+label = "PP"
+create_responses(header_deny, header_allow, label)
 #endregion
 
 #region TODO: Referer/Referrer-Policy

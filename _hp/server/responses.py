@@ -22,22 +22,25 @@ def get_response(resp_id):
 def get_body(feature_group, nest):
     print("Body:", feature_group, os.getpid(),
           threading.current_thread().ident)
-    # Default: iframes.html
-    file = open("_hp/common/iframes.html", "rb")
-    # Other body for other tests
-    if feature_group in ['accessapi']:
-        file = open(f"_hp/common/iframe-api.html", "rb")
-    if feature_group in ['rp', 'pp', 'coop']:
+    
+    if feature_group in ['pp']:
+        file = open(f"_hp/common/frame-fullscreen-pp.html", "rb")
+    elif feature_group in ['rp', 'coop']:
         file = open(f"_hp/common/{feature_group}.html", "rb")
     elif feature_group in ['coep', 'oac']:
         file = open(f"_hp/common/{feature_group}test.html", "rb")
     elif feature_group in ['hsts']:
         return ""  # Empty body
-    elif feature_group == 'corp':
+    elif feature_group in ['corp']:
         if nest == 0:
             file = open("_hp/common/swag.jpg", "rb")
         else:
             file = open("_hp/common/frame-corp.html", "rb")
+    elif feature_group in ["framing"]:
+        file = open("_hp/common/iframes.html", "rb")
+    else:
+        print(f"Invalid feature_group: {feature_group}")
+        return ""
     return file.read()
 
 @handler

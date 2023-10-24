@@ -94,14 +94,13 @@ More thoughts:
     - Test site has to be visited on HTTP due to Mixed Content Blocking
 - Restricted API Access (Permission Policy):
     - Tests:
-      - Access API same-origin top-frame (battery or geolocation or something like that)
+      - Access API same-origin top-frame (fullscreen?; document.fullscreenEnabled; Its default allowlist is 'self'.)
       - Access API same-origin frame
       - Acces API cross-origin frame
       - Access API same-site frame?
-      - Access API subdomain? ...
-      - Inheritance for IFrames? ...
-      - Log document.permissionsPolicy object?
       - Multiple nestings?
+      - Inheritance for IFrames? ...
+      - Log document.permissionsPolicy/featurePolicy object?
       - ...
     - Headers:
         - PermissionPolicy:
