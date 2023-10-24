@@ -137,7 +137,12 @@ create_responses(header_deny, header_allow, label)
 #region TODO: Maybe CSP subresource loading
 #endregion
 
-#region TODO: HSTS enforcement
+#region HSTS enforcement
+# deny and allow are not fitting terms here, but does not matter
+header_deny = [("Strict-Transport-Security", "max-age=20")]
+header_allow = [("Strict-Transport-Security", "max-age=20; includeSubDomains")]
+label = "HSTS"
+create_responses(header_deny, header_allow, label)
 #endregion
 
 #region TODO: document.domain and site isolation?/OAC

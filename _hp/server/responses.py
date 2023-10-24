@@ -4,42 +4,48 @@ from functools import lru_cache
 import os
 import threading
 
+
 @lru_cache(maxsize=5000)
 def get_response(resp_id):
     with Session() as session:
         try:
             response = session.query(Response).filter_by(id=resp_id).first()
-            print("Header:", response.raw_header, os.getpid(), threading.current_thread().ident)
+            print("Header:", response.raw_header, os.getpid(),
+                  threading.current_thread().ident)
         except Exception as e:
             print(e)
             # TODO how to handle this?
         return response
-    
+
+
 @lru_cache(maxsize=None)
 def get_body(feature_group, nest):
-    print("Body:", feature_group, os.getpid(), threading.current_thread().ident)
+    print("Body:", feature_group, os.getpid(),
+          threading.current_thread().ident)
     # Default: iframes.html
     file = open("_hp/common/iframes.html", "rb")
     # Other body for other tests
     if feature_group in ['accessapi']:
         file = open(f"_hp/common/iframe-api.html", "rb")
-    if feature_group in ['rp','pp','coop']:
+    if feature_group in ['rp', 'pp', 'coop']:
         file = open(f"_hp/common/{feature_group}.html", "rb")
-    elif feature_group in ['coep','oac']:
+    elif feature_group in ['coep', 'oac']:
         file = open(f"_hp/common/{feature_group}test.html", "rb")
-    elif feature_group=='corp':
+    elif feature_group in ['hsts']:
+        return ""  # Empty body
+    elif feature_group == 'corp':
         if nest == 0:
             file = open("_hp/common/swag.jpg", "rb")
         else:
             file = open("_hp/common/frame-corp.html", "rb")
     return file.read()
 
-#@handler
+@handler
 def main(request, response):
     params = request.GET
     # print(params)
     # Get the correct response based on resp_id (headers + status code, without body)
-    nest = int(params["nest"]) 
+    nest = int(params["nest"])
     if nest == 0:
         response = get_response(params["resp_id"])
     else:

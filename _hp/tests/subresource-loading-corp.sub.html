@@ -57,6 +57,7 @@
   const simple_subresource_loading = subresource_loading_test.bind(null, "img", false, "direct");
   // CORP should not apply to object, however it does in Firefox (https://bugzilla.mozilla.org/show_bug.cgi?id=1732106)
   const object_subresource_loading = subresource_loading_test.bind(null, "object", false, "direct");
+  // CORP should only take the parent into account?
   // A -> B (sandbox) -> A
   const sandboxed_subresource_loading = subresource_loading_test.bind(null, "img", true, "sandbox");
   // A -> B -> A -> A
@@ -64,7 +65,10 @@
 
   // TODO: add other more advanced tests?
   // Other elements (script, fetch (no-cors and others?, CORP should only be active for no-cors), ...)
-  // Relationship with COEP?
+  // Data URL?
+  // (General note: more complex tests are not too important as we want to test the parsing of different header values and not edge case behavior for well-specified header values.
+  // Edge cases for well-specified headers are mostly tested in WPT e.g.,: https://wpt.fyi/results/fetch/cross-origin-resource-policy?label=master&label=experimental&aligned&q=cross-origin-resource)
+  // Relationship with COEP? (test in COEP tests!)
   // ...
   const test_declarations = [simple_subresource_loading, object_subresource_loading, sandboxed_subresource_loading, nested_subresource_loading];
   const path = '/_hp/server/responses.py?feature_group=corp&resp_id=';

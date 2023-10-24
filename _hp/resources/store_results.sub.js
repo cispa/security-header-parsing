@@ -33,10 +33,12 @@ function waitForMessageFrom(frame, test) {
 }
 
 // Run all tests
-function run_tests(test_declarations, path, label) {
+function run_tests(test_declarations, path, label, origins) {
   for (let test of test_declarations) {
     // Run all tests for origin relations and similar!
-    let origins = get_test_origins();
+    if (!origins) {
+      origins = get_test_origins();
+    }
     // Test self-driving tests:
     let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
     const start_id = parseInt(urlParams.get("start_id"), 10) || 0;

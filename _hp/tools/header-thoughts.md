@@ -81,14 +81,17 @@ More thoughts:
         - Both: XFO is CSP framing control fallback?
 - Connection Upgrade (Strict-Transport-Security):
     - Tests:
-        -  HSTS upgrade site-landingURL (visit site, set HSTS, visit again and check whether connection is upgraded)
-        -  HSTS upgrade site-randomURL (same as above but visit a different URL)
+        -  HSTS upgrade site-randomURL (visit site and set HSTS, visit again and check whether connection is upgraded)
         -  HSTS upgrade site-subdomainURL (same as above but visit a subdomain URL)
-        -  Double subdomain? (visit domain, set HSTS, visit subdomain, set HSTS, visit subsubdomain?) (see example on whiteboard)
-        -  HSTS via HTTP does nothing?
+        -  Double subdomain? (visit domain, set HSTS, visit subdomain, set HSTS, visit subsubdomain?) 
+           -  (see example on whiteboard)
+           -  max-age=1 on sub.domain.com, max-age=123,ISD on domain.com -> what happens when visiting foo.sub.domain.com?
+           -  max-age=123 on sub.domain.com, max-age=123,ISD on domain.com -> what happens when visiting foo.sub.domain.com?
+        -  HSTS via HTTP does nothing (tested implicetly during the normal tests!)
         -  Clearing?
         -  Caching?
     - STS-Header: multiple header spec: (first; some browsers might order headers in a strange way with different casing/HTTP versions)
+    - Test site has to be visited on HTTP due to Mixed Content Blocking
 - Restricted API Access (Permission Policy):
     - Tests:
       - Access API same-origin top-frame (battery or geolocation or something like that)
