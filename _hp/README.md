@@ -16,6 +16,9 @@
 - TODOs:
     - implement test cases for each feature group
     - create useful responses for each feature group
+    - analyse results!
+      - discover differences in browsers/versions
+      - "explain" reasons (keep in mind that other features such as blocked mixed content and CORB might be responsible for differences and not different parsing of the security header)
     - ...
 - Inventory (of _hp):
     - wpt-config.json: Ports, Domains, Certs, ... (Subdomains currently hardcoded in tools/serve/serve.py)
