@@ -7,7 +7,7 @@
 		var urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
 		var id = urlParams.get("count");
 		if (urlParams.get("nest") == 0) {
-			window.parent.postMessage(id, "*");
+			window.parent.postMessage({"id": id, "message": "message send"}, "*");
 		} else {
 			window.addEventListener("message", (e) => {
 				window.parent.postMessage(e.data, "*");

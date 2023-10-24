@@ -25,7 +25,7 @@ function get_test_origins() {
 function waitForMessageFrom(frame, test) {
     return new Promise(resolve => {
       window.addEventListener("message", test.step_func(e => {
-        if (e.data == frame.id) {
+        if (e.data.id == frame.id) {
           resolve(e);
         }
       }));

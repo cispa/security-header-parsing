@@ -67,14 +67,14 @@ function subresource_loading_test(element, sandbox, test_info, url, origin, resp
     
         // Wait for 90% of test_timeout; then report that no message was received!
         let timer = t.step_timeout(() => {
-          t.report_outcome({"message": null});
+          t.report_outcome("message timeout");
           t.done();
         }, 0.9 * test_timeout);
   
         // Report that a message was received
         waitForMessageFrom(i, t).then(t.step_func_done(e => {
           clearTimeout(timer);
-          t.report_outcome({"message": e.data});
+          t.report_outcome(e.data.message);
         }));
         // Cleanup function (remove the frame after the test)
         //t.add_cleanup(() => i.remove());
@@ -89,7 +89,7 @@ function subresource_loading_test(element, sandbox, test_info, url, origin, resp
   // A -> B
   const simple_subresource_loading = subresource_loading_test.bind(null, "img", false, "direct");
   // CORP should not apply to object, however it does in Firefox (https://bugzilla.mozilla.org/show_bug.cgi?id=1732106)
-  const object_subresource_loading = subresource_loading_test(null, "object", false, "direct");
+  const object_subresource_loading = subresource_loading_test.bind(null, "object", false, "direct");
   // A -> B (sandbox) -> A
   const sandboxed_subresource_loading = subresource_loading_test.bind(null, "img", true, "sandbox");
   // A -> B -> A -> A
