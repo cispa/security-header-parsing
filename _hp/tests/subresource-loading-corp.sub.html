@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Framing Tests</title>
+  <title>Subresource Loading (CORP) Tests</title>
   <script src="/_hp/resources/testharness.js"></script>
   <!-- <script src="/_hp/resources/testharnessreport.js"></script> -->
   <script src="/_hp/resources/store_results.sub.js"></script>
@@ -32,7 +32,7 @@ function subresource_loading_test(element, sandbox, test_info, url, origin, resp
       t.set_test_info(url, test_info);
 
       if (test_info == "direct") {
-        const i = document.createElement('img')
+        const i = document.createElement(element)
         i.onload = () => {
             t.report_outcome("load");
             t.done();
@@ -42,7 +42,8 @@ function subresource_loading_test(element, sandbox, test_info, url, origin, resp
             t.done();
         }
         i.src = url + response_id + `&nest=0`;
-        t.add_cleanup(() => i.remove());
+        i.data = url + response_id + `&nest=0`;
+        //t.add_cleanup(() => i.remove());
         document.body.appendChild(i);
       }
       // TODO: WIP check that nested tests are working correctly?
@@ -50,7 +51,7 @@ function subresource_loading_test(element, sandbox, test_info, url, origin, resp
         const i = document.createElement('iframe');
         count = count + 1;
         i.id = count;
-        let origin = location.origin; // Works for A->B and A->B(->A)->A embedding; for A->B->B we would need to use the origin of B
+        let origin = location.origin;
         let nesting = 0;
         if (sandbox) {
           i.sandbox = "allow-scripts";
@@ -76,10 +77,9 @@ function subresource_loading_test(element, sandbox, test_info, url, origin, resp
           t.report_outcome({"message": e.data});
         }));
         // Cleanup function (remove the frame after the test)
-        t.add_cleanup(() => i.remove());
+        //t.add_cleanup(() => i.remove());
         // Start the test
         document.body.append(i);
-
       }
 
     }, test_name);
@@ -87,14 +87,19 @@ function subresource_loading_test(element, sandbox, test_info, url, origin, resp
   
   
   // A -> B
-  const simple_subresource_loading = subresource_loading_test.bind(null, 'img', false, "direct");
+  const simple_subresource_loading = subresource_loading_test.bind(null, "img", false, "direct");
+  // CORP should not apply to object, however it does in Firefox (https://bugzilla.mozilla.org/show_bug.cgi?id=1732106)
+  const object_subresource_loading = subresource_loading_test(null, "object", false, "direct");
+  // A -> B (sandbox) -> A
+  const sandboxed_subresource_loading = subresource_loading_test.bind(null, "img", true, "sandbox");
+  // A -> B -> A -> A
+  const nested_subresource_loading = subresource_loading_test.bind(null, "img", false, "nested");
 
   // TODO: add other more advanced tests?
-  // Other elements
-  // Nested loads?
+  // Other elements (script, fetch (no-cors and others?, CORP should only be active for no-cors), ...)
   // Relationship with COEP?
   // ...
-  const test_declarations = [simple_subresource_loading];
+  const test_declarations = [simple_subresource_loading, object_subresource_loading, sandboxed_subresource_loading, nested_subresource_loading];
   const path = '/_hp/server/responses.py?feature_group=corp&resp_id=';
   const label = 'CORP';
   run_tests(test_declarations, path, label);
