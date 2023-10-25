@@ -158,7 +158,11 @@ label = "PP"
 create_responses(header_deny, header_allow, label)
 #endregion
 
-#region TODO: Referer/Referrer-Policy
+#region Referer/Referrer-Policy
+header_deny = [("Referrer-Policy", "no-referrer")]
+header_allow = [("Referrer-Policy", "strict-origin-when-cross-origin")]
+label = "RP"
+create_responses(header_deny, header_allow, label)
 #endregion
 
 #region TODO: PerformanceAPI timing/TAO

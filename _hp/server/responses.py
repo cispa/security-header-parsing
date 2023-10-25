@@ -29,6 +29,8 @@ def get_body(feature_group, resp):
         file = open("_hp/common/swag.jpg", "rb") # Empty file triggers download in FF
     elif feature_group in ['hsts']:
         return ""  # Empty body
+    elif feature_group in ["rp"]:
+        file = open("_hp/common/frame-referrer.html", "rb")
     elif feature_group in ['corp']:
         if resp == 1:
             file = open("_hp/common/swag.jpg", "rb")

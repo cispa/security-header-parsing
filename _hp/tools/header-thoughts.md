@@ -121,7 +121,7 @@ More thoughts:
         - Referrer send to cross-site downgrade? (HTTPS to HTTP)
         - ...?
     - Referer-Policy:
-        - multiple header spec: (no idea; fallback features)
+        - multiple header spec: (fallback features)
         - (whiteboard) window.open(), check if this works on all browsers, x-proto, x-site, x-origin (not sure what the idea was here)
 - TimingAPI:
     - Tests:

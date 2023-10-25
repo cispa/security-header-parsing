@@ -23,7 +23,6 @@
             let w = window.open(url + response_id, "_blank");
             t.step_timeout(() => {
                 let outcome;
-                console.log(w);
                 try {
                     outcome = format_value(w.opener);
                 } catch (e) {
