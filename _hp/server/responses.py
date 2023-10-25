@@ -49,6 +49,7 @@ def main(request, response):
     # print(params)
     # Get the correct response based on resp_id (headers + status code, without body)
     resp = int(params["resp"])
+    # Only set the response if resp=1, if resp=0 set a default response with code 200 and no special headers
     if resp == 1:
         response = get_response(params["resp_id"])
     else:

@@ -13,6 +13,7 @@
         let nest = urlParams.get("nest");
         let response_id = urlParams.get("resp_id");
         let element = urlParams.get("element");
+        let test_info = urlParams.get("test_info");
         if (nest == 0) {
           window.parent.postMessage({"id": id, "message": `fullscreenEnabled: ${document.fullscreenEnabled}`}, "*");
         } else {
@@ -20,6 +21,14 @@
                 window.parent.postMessage(e.data, "*");
             });
             const i = document.createElement('iframe');
+            if (test_info == "child_sandbox") {
+                i.sandbox = "allow-scripts";
+            } else if (test_info == "child_allow") {
+                i.allow = "fullscreen *";
+                i.allowfullscreen = true;
+            } else {
+                // Nothing special
+            }
             const final_url = url + response_id + `&count=${id}&nest=${nest - 1}&resp=0&origin=${origin}&element=${element}`;
             i.src = final_url;
             i.data = final_url;

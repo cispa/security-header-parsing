@@ -149,6 +149,9 @@ create_responses(header_deny, header_allow, label)
 #endregion
 
 #region Permission access/PP
+# https://github.com/w3c/webappsec-permissions-policy/blob/main/features.md
+# https://fullscreen.spec.whatwg.org/#fullscreen-is-supported
+# https://w3c.github.io/webappsec-permissions-policy/#policy-controlled-feature-default-allowlist
 header_deny = [("Permissions-Policy", "fullscreen=()")]
 header_allow = [("Permissions-Policy", "fullscreen=(*)")]
 label = "PP"

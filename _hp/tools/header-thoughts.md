@@ -9,6 +9,11 @@
   - should support many browsers
   - including mobile browsers
 
+## Analysis ideas
+- For each browser and feature: group together all responses that resulted in the same test outcomes (or almost the same to account for noise/timeouts)
+  - analyse the groups of responses to see any patterns
+  - do it for every browser and then focus on the responses that are in different groups in different browsers
+
 ## Header generation thoughts
 
 All tests:
