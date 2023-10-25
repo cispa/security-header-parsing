@@ -118,7 +118,7 @@ More thoughts:
         - Referrer send to same-origin
         - Referrer send to same-site
         - Referrer send to cross-site
-        - Referrer send to cross-site downgrade? (HTTPS to HTTP)
+        - Referrer send to cross-site downgrade (HTTPS to HTTP)
         - ...?
     - Referer-Policy:
         - multiple header spec: (fallback features)

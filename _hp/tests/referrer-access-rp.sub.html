@@ -37,9 +37,14 @@
       let origin = location.origin;
       let resp = 1;
       let nest = 1;
-      let final_url = url + response_id + `&count=${i.id}&nest=${nest}&origin=${origin}&element=${element}&resp=${resp}`
-      i.data = final_url; // Object
-      i.src = final_url; // Embed + IFrame
+      let final_url = url + response_id + `&count=${i.id}&nest=${nest}&origin=${origin}&element=${test_info}&resp=${resp}`;
+      console.log(final_url);
+      let w;
+      if (test_info == "window.open") {
+        w = window.open(final_url, "_blank");
+      } else {
+        i.src = final_url;
+      }
 
       // Wait for 90% of test_timeout; then report that no message was received!
       let timer = t.step_timeout(() => {
@@ -53,17 +58,25 @@
         t.report_outcome(e.data.message);
       }));
       // Cleanup function (remove the frame after the test)
-      t.add_cleanup(() => i.remove());
+      t.add_cleanup(() => {
+        if (test_info == "window.open") {
+          w.close();
+        }
+        i.remove();
+      });
       // Start the test
       document.body.append(i);
     }, test_name);
   }
 
   // A -> B (sets RP) -> A: access document.referrer (should be equal to what was send to the server)
-  const simple_access = access_referrer_test.bind(null, 'iframe', false, "ABA");
-  // Other tests: downgrade and similar cannot be tested currently as iframes are active content and blocked by mixed content policy
+  const simple_access = access_referrer_test.bind(null, 'iframe', false, "iframe");
+  // Other tests: downgrade and similar can only be tested with window.open as active content is blocked by mixed content policy
+  const simple_window_access = access_referrer_test.bind(null, 'iframe', false, "window.open");
+  // Loads of tests exist in WPT: https://wpt.fyi/results/referrer-policy?label=master&label=experimental&aligned&q=referrer-policy
 
-  const test_declarations = [simple_access];
+  // Important: allow popups for all our origins!
+  const test_declarations = [simple_access, simple_window_access];
   const path = '/_hp/server/responses.py?feature_group=rp&resp_id=';
   const label = 'RP';
   run_tests(test_declarations, path, label);

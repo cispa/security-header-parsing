@@ -14,16 +14,30 @@
         let response_id = urlParams.get("resp_id");
         let element = urlParams.get("element");
         if (nest == 0) {
-          window.parent.postMessage({"id": id, "message": `document.referrer: ${document.referrer}`}, "*");
+            if (element == "window.open") {
+                window.opener.postMessage({ "id": id, "message": `document.referrer: ${document.referrer}` }, "*");
+            } else {
+                window.parent.postMessage({ "id": id, "message": `document.referrer: ${document.referrer}` }, "*");
+            }
         } else {
-            window.addEventListener("message", (e) => {
-                window.parent.postMessage(e.data, "*");
-            });
-            const i = document.createElement('iframe');
             const final_url = url + response_id + `&count=${id}&nest=${nest - 1}&resp=0&origin=${origin}&element=${element}`;
-            i.src = final_url;
-            i.data = final_url;
-            document.body.append(i);
+
+            if (element == "window.open") {
+                window.addEventListener("message", (e) => {
+                    window.opener.postMessage(e.data, "*");
+                    w.close();
+                });
+                const i = document.createElement('iframe');
+                w = window.open(final_url);
+            } else {
+                window.addEventListener("message", (e) => {
+                    window.parent.postMessage(e.data, "*");
+                });
+                const i = document.createElement('iframe');
+                i.src = final_url;
+                document.body.appendChild(i);
+            }
+
         }
     </script>
 </body>
