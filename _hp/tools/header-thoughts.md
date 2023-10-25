@@ -142,7 +142,6 @@ More thoughts:
     - Tests:
         - Access window.opener (same-origin)
         - Access window.opener (cross-site)
-        - (Currently the tests run in the opened window? however, we can run the tests in the top-level window that opened the new windows to check whether they can be accessed?)
     - Cross-Origin-Opener-Policy: ...
 - Cross-Origin-Isolation (COEP):
     - Tests:

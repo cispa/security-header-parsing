@@ -109,7 +109,7 @@ create_responses(header_deny, header_allow, label)
 
 #endregion
 
-#region COEP?
+#region TODO COEP?
 # TODO: what do we want to test here? which feature?
 # CrossOriginIsolation is working? No non-corp ressources allowed while COEP is there?, ...
 
@@ -117,7 +117,7 @@ create_responses(header_deny, header_allow, label)
 
 #region Window References/COOP
 header_deny = [("Cross-Origin-Opener-Policy", "same-origin")]
-header_allow = [("Cross-Origin-Opener-Policy", "cross-origin")]
+header_allow = [("Cross-Origin-Opener-Policy", "unsafe-none")]
 label = "COOP"
 create_responses(header_deny, header_allow, label)
 
