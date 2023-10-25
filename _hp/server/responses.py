@@ -36,6 +36,8 @@ def get_body(feature_group, resp):
             file = open("_hp/common/swag.jpg", "rb")
         else:
             file = open("_hp/common/frame-corp.html", "rb")
+    elif feature_group in ["tao"]:
+        file = open("_hp/common/swag.jpg", "rb")
     elif feature_group in ["framing"]:
         file = open("_hp/common/iframes.html", "rb")
     else:

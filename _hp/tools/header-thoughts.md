@@ -125,10 +125,7 @@ More thoughts:
         - (whiteboard) window.open(), check if this works on all browsers, x-proto, x-site, x-origin (not sure what the idea was here)
 - TimingAPI:
     - Tests:
-        - Access Timing API same-origin
-        - Access Timing API same-site (subdomain)
-        - Access Timing API cross-site
-        - Access Timing API cross-site (subdomain)?
+        - Access Timing API different origin relations
     - Timing-Allow-Origin:
         -  *, origin list, ...
 -  Image Load (CORP):

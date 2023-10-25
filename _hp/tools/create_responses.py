@@ -165,5 +165,9 @@ label = "RP"
 create_responses(header_deny, header_allow, label)
 #endregion
 
-#region TODO: PerformanceAPI timing/TAO
+#region PerformanceAPI timing/TAO
+header_deny = [("Timing-Allow-Origin", "null")]
+header_allow = [("Timing-Allow-Origin", "*")]
+label = "TAO"
+create_responses(header_deny, header_allow, label)
 #endregion

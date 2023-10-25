@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAO PerfAPI Tests</title>
+    <script src="/_hp/resources/testharness.js"></script>
+    <!-- <script src="/_hp/resources/testharnessreport.js"></script> -->
+    <script src="/_hp/resources/store_results.sub.js"></script>
+</head>
+
+<body>
+
+</body>
+
+
+<script>
+    var count = 0;
+    function access_perf_test(element, sandbox, test_info, url, origin, response_id) {
+        /*
+        url: str, URL to be tested (next in the framing chain)
+        origin: str, Origin of the URL to be tested
+        response_id: int, ID of the response element (final response of the chain)
+        element: str, iframe/object/embed
+        sandbox: bool whether to add the sandbox attribute to the next frame
+        test_info: str, additional information about the test (direct, sandbox, nested (A->B->A->A))
+        */
+        test_name = `perfAPI_${element}|${sandbox}|${test_info}|${origin}|${response_id}`;
+        //console.log(url, response_id, test_name);
+        async_test(t => {
+            t.set_test_info(url, test_info);
+            const i = document.createElement(element);
+            count = count + 1;
+            i.id = count;
+            let origin = location.origin;
+            let resp = 1;
+            let nest = 0;
+            let final_url = url + response_id + `&count=${i.id}&nest=${nest}&origin=${origin}&element=${test_info}&resp=${resp}`;
+            i.src = final_url;
+
+            i.onload = () => test_perfAPI(t, final_url);
+            i.onerror = () => test_perfAPI(t, final_url);
+
+            // Cleanup function (not called for tests that time out?)
+            t.add_cleanup(() => {
+                i.remove();
+            });
+            // Start the test
+            document.body.append(i);
+        }, test_name);
+    }
+
+    function test_perfAPI(t, url) {
+        const resources = performance.getEntriesByName(url);
+        assert_true(resources.length <= 1, "Only one performance entry for one URL");
+        if (resources.length) {
+            t.report_outcome({ "requestStart != 0": resources[0].requestStart != 0 });
+        } else {
+            t.report_outcome("No performance entry");
+        }
+        t.done();
+    }
+
+    // A -> B (sets TAO), original A: access perfAPI timing of B
+    const simple_access = access_perf_test.bind(null, 'img', false, "direct");
+    // Other tests? A -> B (sandbox, ....) -> A (sets TAO), B: access perfAPI timing of final A?
+    // https://wpt.fyi/results/resource-timing?label=master&label=experimental&aligned&q=TAO
+
+    const test_declarations = [simple_access];
+    const path = '/_hp/server/responses.py?feature_group=tao&resp_id=';
+    const label = 'TAO';
+    run_tests(test_declarations, path, label);
+
+</script>
+
+</html>
