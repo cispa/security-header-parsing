@@ -36,7 +36,7 @@
         count = count + 1;
         i.id = count;
         let origin = location.origin;
-        let final_url = url + response_id + `&count=${i.id}&nest=0&origin=${origin}&element=${element}`
+        let final_url = url + response_id + `&count=${i.id}&nest=0&origin=${origin}&element=${element}&resp=1`
         i.data = final_url; // Object
         i.src = final_url; // Embed + IFrame
         i.allow = "fullscreen *";
@@ -62,17 +62,17 @@
     }
   }
 
-  // The FP/PP response header is only set on B (and on initial A, not on other As)
-  // A -> B: access API
+  // The FP/PP configured response header is only set on B (allow * on initial A, not on other As)
+  // A -> B (allow): access API
   const simple_access = access_fullscreen_test.bind(null, 'iframe', false, "direct");
 
   // TODO: create more advanced access API tests;
   // Potential problem we want to set the policy on B and not on the final frame that performs the access?
-  // A -> B (sandboxed) -> A: access API
+  // A -> B (allow) -> A (sandbox): access API
 
-  // A -> B (nothing) -> A: access API
+  // A -> B (allow) -> A (nothing): access API
 
-  // A -> B (allow) -> A: access API
+  // A -> B (allow) -> A (allow): access API
 
 
   const test_declarations = [simple_access];

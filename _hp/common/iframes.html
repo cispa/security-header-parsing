@@ -21,7 +21,8 @@
 			});
 
 			const i = document.createElement(element);
-			const final_url = url + response_id + `&count=${id}&nest=${nest - 1}&origin=${origin}&element=${element}`;
+			const resp = nest == 1 ? 1 : 0;
+			const final_url = url + response_id + `&count=${id}&nest=${nest - 1}&origin=${origin}&element=${element}&resp=${resp}`;
 			i.src = final_url;
 			i.data = final_url;
 			document.body.append(i);

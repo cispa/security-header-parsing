@@ -67,7 +67,7 @@ function nested_test(frame_element, sandbox, url, response_id, element, test_inf
     count = count + 1;
     i.id = count;
     let origin = location.origin; // Works for A->B and A->B(->A)->A embedding; for A->B->B we would need to use the origin of B
-    let nesting = 0;
+    let nesting;
     // A -> B (sandbox) -> A embedding
     if (sandbox) {
       i.sandbox = "allow-scripts";
@@ -77,7 +77,7 @@ function nested_test(frame_element, sandbox, url, response_id, element, test_inf
     if (test_info === "nested") {
       nesting = 2;
     }
-    let final_url = url + response_id + `&count=${i.id}&nest=${nesting}&origin=${origin}&element=${element}`
+    let final_url = url + response_id + `&count=${i.id}&nest=${nesting}&origin=${origin}&element=${element}&resp=0`
     i.data = final_url; // Object
     i.src = final_url; // Embed + IFrame
     // Wait for 90% of test_timeout; then report that no message was received!

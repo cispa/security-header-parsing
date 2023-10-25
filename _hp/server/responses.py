@@ -19,7 +19,7 @@ def get_response(resp_id):
 
 
 @lru_cache(maxsize=None)
-def get_body(feature_group, nest):
+def get_body(feature_group, resp):
     print("Body:", feature_group, os.getpid(),
           threading.current_thread().ident)
     
@@ -32,7 +32,7 @@ def get_body(feature_group, nest):
     elif feature_group in ['hsts']:
         return ""  # Empty body
     elif feature_group in ['corp']:
-        if nest == 0:
+        if resp == 1:
             file = open("_hp/common/swag.jpg", "rb")
         else:
             file = open("_hp/common/frame-corp.html", "rb")
@@ -48,12 +48,12 @@ def main(request, response):
     params = request.GET
     # print(params)
     # Get the correct response based on resp_id (headers + status code, without body)
-    nest = int(params["nest"])
-    if nest == 0:
+    resp = int(params["resp"])
+    if resp == 1:
         response = get_response(params["resp_id"])
     else:
         response.status_code = 200
         response.raw_header = []
     # Get the correct response body based on the current test/feature group
-    file = get_body(params['feature_group'], nest=nest)
+    file = get_body(params['feature_group'], resp=resp)
     return response.status_code, response.raw_header, file
