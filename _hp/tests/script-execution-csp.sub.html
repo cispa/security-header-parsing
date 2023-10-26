@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script execution CSP Tests</title>
+    <script src="/_hp/resources/testharness.js"></script>
+    <!-- <script src="/_hp/resources/testharnessreport.js"></script> -->
+    <script src="/_hp/resources/store_results.sub.js"></script>
+</head>
+
+<body>
+
+</body>
+
+
+<script>
+    var count = 0;
+    function script_execution_test(element, sandbox, test_info, url, origin, response_id) {
+        /*
+        url: str, URL to be tested (next in the framing chain)
+        origin: str, Origin of the URL to be tested
+        response_id: int, ID of the response element (final response of the chain)
+        element: str, iframe/object/embed
+        sandbox: bool whether to add the sandbox attribute to the next frame
+        test_info: str, additional information about the test (direct, sandbox, nested (A->B->A->A))
+        */
+        test_name = `script_execution_${element}|${sandbox}|${test_info}|${origin}|${response_id}`;
+        //console.log(url, response_id, test_name);
+        async_test(t => {
+            t.set_test_info(url, test_info);
+            const i = document.createElement(element);
+            count = count + 1;
+            i.id = count;
+            let origin = location.origin;
+            let resp = 1;
+            let nest = 0;
+            if (sandbox) {
+                i.sandbox = "allow-scripts";
+            }
+            let final_url = url + response_id + `&count=${i.id}&nest=${nest}&origin=${origin}&element=${element}&resp=${resp}`
+            i.src = final_url;
+
+            // Wait for 90% of test_timeout; then report that no message was received!
+            let timer = t.step_timeout(() => {
+                t.report_outcome("message timeout");
+                t.done();
+            }, 0.9 * test_timeout);
+            // Report that a message was received
+            waitForMessageFrom(i, t).then(t.step_func_done(e => {
+                clearTimeout(timer);
+                t.report_outcome(e.data.message);
+            }));
+            // Cleanup function (remove the frame after the test)
+            t.add_cleanup(() => {
+                i.remove();
+            });
+            // Start the test
+            document.body.append(i);
+        }, test_name);
+    }
+
+    // A -> B (CSP), A (script): send message
+    const simple_access = script_execution_test.bind(null, 'iframe', false, "direct");
+    // A -> B (CSP, sandbox), A (script): send message
+    const sandbox_access = script_execution_test.bind(null, 'iframe', true, "sandbox");
+
+    const test_declarations = [simple_access, sandbox_access];
+    const path = '/_hp/server/responses.py?feature_group=csp-xss&resp_id=';
+    const label = 'CSP-XSS';
+    run_tests(test_declarations, path, label);
+
+</script>
+
+</html>
