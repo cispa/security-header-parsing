@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Script execution CSP Tests</title>
+    <title>Subresource loading (IMG) CSP Tests</title>
     <script src="/_hp/resources/testharness.js"></script>
     <!-- <script src="/_hp/resources/testharnessreport.js"></script> -->
     <script src="/_hp/resources/store_results.sub.js"></script>
@@ -18,7 +18,7 @@
 
 <script>
     var count = 0;
-    function script_execution_test(element, sandbox, test_info, url, origin, response_id) {
+    function img_loading_test(element, sandbox, test_info, url, origin, response_id) {
         /*
         url: str, URL to be tested (next in the framing chain)
         origin: str, Origin of the URL to be tested
@@ -27,7 +27,7 @@
         sandbox: bool whether to add the sandbox attribute to the next frame
         test_info: str, additional information about the test (direct, sandbox, nested (A->B->A->A))
         */
-        test_name = `script_execution_${element}|${sandbox}|${test_info}|${origin}|${response_id}`;
+        test_name = `imgloading_${element}|${sandbox}|${test_info}|${origin}|${response_id}`;
         //console.log(url, response_id, test_name);
         async_test(t => {
             t.set_test_info(url, test_info);
@@ -37,9 +37,7 @@
             let origin = location.origin;
             let resp = 1;
             let nest = 0;
-            if (sandbox) {
-                i.sandbox = "allow-scripts";
-            }
+
             let final_url = url + response_id + `&count=${i.id}&nest=${nest}&origin=${origin}&element=${element}&resp=${resp}`
             i.src = final_url;
 
@@ -62,14 +60,12 @@
         }, test_name);
     }
 
-    // A -> B (CSP), A (script): send message
-    const simple_access = script_execution_test.bind(null, 'iframe', false, "direct");
-    // A -> B (CSP, sandbox), A (script): send message
-    const sandbox_access = script_execution_test.bind(null, 'iframe', true, "sandbox");
+    // A -> B (CSP), A (img): send message
+    const simple_access = img_loading_test.bind(null, 'iframe', false, "direct");
 
-    const test_declarations = [simple_access, sandbox_access];
-    const path = '/_hp/server/responses.py?feature_group=csp-script&resp_id=';
-    const label = 'CSP-SCRIPT';
+    const test_declarations = [simple_access];
+    const path = '/_hp/server/responses.py?feature_group=csp-img&resp_id=';
+    const label = 'CSP-IMG';
     run_tests(test_declarations, path, label);
 
 </script>

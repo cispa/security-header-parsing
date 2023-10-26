@@ -130,15 +130,18 @@ create_responses(header_deny, header_allow, label)
 # ....
 #endregion
 
-#region CSP XSS
+#region CSP script-execution
 header_deny = [("Content-Security-Policy", "script-src 'none'")]
 header_allow = [("Content-Security-Policy", "script-src *")]
-label = "CSP-XSS"
+label = "CSP-SCRIPT"
 create_responses(header_deny, header_allow, label)
 #endregion
 
-#region TODO: CSP subresource loading (image)
-
+#region CSP subresource loading (image)
+header_deny = [("Content-Security-Policy", "img-src 'none'")]
+header_allow = [("Content-Security-Policy", "img-src *")]
+label = "CSP-IMG"
+create_responses(header_deny, header_allow, label)
 #endregion
 
 #region HSTS enforcement

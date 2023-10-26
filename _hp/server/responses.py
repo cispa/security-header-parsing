@@ -42,8 +42,10 @@ def get_body(feature_group, resp):
         file = open("_hp/common/iframes.html", "rb")
     elif feature_group in ["oac"]:
         file = open("_hp/common/frame-oac.html", "rb")
-    elif feature_group in ["csp-xss"]:
+    elif feature_group in ["csp-script"]:
         file = open("_hp/common/frame-script-csp.html", "rb")
+    elif feature_group in ["csp-img"]:
+        file = open("_hp/common/frame-img-csp.html", "rb")
     else:
         print(f"Invalid feature_group: {feature_group}")
         return ""

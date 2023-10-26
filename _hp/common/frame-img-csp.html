@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+</head>
+
+<body>
+    <script>
+        var urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+        var id = urlParams.get("count");
+        let url = urlParams.get("origin") + '/_hp/common/swag.jpg';
+        const i = document.createElement("img");
+        i.onload = () => {
+            window.parent.postMessage({ "id": id, "message": "load" }, "*");
+        }
+        i.onerror = () => {
+            window.parent.postMessage({ "id": id, "message": "error" }, "*");
+        }
+        i.src = url;
+        document.body.appendChild(i);
+    </script>
+</body>
+
+</html>
