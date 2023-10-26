@@ -113,7 +113,7 @@ More thoughts:
             - where to deploy the header? top-level document? nested document? both? ...
             - OT: camera/video; pp is only responsible for allowing the call to getUserMedia, mediacapture spec is then responsible to check whether it is allowed or not; which Origin is shown to the user if the call comes from a cross-origin iframe?
         - FeaturePolicy: FeaturePolicy/iframe allow (no idea; should we test this?)
-- Referrer value:
+- Referrer value (Referer-Policy):
     - Tests:
         - Referrer send to same-origin
         - Referrer send to same-site
@@ -123,12 +123,12 @@ More thoughts:
     - Referer-Policy:
         - multiple header spec: (fallback features)
         - (whiteboard) window.open(), check if this works on all browsers, x-proto, x-site, x-origin (not sure what the idea was here)
-- TimingAPI:
+- PerformanceAPI (Timing-Allow-Origin):
     - Tests:
         - Access Timing API different origin relations
     - Timing-Allow-Origin:
         -  *, origin list, ...
--  Image Load (CORP):
+-  Subresource Loads (Image) (CORP):
     -  Tests:
         -  Events-fired image (same-origin)
         -  Events-fired image (same-site) (subdomain)
@@ -147,7 +147,7 @@ More thoughts:
         - Check whether requests are send without credentials, blocked if they do not have correct CORP or CORS settings?
         - ...?
     - Cross-Origin-Embedder-Policy: ...
-- Origin-keying (OAC)
+- Origin-keying/document-domain (OAC)
     - Tests:
         - Access window.originAgentCluster (top-level window)
         - Document.domain, webassembly.module, sharedarraybuffer?
@@ -178,8 +178,7 @@ More thoughts:
 - Other stuff:
     - Other CSP stuff:
         - script-control
-        - anything else? TLS enforcement (UIR), fetch directive, fallback rules, reporting?, trusted-types?, ...
-        - What about meta tags? E.g., CSP or XFO?
+        - anything else? TLS enforcement (UIR), fetch directive/subresource loading, fallback rules, reporting?, trusted-types?, ...
         - csp tag for iframes?
     - XCTO
     - Expect-CT (not interesting?)

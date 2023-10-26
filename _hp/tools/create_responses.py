@@ -145,7 +145,12 @@ label = "HSTS"
 create_responses(header_deny, header_allow, label)
 #endregion
 
-#region TODO: document.domain and site isolation?/OAC
+#region originAgentCluster/oac header
+# related to document.domain and site/origin isolation
+header_deny = [("origin-agent-cluster", "?1")]  # Set OAC, secure value
+header_allow = [("origin-agent-cluster", "?0")] # Disable OAC, insecure value
+label = "OAC"
+create_responses(header_deny, header_allow, label)
 #endregion
 
 #region Permission access/PP

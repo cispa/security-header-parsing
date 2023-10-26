@@ -40,6 +40,8 @@ def get_body(feature_group, resp):
         file = open("_hp/common/swag.jpg", "rb")
     elif feature_group in ["framing"]:
         file = open("_hp/common/iframes.html", "rb")
+    elif feature_group in ["oac"]:
+        file = open("_hp/common/frame-oac.html", "rb")
     else:
         print(f"Invalid feature_group: {feature_group}")
         return ""
