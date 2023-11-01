@@ -27,7 +27,6 @@
                     window.opener.postMessage(e.data, "*");
                     w.close();
                 });
-                const i = document.createElement('iframe');
                 w = window.open(final_url);
             } else {
                 window.addEventListener("message", (e) => {
