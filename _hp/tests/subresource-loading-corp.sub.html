@@ -27,7 +27,7 @@
     sandbox: bool whether to add the sandbox attribute to the next frame
     test_info: str, additional information about the test (direct, sandbox, nested (A->B->A->A))
     */
-    test_name = `subresourceloading_${element}|${sandbox}|${test_info}|${origin}|${response_id}`;
+    test_name = `subresourceloadingCORP_${element}|${sandbox}|${test_info}|${origin}|${response_id}`;
     //console.log(url, response_id, test_name);
     if (test_info == "direct") {
       async_test(t => {

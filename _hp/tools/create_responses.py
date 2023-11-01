@@ -109,9 +109,13 @@ create_responses(header_deny, header_allow, label)
 
 #endregion
 
-#region TODO COEP?
-# TODO: what do we want to test here? which feature?
-# CrossOriginIsolation is working? No non-corp ressources allowed while COEP is there?, ...
+#region COEP
+# No non-corp ressources allowed while COEP is there, + crossOriginIsolated Flag
+header_deny = [("Cross-Origin-Embedder-Policy", "require-corp")]
+header_allow = [("Cross-Origin-Embedder-Policy", "unsafe-none"),
+                ]
+label = "COEP"
+create_responses(header_deny, header_allow, label)
 
 #endregion
 

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subresource Loading (COEP) Tests</title>
+    <script src="/_hp/resources/testharness.js"></script>
+    <!-- <script src="/_hp/resources/testharnessreport.js"></script> -->
+    <script src="/_hp/resources/store_results.sub.js"></script>
+</head>
+
+<body>
+
+</body>
+
+
+<script>
+    var count = 0;
+    function subresource_loading_test(element, sandbox, test_info, url, origin, response_id) {
+        /*
+        url: str, URL to be tested (next in the framing chain)
+        origin: str, Origin of the URL to be tested
+        response_id: int, ID of the response element (final response of the chain)
+        element: str, iframe/object/embed
+        sandbox: bool whether to add the sandbox attribute to the next frame
+        test_info: str, additional information about the test (direct, sandbox, nested (A->B->A->A))
+        */
+        test_name = `subresourceloadingCOEP_${element}|${sandbox}|${test_info}|${origin}|${response_id}`;
+        async_test(t => {
+            t.set_test_info(url, test_info);
+            const i = document.createElement("iframe");
+            count = count + 1;
+            i.id = count;
+            let origin = location.origin; // Works for A->B and A->B(->A)->A embedding; for A->B->B we would need to use the origin of B
+            let nesting = 1;
+            // A -> B (sandbox) -> A embedding
+            if (sandbox) {
+                i.sandbox = "allow-scripts";
+            }
+            let final_url = url + response_id + `&count=${i.id}&nest=${nesting}&origin=${origin}&element=${element}&resp=1`
+            i.src = final_url; // Embed + IFrame
+            // Wait for 90% of test_timeout; then report that no message was received!
+            let timer = t.step_timeout(() => {
+                t.report_outcome("message timeout");
+                t.done();
+            }, 0.9 * test_timeout);
+            // Report that a message was received
+            waitForMessageFrom(i, t).then(t.step_func_done(e => {
+                clearTimeout(timer);
+                t.report_outcome(e.data.message);
+            }));
+            // Cleanup function (remove the frame after the test)
+            t.add_cleanup(() => i.remove());
+            // Start the test
+            document.body.append(i);
+        }, test_name);
+    }
+
+
+    // A -> B -> A
+    const subresource_loading = subresource_loading_test.bind(null, "img", false, "direct");
+    // A -> B (sandbox) -> A
+    const sandboxed_subresource_loading = subresource_loading_test.bind(null, "img", true, "sandbox");
+
+
+    const test_declarations = [subresource_loading, sandboxed_subresource_loading];
+    const path = '/_hp/server/responses.py?feature_group=coep&resp_id=';
+    const label = 'COEP';
+    run_tests(test_declarations, path, label);
+
+</script>
+
+</html>

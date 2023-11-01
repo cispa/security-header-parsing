@@ -46,6 +46,8 @@ def get_body(feature_group, resp):
         file = open("_hp/common/frame-script-csp.html", "rb")
     elif feature_group in ["csp-img"]:
         file = open("_hp/common/frame-img-csp.html", "rb")
+    elif feature_group in ["coep"]:
+        file = open("_hp/common/frame-coep.html", "rb")
     else:
         print(f"Invalid feature_group: {feature_group}")
         return ""

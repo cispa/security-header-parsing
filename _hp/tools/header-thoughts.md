@@ -142,10 +142,8 @@ More thoughts:
     - Cross-Origin-Opener-Policy: ...
 - Cross-Origin-Isolation (COEP):
     - Tests:
-        - TODO: what do we actually want to test for COEP and what are we currently testing?
+        - Check whether requests are blocked if they do not have correct CORP setting
         - Check whether window is cross-origin-isolated?
-        - Check whether requests are send without credentials, blocked if they do not have correct CORP or CORS settings?
-        - ...?
     - Cross-Origin-Embedder-Policy: ...
 - Origin-keying/document-domain (OAC)
     - Tests:
