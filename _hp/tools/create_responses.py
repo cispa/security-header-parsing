@@ -3,8 +3,6 @@ from sqlalchemy.exc import IntegrityError
 # TODO: create responses for each feature group (file in /tests)
 # Some feature groups have more than one group of responses (label in the DB), e.g., framing has both XFO, CSP, and XFO vs CSP
 
-# TODO: initially create two responses for each feature group (one always activating the feature, one always blocking the feature)
-
 def create_responses(header_deny, header_allow, label, status_code=200):
     with Session() as session:
         for header in [header_deny, header_allow]:
