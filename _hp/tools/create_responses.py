@@ -123,11 +123,19 @@ create_responses(header_deny, header_allow, label)
 
 #endregion
 
-#region TODO: CORS and co.
-
-# ACAC
-# ACEH
-# ....
+#region CORS
+# For testing we only need one AC-XX headers pair
+header_deny = [("Access-Control-Allow-Origin", "null")]
+header_allow = [("Access-Control-Allow-Origin", "https://sub.headers.websec.saarland"),
+                 ("Access-Control-Allow-Credentials", "true"),
+                 ("Access-Control-Allow-Methods", "TEST"),
+                 ("Access-Control-Allow-Headers", "Test"),
+                 ("Access-Control-Expose-Headers", "Test"),
+                 ("Test", "Test"),
+                 # ("Access-Control-Max-Age", "10") # Caching
+                ]
+label = "CORS"
+create_responses(header_deny, header_allow, label)
 #endregion
 
 #region CSP script-execution

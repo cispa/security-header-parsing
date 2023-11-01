@@ -27,7 +27,7 @@ def get_body(feature_group, resp):
         file = open(f"_hp/common/frame-fullscreen-pp.html", "rb")
     elif feature_group in ['coop']:
         file = open("_hp/common/swag.jpg", "rb") # Empty file triggers download in FF
-    elif feature_group in ['hsts']:
+    elif feature_group in ['hsts', "cors"]:
         return ""  # Empty body
     elif feature_group in ["rp"]:
         file = open("_hp/common/frame-referrer.html", "rb")
