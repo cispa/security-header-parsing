@@ -10,11 +10,10 @@
     - Setup certs: either remove `.demo` from the files in `_hp/tools/certs/` to use self-signed certs or add the real certs there
 - Run:
     - Start the WPT Server (from the top-most folder): `poetry run -C _hp python wpt serve --config _hp/wpt-config.json`
-    - Automatic: Start the testrunners, ...
-    - Manual: Visit http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html (HTTPS: 443, HTTP2 (experimental): 9000)
-    - ...
+    - TODO: Automatic: Start the testrunners, ...
+    - Manual: Visit http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html (HTTPS: 443)
 - TODOs:
-    - implement test cases for each feature group
+    - create testrunners
     - create useful responses for each feature group
     - analyse results!
       - discover differences in browsers/versions
@@ -38,25 +37,8 @@
         - config.json: DB connection and co.
         - crawler/ The code for the crawlers that visit the tests
         - models.py: Defines the database models (results, responses, ...); creates dummy data if run directly
-        - TODO: create_responses.py
-            - First create two responses for each feature group: "deny" and "allow" for testing the tests
-            - Later create useful data for responses
+        - create_responses.py: create two responses for each feature group: "deny" and "allow" for testing the tests
 - The only other relevant files are:
     - tools/serve/...: Config to run WPT
     - tools/wptserve/...: The WPT server
     - Some of the tests to take inspirations e.g., x-frame-options/...
-
-
-## Browser setup?
-```
-{
-    "BROWSERS": {
-        "BROWSERNAME_desktop":"PATH_TO_BROWSER_EXECUTABLE",
-        "BROWSERNAME_android":"PACKAGE_NAME",
-        "BROWSERNAME_ios":"YET_TO_DECIDE",
-    }
-}
-
-> For desktop browsers, assign the value as the path to the executable/driver file. For android, assign the value of the package name.
-
-```
