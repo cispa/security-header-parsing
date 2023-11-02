@@ -1,20 +1,5 @@
 {
     "DB_URL": "postgresql+psycopg2://http_header:bde50f42d5851a9eb6bf4166e737cb1c@134.96.225.205:5432/http_header",
-    "SECRET": "swagisthebest",
-    "HEADERS": [
-        "xfo",
-        "hsts",
-        "csp",
-        "pp",
-        "rp",
-        "coop",
-        "coep",
-        "corp",
-        "cors_acac",
-        "cors_aceh",
-        "oac",
-        "tao"
-    ],
     "BROWSERS": {
         "brave_desktop": "../abc.exe",
         "brave_android": "com.brave.android",

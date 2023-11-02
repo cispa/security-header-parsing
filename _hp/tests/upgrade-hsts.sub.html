@@ -51,7 +51,7 @@
 
 
     // Simple upgrade test: Visit URL that sets HSTS, visit http://(sub.)<host of URL> and check for redirect
-    // TODO: other tests e.g., caching or clearing related?, double subdomain?
+    // OPTIONAL: other tests e.g., caching or clearing related?, double subdomain?
     const test_declarations = [simple_upgrade_test, subdomain_upgrade_test];
     const path = '/_hp/server/responses.py?feature_group=hsts&nest=0&resp=1&resp_id=';
     const label = 'HSTS';

@@ -2,6 +2,7 @@ from models import Response, Session
 from sqlalchemy.exc import IntegrityError
 # TODO: create responses for each feature group (file in /tests)
 # Some feature groups have more than one group of responses (label in the DB), e.g., framing has both XFO, CSP, and XFO vs CSP
+# We have to define somewhere which label responses we use for which test_file tests?
 
 def create_responses(header_deny, header_allow, label, status_code=200):
     with Session() as session:

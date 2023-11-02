@@ -10,7 +10,7 @@
     - Setup certs: either remove `.demo` from the files in `_hp/tools/certs/` to use self-signed certs or add the real certs there
 - Run:
     - Start the WPT Server (from the top-most folder): `poetry run -C _hp python wpt serve --config _hp/wpt-config.json`
-    - TODO: Automatic: Start the testrunners, ...
+    - Automatic: Start the testrunners, ...
     - Manual: Visit http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html (HTTPS: 443)
 - TODOs:
     - create testrunners

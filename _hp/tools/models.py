@@ -15,8 +15,6 @@ except OSError:
     proj_config= json.load(open("_hp/tools/config.json"))
 
 DB_URL = proj_config['DB_URL']
-SECRET = proj_config['SECRET']
-
 
 # DB
 Base = declarative_base()
@@ -76,9 +74,8 @@ class Response(BaseModel):
     raw_header = Column(JSONB)
     # The status code WPT should use
     status_code = Column(Integer, default=200)
-    # TODO: additional information about a response
+    # Additional information about a response
     # E.g., for framing we have different "groups" of responses we test: XFO only, CSP-FA only, XFO vs. CSP-FA, ...
-    # We have to define somewhere which label responses we use for which test_file tests?
     label = Column(String)
 
     # Helper
@@ -103,7 +100,7 @@ class Result(BaseModel):
     outcome_value = Column(JSONB)
 
     # Provided by testharness.js
-    test_name = Column(String)   # TODO: Alternative for testcase_id? Otherwise we need to figure out how each wpt-test knows it's own testcase_id, problem: includes resp_id and URL?
+    test_name = Column(String)   # Alternative for testcase_id? Otherwise we need to figure out how each wpt-test knows it's own testcase_id?
     test_status = Column(Integer)
     test_message = Column(String)
     test_stack = Column(String)
@@ -113,7 +110,7 @@ class Result(BaseModel):
     org_host = Column(Enum('sub.headers.websec.saarland', '', name='ohost')) # Should always be sub.headers.websec.saarland!
     resp_scheme = Column(Enum('http', 'https', 'http2', name='scheme'))
     resp_host = Column(Enum('sub.headers.websec.saarland', 'sub.sub.headers.websec.saarland', 'headers.websec.saarland', 'headers.webappsec.eu', name='rhost')) # Should be one of sub.headers.websec.saarland (same-orgin), headers.websec.saarland (parent-domain; same-site), sub.sub.headers.websec.saarland (sub-domain; same-site), or headers.webappsec.eu (cross-site)
-    relation_info = Column(String) # E.g., direct, sandbox/srcdoc, nested (chain), nested (parent), nested (top-level)
+    relation_info = Column(String) # E.g., direct, sandbox/srcdoc, nested (chain), nested (parent), nested (top-level), or something else
 
     # Foreign keys
     browser_id: Mapped[int] = mapped_column(ForeignKey("Browser.id"))
