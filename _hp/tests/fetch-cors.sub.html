@@ -16,6 +16,8 @@
 
 
 <script>
+    let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+    let resp_type = urlParams.get("resp_type") || "debug";
     var count = 0;
     function access_fetch_test(method, credentials, headers, test_info, url, origin, response_id) {
         /*
@@ -55,8 +57,12 @@
     const custom_headers = access_fetch_test.bind(null, "GET", "omit", new Headers({ "Test": "Test" }), "custom_headers")
     const credentials_fetch = access_fetch_test.bind(null, "GET", "include", new Headers(), "credendials")
     // Other tests? caching, ..
-
-    const test_declarations = [simple_fetch, custom_method, custom_headers, credentials_fetch];
+    let test_declarations;
+    if (resp_type === "parsing") {
+        test_declarations = [simple_fetch, custom_method, custom_headers, credentials_fetch];
+    } else {
+        test_declarations = [simple_fetch, custom_method, custom_headers, credentials_fetch];
+    }
     const path = '/_hp/server/responses.py?feature_group=cors&resp_id=';
     const label = 'CORS';
     run_tests(test_declarations, path, label);

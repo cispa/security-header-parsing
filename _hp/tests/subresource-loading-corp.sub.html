@@ -16,6 +16,8 @@
 
 
 <script>
+  let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+  let resp_type = urlParams.get("resp_type") || "debug";
   var count = 0;
   function subresource_loading_test(element, sandbox, test_info, url, origin, response_id) {
     /*
@@ -67,9 +69,13 @@
   // Data URL?
   // (General note: more complex tests are not too important as we want to test the parsing of different header values and not edge case behavior for well-specified header values.
   // Edge cases for well-specified headers are mostly tested in WPT e.g.,: https://wpt.fyi/results/fetch/cross-origin-resource-policy?label=master&label=experimental&aligned&q=cross-origin-resource)
-  // Relationship with COEP? (test in COEP tests!)
-  // ...
-  const test_declarations = [simple_subresource_loading, object_subresource_loading, sandboxed_subresource_loading, nested_subresource_loading];
+  // Relationship with COEP? (test in COEP tests!)  // ...
+  let test_declarations;
+  if (resp_type === "parsing") {
+    test_declarations = [simple_subresource_loading];
+  } else {
+    test_declarations = [simple_subresource_loading, object_subresource_loading, sandboxed_subresource_loading, nested_subresource_loading];
+  }
   const path = '/_hp/server/responses.py?feature_group=corp&resp_id=';
   const label = 'CORP';
   run_tests(test_declarations, path, label);

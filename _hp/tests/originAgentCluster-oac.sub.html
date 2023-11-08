@@ -16,6 +16,8 @@
 
 
 <script>
+    let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+    let resp_type = urlParams.get("resp_type") || "debug";
     var count = 0;
     function access_oac_test(element, sandbox, test_info, url, origin, response_id) {
         /*
@@ -81,8 +83,12 @@
     // Only supported in Chromium at the moment (2023-10)
     // Potential "caching" issue: The page requested an origin-keyed agent cluster using the Origin-Agent-Cluster header, but could not be origin-keyed since the origin 'https://sub.headers.websec.saarland' had previously been placed in a site-keyed agent cluster. Update your headers to uniformly request origin-keying for all pages on the origin.
     // Also has effects on setting document.domain: https://html.spec.whatwg.org/multipage/browsers.html#relaxing-the-same-origin-restriction
-
-    const test_declarations = [simple_access, sandbox_access, window_access];
+    let test_declarations;
+    if (resp_type === "parsing") {
+        test_declarations = [window_access];
+    } else {
+        test_declarations = [simple_access, sandbox_access, window_access];
+    }
     const path = '/_hp/server/responses.py?feature_group=oac&resp_id=';
     const label = 'OAC';
     run_tests(test_declarations, path, label);

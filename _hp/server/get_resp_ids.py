@@ -3,10 +3,10 @@ from _hp.tools.models import Response, Session
 from functools import lru_cache
 
 @lru_cache(maxsize=None)
-def get_resp_ids(label):
+def get_resp_ids(label, resp_type):
     with Session() as session:
         try:
-            responses = session.query(Response).filter_by(label=label).all()
+            responses = session.query(Response).filter_by(label=label, resp_type=resp_type).all()
             return [response.id for response in responses]
         except Exception as e:
             print(e)
@@ -16,4 +16,5 @@ def get_resp_ids(label):
 @json_handler
 def main(request, response):
     label = request.GET["label"]
-    return get_resp_ids(label)
+    mode = request.GET["resp_type"]
+    return get_resp_ids(label, mode)

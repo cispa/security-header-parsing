@@ -3,13 +3,18 @@ var org_scheme = location.port == 9000 ? "http2" : location.protocol == "http:" 
 var org_host = location.hostname;
 
 // We always visit the testpages at http://sub.headers.websec.saarland or https://sub.headers.websec.saarland
-// We then create tests for http, https, and http2 for the following cases:
+// We then create tests for http, https, ~~and http2~~ for the following cases:
 // same-org, 2x same-site (parent-domain + sub-domain), cross-site
-function get_test_origins() {
+function get_test_origins(resp_type) {
   const same_host = 'sub.{{host}}';
   const parent = '{{host}}';
   const sub = 'sub.sub.{{host}}';
   const alt_host = '{{hosts[alt][]}}';
+
+  // Only run for one origin relation (cross-site) in the parsing mode!
+  if (resp_type == "parsing") {
+    return [`https://${alt_host}`];
+  }
 
   origins = [];
   for (let host of [same_host, parent, sub, alt_host]) {
@@ -36,11 +41,12 @@ function waitForMessageFrom(frame, test) {
 function run_tests(test_declarations, path, label, origins) {
   for (let test of test_declarations) {
     // Run all tests for origin relations and similar!
+    let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+    const resp_type = urlParams.get("resp_type") || "debug";
     if (!origins) {
-      origins = get_test_origins();
+      origins = get_test_origins(resp_type);
     }
     // Test self-driving tests:
-    let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
     const start_id = parseInt(urlParams.get("start_id"), 10) || 0;
     const chunk_size = parseInt(urlParams.get("chunk_size"), 10) || 1;
     const end_id = parseInt(urlParams.get("end_id"), 10) || 1;
@@ -49,9 +55,9 @@ function run_tests(test_declarations, path, label, origins) {
     // Later: From start_id to end_id (provided by  the testrunner via query parameters &start_id=<id>&end_id=<id>&chunk_size=<chunk_size>)
     // TODO: iterate over the fixed ids instead of fetching them dynamically
     //for (var response_id=start_id; response_id < Math.min(end_id, start_id + chunk_size); i++){
-    fetch(`${location.origin}/_hp/server/get_resp_ids.py?label=${label}`).then(resp => resp.json()).then(ids => {
+
+    fetch(`${location.origin}/_hp/server/get_resp_ids.py?label=${label}&resp_type=${resp_type}`).then(resp => resp.json()).then(ids => {
       for (var response_id of ids) {
-        // origins = ["https://sub.headers.websec.saarland"];
         for (var origin of origins) {
           test(`${origin}${path}`, origin, response_id);
         }
@@ -98,8 +104,8 @@ function nested_test(frame_element, sandbox, url, response_id, element, test_inf
 }
 
 // Store result helpers!
-let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
 async function save_result(tests, status) {
+  let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
   console.log(tests);
   var test_results = tests.map(function (x) {
     return {

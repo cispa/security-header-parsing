@@ -78,12 +78,15 @@ class Response(BaseModel):
     # E.g., for framing we have different "groups" of responses we test: XFO only, CSP-FA only, XFO vs. CSP-FA, ...
     label = Column(String)
 
+    # RespType: debug (allow/deny only for debug), basic (small set of well-defined values for testing all combinations), parsing (large set of responses, do not run all combinations with them!)
+    resp_type = Column(Enum('debug', 'basic', 'parsing', name='resp_type'))
+
     # Helper
     result = relationship('Result', back_populates='response')
      
     # Combination of header, status_code, http_ver, label should be unique
     __table_args__ = (
-        UniqueConstraint('raw_header', 'status_code', 'label', name='uq_response'),
+        UniqueConstraint('raw_header', 'status_code', 'label', 'resp_type', name='uq_response'),
     )
 
 # All the above tables get created before we run the tests
@@ -144,6 +147,6 @@ if __name__ == "__main__":
         # Always make sure that the unknown browser exist with ID=1!
         b: Browser = Browser(name="Unknown", version="Unknown", os="Unknown")
         t: TestCase = TestCase(feature_group="Unknown", test_file="Unknown", test_name="Unknown")
-        r: Response = Response(raw_header=[("X-Frame-Options", "SAMEORIGIN"), ("Content-Type", "text/html")], status_code=200, label="Unknown")
+        r: Response = Response(raw_header=[("X-Frame-Options", "SAMEORIGIN"), ("Content-Type", "text/html")], status_code=200, label="Unknown", resp_type="debug")
         session.add_all([b,t,r])
         session.commit()

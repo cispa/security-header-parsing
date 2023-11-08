@@ -4,11 +4,11 @@ from sqlalchemy.exc import IntegrityError
 # Some feature groups have more than one group of responses (label in the DB), e.g., framing has both XFO, CSP, and XFO vs CSP
 # We have to define somewhere which label responses we use for which test_file tests?
 
-def create_responses(header_deny, header_allow, label, status_code=200):
+def create_responses(header_deny, header_allow, label, status_code=200, resp_type="debug"):
     with Session() as session:
         for header in [header_deny, header_allow]:
             try:
-                r = Response(raw_header=header, status_code=status_code, label=label)
+                r = Response(raw_header=header, status_code=status_code, label=label, resp_type=resp_type)
                 session.add(r)
                 session.commit()
             except IntegrityError as e:

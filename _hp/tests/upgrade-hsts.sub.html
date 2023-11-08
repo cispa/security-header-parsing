@@ -15,6 +15,8 @@
 
 </body>
 <script>
+    let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+    let resp_type = urlParams.get("resp_type") || "debug";
     async function upgrade_test(test_info, url, origin, response_id) {
         test_name = `upgradeHSTS_${test_info}|${origin}|${response_id}`;
         let u = new URL(origin);
@@ -29,7 +31,7 @@
             });
             // Visit URL that (might) set HSTS
             // No-CORS request such that we do not have to care about ACAO
-            let r = await fetch(url + response_id, {"method": "GET", "mode": "no-cors"});
+            let r = await fetch(url + response_id, { "method": "GET", "mode": "no-cors" });
             assert_equals(r.bodyUsed, false, "Initial request succeeded");
             // Visit http://(sub.)host to check for HSTS/redirect
             let test_url;
@@ -39,9 +41,9 @@
                 test_url = "http://" + u.host + "/_hp/common/empty.html";
             }
             // CORS request such that we can access r.redirected
-            r = await fetch(test_url, {"method": "GET"});
+            r = await fetch(test_url, { "method": "GET" });
             console.log(r);
-            t.report_outcome({"response.redirected": r.redirected});
+            t.report_outcome({ "response.redirected": r.redirected });
             assert_equals(r.bodyUsed, false, "Second request finished");
         }, test_name);
     }
@@ -51,8 +53,12 @@
 
 
     // Simple upgrade test: Visit URL that sets HSTS, visit http://(sub.)<host of URL> and check for redirect
-    // OPTIONAL: other tests e.g., caching or clearing related?, double subdomain?
-    const test_declarations = [simple_upgrade_test, subdomain_upgrade_test];
+    // OPTIONAL: other tests e.g., caching or clearing related?, double subdomain?    let test_declarations;
+    if (resp_type === "parsing") {
+        test_declarations = [simple_upgrade_test, subdomain_upgrade_test];
+    } else {
+        test_declarations = [simple_upgrade_test, subdomain_upgrade_test];
+    }
     const path = '/_hp/server/responses.py?feature_group=hsts&nest=0&resp=1&resp_id=';
     const label = 'HSTS';
     // Use hosts[alt][] to test a different origin as the one we are on (not poison ourselves)
@@ -61,6 +67,7 @@
     } else {
         // Due to mixed content blocking we cannot fetch http on https and our tests would fail
         // These tests only are meaningful if we visit the test site on http (alternatively we would need to use passive content/non-fetch)
+        alert("Only works from HTTP!");
     }
 
 </script>

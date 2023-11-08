@@ -16,6 +16,8 @@
 
 
 <script>
+    let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+    let resp_type = urlParams.get("resp_type") || "debug";
     var count = 0;
     function access_perf_test(element, sandbox, test_info, url, origin, response_id) {
         /*
@@ -66,8 +68,12 @@
     const simple_access = access_perf_test.bind(null, 'img', false, "direct");
     // Other tests? A -> B (sandbox, ....) -> A (sets TAO), B: access perfAPI timing of final A?
     // https://wpt.fyi/results/resource-timing?label=master&label=experimental&aligned&q=TAO
-
-    const test_declarations = [simple_access];
+    let test_declarations;
+    if (resp_type === "parsing") {
+        test_declarations = [simple_access];
+    } else {
+        test_declarations = [simple_access];
+    }
     const path = '/_hp/server/responses.py?feature_group=tao&resp_id=';
     const label = 'TAO';
     run_tests(test_declarations, path, label);

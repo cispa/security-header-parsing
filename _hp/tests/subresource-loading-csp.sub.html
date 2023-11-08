@@ -16,6 +16,8 @@
 
 
 <script>
+    let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+    let resp_type = urlParams.get("resp_type") || "debug";
     var count = 0;
     function img_loading_test(element, sandbox, test_info, url, origin, response_id) {
         /*
@@ -61,8 +63,12 @@
 
     // A -> B (CSP), A (img): send message
     const simple_access = img_loading_test.bind(null, 'iframe', false, "direct");
-
-    const test_declarations = [simple_access];
+    let test_declarations;
+    if (resp_type === "parsing") {
+        test_declarations = [simple_access];
+    } else {
+        test_declarations = [simple_access];
+    }
     const path = '/_hp/server/responses.py?feature_group=csp-img&resp_id=';
     const label = 'CSP-IMG';
     run_tests(test_declarations, path, label);

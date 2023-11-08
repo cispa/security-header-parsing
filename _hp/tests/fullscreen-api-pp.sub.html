@@ -16,6 +16,8 @@
 
 
 <script>
+  let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+  let resp_type = urlParams.get("resp_type") || "debug";
   var count = 0;
   function access_fullscreen_test(element, sandbox, test_info, url, origin, response_id) {
     /*
@@ -80,8 +82,12 @@
   // Support for everything permission related seems to be quite low currently: https://wpt.fyi/results/?label=master&label=experimental&aligned&q=permissions
   // Other alternative: try to access geolocation or something similar directly (problem, how to handle permissions prompts?)
   // navigator.geolocation.getCurrentPosition(successCallback, console.error, { maximumAge: 600_000 });
-
-  const test_declarations = [simple_access, child_access, child_allow_access, child_sandbox_access];
+  let test_declarations;
+  if (resp_type === "parsing") {
+    test_declarations = [simple_access, child_allow_access];
+  } else {
+    test_declarations = [simple_access, child_access, child_allow_access, child_sandbox_access];
+  }
   const path = '/_hp/server/responses.py?feature_group=pp&resp_id=';
   const label = 'PP';
   run_tests(test_declarations, path, label);

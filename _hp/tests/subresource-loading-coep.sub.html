@@ -16,6 +16,8 @@
 
 
 <script>
+    let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+    let resp_type = urlParams.get("resp_type") || "debug";
     var count = 0;
     function subresource_loading_test(element, sandbox, test_info, url, origin, response_id) {
         /*
@@ -63,8 +65,12 @@
     // A -> B (sandbox) -> A
     const sandboxed_subresource_loading = subresource_loading_test.bind(null, "img", true, "sandbox");
 
-
-    const test_declarations = [subresource_loading, sandboxed_subresource_loading];
+    let test_declarations;
+    if (resp_type === "parsing") {
+        test_declarations = [subresource_loading];
+    } else {
+        test_declarations = [subresource_loading, sandboxed_subresource_loading];
+    }
     const path = '/_hp/server/responses.py?feature_group=coep&resp_id=';
     const label = 'COEP';
     run_tests(test_declarations, path, label);

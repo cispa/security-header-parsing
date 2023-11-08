@@ -15,6 +15,8 @@
 
 </body>
 <script>
+    let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+    let resp_type = urlParams.get("resp_type") || "debug";
     async function access_window(test_info, url, origin, response_id) {
         test_name = `accesswindow_${test_info}|${origin}|${response_id}`;
         async_test(t => {
@@ -29,8 +31,8 @@
                 }
                 t.report_outcome({ "window.open.opener": outcome });
                 t.done();
-            // Wait for a timeout, then run the test
-            // Alternative use global/server-side communication channel to signal that load is finished: https://web-platform-tests.org/writing-tests/channels.html
+                // Wait for a timeout, then run the test
+                // Alternative use global/server-side communication channel to signal that load is finished: https://web-platform-tests.org/writing-tests/channels.html
             }, 0.5 * test_timeout);
 
             t.add_cleanup(() => {
@@ -47,8 +49,12 @@
 
     // Other tests? e.g., same-origin-allow-popups need additional popups opened in the popup?
     // Even same-origin needs a parent that also sets same-origin (to not block for same-origin loads): https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-group-switches-due-to-cross-origin-opener-policy
-    // popups caused from within (sandboxed) frames service workers, ..., see: https://wpt.fyi/results/html/cross-origin-opener-policy?label=master&label=experimental&aligned&q=cross-origin-opener-policy
-    const test_declarations = [simple_access_window_test];
+    // popups caused from within (sandboxed) frames service workers, ..., see: https://wpt.fyi/results/html/cross-origin-opener-policy?label=master&label=experimental&aligned&q=cross-origin-opener-policy    let test_declarations;
+    if (resp_type === "parsing") {
+        test_declarations = [simple_access_window_test];
+    } else {
+        test_declarations = [simple_access_window_test];
+    }
     const path = '/_hp/server/responses.py?feature_group=coop&nest=0&resp=1&resp_id=';
     const label = 'COOP';
     run_tests(test_declarations, path, label);

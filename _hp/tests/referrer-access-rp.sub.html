@@ -16,6 +16,8 @@
 
 
 <script>
+  let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+  let resp_type = urlParams.get("resp_type") || "debug";
   var count = 0;
   function access_referrer_test(element, sandbox, test_info, url, origin, response_id) {
     /*
@@ -74,8 +76,12 @@
   const simple_window_access = access_referrer_test.bind(null, 'iframe', false, "window.open");
   // Loads of tests exist in WPT: https://wpt.fyi/results/referrer-policy?label=master&label=experimental&aligned&q=referrer-policy
 
-  // Important: allow popups for all our origins!
-  const test_declarations = [simple_access, simple_window_access];
+  // Important: allow popups for all our origins!  let test_declarations;
+  if (resp_type === "parsing") {
+    test_declarations = [simple_access];
+  } else {
+    test_declarations = [simple_access, simple_window_access];
+  }
   const path = '/_hp/server/responses.py?feature_group=rp&resp_id=';
   const label = 'RP';
   run_tests(test_declarations, path, label);

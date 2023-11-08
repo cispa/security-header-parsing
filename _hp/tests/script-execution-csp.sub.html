@@ -16,6 +16,8 @@
 
 
 <script>
+    let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+    let resp_type = urlParams.get("resp_type") || "debug";
     var count = 0;
     function script_execution_test(element, sandbox, test_info, url, origin, response_id) {
         /*
@@ -65,8 +67,12 @@
     const simple_access = script_execution_test.bind(null, 'iframe', false, "direct");
     // A -> B (CSP, sandbox), A (script): send message
     const sandbox_access = script_execution_test.bind(null, 'iframe', true, "sandbox");
-
-    const test_declarations = [simple_access, sandbox_access];
+    let test_declarations;
+    if (resp_type === "parsing") {
+        test_declarations = [simple_access];
+    } else {
+        test_declarations = [simple_access, sandbox_access];
+    }
     const path = '/_hp/server/responses.py?feature_group=csp-script&resp_id=';
     const label = 'CSP-SCRIPT';
     run_tests(test_declarations, path, label);
