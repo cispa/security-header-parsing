@@ -196,10 +196,32 @@ create_responses([header_deny, header_allow], label)
 #endregion
 
 #region Referer/Referrer-Policy
-header_deny = [("Referrer-Policy", "no-referrer")]
-header_allow = [("Referrer-Policy", "strict-origin-when-cross-origin")]
 label = "RP"
+header_name = "Referrer-Policy" # https://w3c.github.io/webappsec-referrer-policy/#referrer-policy-header
+v1 = "no-referrer"
+v2 = "no-referrer-when-downgrade"
+v3 = "same-origin"
+v4 = "origin"
+v5 = "strict-origin"
+v6 = "origin-when-cross-origin"
+v7 = "strict-origin-when-cross-origin"
+v8 = "unsafe-url"
+v9 = ""
+header_deny = [(header_name, v1)]
+header_allow = [(header_name, v8)]
 create_responses([header_deny, header_allow], label)
+header_list = [[(header_name, "*")], [], 
+               [(header_name, "null")], [(header_name, v1)],
+               [(header_name, v2)], [(header_name, v3)],
+               [(header_name, v4)], [(header_name, v5)],
+               [(header_name, v6)], [(header_name, v7)], [(header_name, v8)], [(header_name, v9)],
+               [(header_name, f"{v1}, {v2}, {v3}, {v4}, {v5}, {v6}, {v7}, {v8}")],
+               [(header_name, f"abc, {v5}")]
+            ]
+create_responses(header_list, label, resp_type="basic")
+# Some basic headers with redirect
+header_list = [[(header_name, v1), redirect_empty], [(header_name, v8), redirect_empty]]
+create_responses(header_list, label, status_code=302, resp_type="basic")
 #endregion
 
 #region PerformanceAPI timing/TAO
