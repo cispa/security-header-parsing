@@ -35,9 +35,10 @@ def create_responses(header_list, label, status_code=200, resp_type="debug"):
 #region Framing
 
 ## XFO only
-header_deny = [("x-frame-options", "DENY")]
-header_allow = [("x-frame-options", "INVALID")]
 label = "XFO"
+header_name = "x-frame-options"
+header_deny = [(header_name, "DENY")]
+header_allow = [(header_name, "INVALID")]
 create_responses([header_deny, header_allow], label)
 
 # WPT tests: https://wpt.fyi/results/x-frame-options?label=master&label=experimental&aligned&q=x-frame
@@ -78,9 +79,10 @@ other_values = {"same origin", "den y"}
 alt_header_names = ["Frame-Options", "X-Frame-Option", "X-FRAMES-OPTIONS", "Content-Security-Policy", "X_FRAME_OPTIONS", "XFRAMEOPTIONS"]
 
 ## CSP-FA
-header_deny = [("Content-Security-Policy", "frame-ancestors 'none'")]
-header_allow = [("Content-Security-Policy", "frame-ancestors *")]
 label = "CSP-FA"
+header_name = "Content-Security-Policy"
+header_deny = [(header_name, "frame-ancestors 'none'")]
+header_allow = [(header_name, "frame-ancestors *")]
 create_responses([header_deny, header_allow], label)
 
 # WPT tests?: https://wpt.fyi/results/content-security-policy/frame-ancestors?label=master&label=experimental&aligned&q=frame
@@ -108,36 +110,40 @@ other = {}
 # X-Content-Security-Policy, X-Webkit-CSP, ...
 
 ## XFO vs CSP
-header_deny = [("Content-Security-Policy", "frame-ancestors 'none'"), ('X-Frame-Options', 'DENY')]
-header_allow = [("Content-Security-Policy", "frame-ancestors *"), ('X-Frame-Options', 'INVALID')]
 label = "CSPvsXFO"
+h1 = "Content-Security-Policy"
+h2 = "X-Frame-Options"
+header_deny = [(h1, "frame-ancestors 'none'"), (h2, 'DENY')]
+header_allow = [(h1, "frame-ancestors *"), (h2, 'INVALID')]
 create_responses([header_deny, header_allow], label)
 
 #endregion
 
 #region CORP
 # Subresource loading/CORP
-header_deny = [("Cross-Origin-Resource-Policy", "same-origin")]
-header_allow = [("Cross-Origin-Resource-Policy", "cross-origin")]
 label = "CORP"
+header_name = "Cross-Origin-Resource-Policy"
+header_deny = [(header_name, "same-origin")]
+header_allow = [(header_name, "cross-origin")]
 create_responses([header_deny, header_allow], label)
 
 #endregion
 
 #region COEP
 # No non-corp ressources allowed while COEP is there, + crossOriginIsolated Flag
-header_deny = [("Cross-Origin-Embedder-Policy", "require-corp")]
-header_allow = [("Cross-Origin-Embedder-Policy", "unsafe-none"),
-                ]
 label = "COEP"
+header_name = "Cross-Origin-Embedder-Policy"
+header_deny = [(header_name, "require-corp")]
+header_allow = [(header_name, "unsafe-none")]
 create_responses([header_deny, header_allow], label)
 
 #endregion
 
 #region Window References/COOP
-header_deny = [("Cross-Origin-Opener-Policy", "same-origin")]
-header_allow = [("Cross-Origin-Opener-Policy", "unsafe-none")]
 label = "COOP"
+header_name = "Cross-Origin-Opener-Policy"
+header_deny = [(header_name, "same-origin")]
+header_allow = [(header_name, "unsafe-none")]
 create_responses([header_deny, header_allow], label)
 
 #endregion
@@ -158,16 +164,18 @@ create_responses([header_deny, header_allow], label)
 #endregion
 
 #region CSP script-execution
-header_deny = [("Content-Security-Policy", "script-src 'none'")]
-header_allow = [("Content-Security-Policy", "script-src *")]
 label = "CSP-SCRIPT"
+header_name = "Content-Security-Policy"
+header_deny = [(header_name, "script-src 'none'")]
+header_allow = [(header_name, "script-src *")]
 create_responses([header_deny, header_allow], label)
 #endregion
 
 #region CSP subresource loading (image)
-header_deny = [("Content-Security-Policy", "img-src 'none'")]
-header_allow = [("Content-Security-Policy", "img-src *")]
 label = "CSP-IMG"
+header_name = "Content-Security-Policy"
+header_deny = [(header_name, "img-src 'none'")]
+header_allow = [(header_name, "img-src *")]
 create_responses([header_deny, header_allow], label)
 #endregion
 
