@@ -173,10 +173,30 @@ create_responses([header_deny, header_allow], label)
 
 #region HSTS enforcement
 # deny and allow are not fitting terms here, but does not matter
-header_deny = [("Strict-Transport-Security", "max-age=20")]
-header_allow = [("Strict-Transport-Security", "max-age=20; includeSubDomains")]
 label = "HSTS"
+header_name = "Strict-Transport-Security" # https://www.rfc-editor.org/rfc/rfc6797#section-6.1
+v1 = "max-age=20"
+v2 = "max-age=20; includeSubDomains"
+v3 = "includeSubDomains"
+v4 = ""
+v5 = "max-age=20; includeSubDomains; preload"
+v6 = "max-age=0"
+v7 = "max-age=-5"
+header_deny = [(header_name, v1)]
+header_allow = [(header_name, v2)]
 create_responses([header_deny, header_allow], label)
+header_list = [[(header_name, "*")], [], 
+               [(header_name, "null")], [(header_name, v1)],
+               [(header_name, v2)], [(header_name, v3)],
+               [(header_name, v4)], [(header_name, v5)],
+               [(header_name, v6)], [(header_name, v7)],
+               [(header_name, f"{v1}, {v2}, {v3}, {v4}, {v5}, {v6}, {v7}")],
+               [(header_name, f"abc, {v1}")]
+            ]
+create_responses(header_list, label, resp_type="basic")
+# Some basic headers with redirect
+header_list = [[(header_name, v1), redirect_empty], [(header_name, v2), redirect_empty]]
+create_responses(header_list, label, status_code=302, resp_type="basic")
 #endregion
 
 #region originAgentCluster/oac header
@@ -190,8 +210,8 @@ v4 = "1"
 v5 = "0"
 v6 = "true"
 v7 = "false"
-header_deny = [("origin-agent-cluster", v1)]  # Set OAC, secure value
-header_allow = [("origin-agent-cluster", v2)] # Disable OAC, insecure value
+header_deny = [(header_name, v1)]  # Set OAC, secure value
+header_allow = [(header_name, v2)] # Disable OAC, insecure value
 create_responses([header_deny, header_allow], label)
 header_list = [[(header_name, "*")], [], 
                [(header_name, "null")], [(header_name, v1)],
