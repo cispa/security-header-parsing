@@ -1,12 +1,26 @@
 from models import Response, Session
 from sqlalchemy.exc import IntegrityError
+
+# Common area
+# Redirect to empty response, has ACAO *, other than that no special headers!
+redirect_empty = ("location", "https://sub.headers.websec.saarland/_hp/common/empty.html")
+site = "sub.headers.websec.saarland"
+origin_s = "https://sub.headers.websec.saarland"
+origin = "http://sub.headers.websec.saarland"
+origin_sp = f"{origin_s}:443"
+home = f"{origin_s}/"
+home_p = f"{origin_sp}/"
+parent = "https://headers.websec.saarland"
+child = "https://sub.sub.headers.websec.saarland"
+
+
 # TODO: create responses for each feature group (file in /tests)
 # Some feature groups have more than one group of responses (label in the DB), e.g., framing has both XFO, CSP, and XFO vs CSP
 # We have to define somewhere which label responses we use for which test_file tests?
 
-def create_responses(header_deny, header_allow, label, status_code=200, resp_type="debug"):
+def create_responses(header_list, label, status_code=200, resp_type="debug"):
     with Session() as session:
-        for header in [header_deny, header_allow]:
+        for header in header_list:
             try:
                 r = Response(raw_header=header, status_code=status_code, label=label, resp_type=resp_type)
                 session.add(r)
@@ -22,7 +36,7 @@ def create_responses(header_deny, header_allow, label, status_code=200, resp_typ
 header_deny = [("x-frame-options", "DENY")]
 header_allow = [("x-frame-options", "INVALID")]
 label = "XFO"
-create_responses(header_deny, header_allow, label)
+create_responses([header_deny, header_allow], label)
 
 # WPT tests: https://wpt.fyi/results/x-frame-options?label=master&label=experimental&aligned&q=x-frame
 # Basic tests: same-origin, cross-origin
@@ -65,7 +79,7 @@ alt_header_names = ["Frame-Options", "X-Frame-Option", "X-FRAMES-OPTIONS", "Cont
 header_deny = [("Content-Security-Policy", "frame-ancestors 'none'")]
 header_allow = [("Content-Security-Policy", "frame-ancestors *")]
 label = "CSP-FA"
-create_responses(header_deny, header_allow, label)
+create_responses([header_deny, header_allow], label)
 
 # WPT tests?: https://wpt.fyi/results/content-security-policy/frame-ancestors?label=master&label=experimental&aligned&q=frame
 # Simple framing: same-origin, cross-origin, nested (cross-cross, cross-same, same-cross, same-same)
@@ -95,7 +109,7 @@ other = {}
 header_deny = [("Content-Security-Policy", "frame-ancestors 'none'"), ('X-Frame-Options', 'DENY')]
 header_allow = [("Content-Security-Policy", "frame-ancestors *"), ('X-Frame-Options', 'INVALID')]
 label = "CSPvsXFO"
-create_responses(header_deny, header_allow, label)
+create_responses([header_deny, header_allow], label)
 
 #endregion
 
@@ -104,7 +118,7 @@ create_responses(header_deny, header_allow, label)
 header_deny = [("Cross-Origin-Resource-Policy", "same-origin")]
 header_allow = [("Cross-Origin-Resource-Policy", "cross-origin")]
 label = "CORP"
-create_responses(header_deny, header_allow, label)
+create_responses([header_deny, header_allow], label)
 
 #endregion
 
@@ -114,7 +128,7 @@ header_deny = [("Cross-Origin-Embedder-Policy", "require-corp")]
 header_allow = [("Cross-Origin-Embedder-Policy", "unsafe-none"),
                 ]
 label = "COEP"
-create_responses(header_deny, header_allow, label)
+create_responses([header_deny, header_allow], label)
 
 #endregion
 
@@ -122,7 +136,7 @@ create_responses(header_deny, header_allow, label)
 header_deny = [("Cross-Origin-Opener-Policy", "same-origin")]
 header_allow = [("Cross-Origin-Opener-Policy", "unsafe-none")]
 label = "COOP"
-create_responses(header_deny, header_allow, label)
+create_responses([header_deny, header_allow], label)
 
 #endregion
 
@@ -138,21 +152,21 @@ header_allow = [("Access-Control-Allow-Origin", "https://sub.headers.websec.saar
                  # ("Access-Control-Max-Age", "10") # Caching
                 ]
 label = "CORS"
-create_responses(header_deny, header_allow, label)
+create_responses([header_deny, header_allow], label)
 #endregion
 
 #region CSP script-execution
 header_deny = [("Content-Security-Policy", "script-src 'none'")]
 header_allow = [("Content-Security-Policy", "script-src *")]
 label = "CSP-SCRIPT"
-create_responses(header_deny, header_allow, label)
+create_responses([header_deny, header_allow], label)
 #endregion
 
 #region CSP subresource loading (image)
 header_deny = [("Content-Security-Policy", "img-src 'none'")]
 header_allow = [("Content-Security-Policy", "img-src *")]
 label = "CSP-IMG"
-create_responses(header_deny, header_allow, label)
+create_responses([header_deny, header_allow], label)
 #endregion
 
 #region HSTS enforcement
@@ -160,7 +174,7 @@ create_responses(header_deny, header_allow, label)
 header_deny = [("Strict-Transport-Security", "max-age=20")]
 header_allow = [("Strict-Transport-Security", "max-age=20; includeSubDomains")]
 label = "HSTS"
-create_responses(header_deny, header_allow, label)
+create_responses([header_deny, header_allow], label)
 #endregion
 
 #region originAgentCluster/oac header
@@ -168,7 +182,7 @@ create_responses(header_deny, header_allow, label)
 header_deny = [("origin-agent-cluster", "?1")]  # Set OAC, secure value
 header_allow = [("origin-agent-cluster", "?0")] # Disable OAC, insecure value
 label = "OAC"
-create_responses(header_deny, header_allow, label)
+create_responses([header_deny, header_allow], label)
 #endregion
 
 #region Permission access/PP
@@ -178,19 +192,36 @@ create_responses(header_deny, header_allow, label)
 header_deny = [("Permissions-Policy", "fullscreen=()")]
 header_allow = [("Permissions-Policy", "fullscreen=(*)")]
 label = "PP"
-create_responses(header_deny, header_allow, label)
+create_responses([header_deny, header_allow], label)
 #endregion
 
 #region Referer/Referrer-Policy
 header_deny = [("Referrer-Policy", "no-referrer")]
 header_allow = [("Referrer-Policy", "strict-origin-when-cross-origin")]
 label = "RP"
-create_responses(header_deny, header_allow, label)
+create_responses([header_deny, header_allow], label)
 #endregion
 
 #region PerformanceAPI timing/TAO
-header_deny = [("Timing-Allow-Origin", "null")]
-header_allow = [("Timing-Allow-Origin", "*")]
 label = "TAO"
-create_responses(header_deny, header_allow, label)
+header_name = "Timing-Allow-Origin" # https://w3c.github.io/resource-timing/#sec-timing-allow-origin
+header_deny = [(header_name, "null")]
+header_allow = [(header_name, "*")]
+# Debug tests
+create_responses([header_deny, header_allow], label)
+# Basic tests
+header_list = [[(header_name, "*")], [], 
+               [(header_name, "null")], [(header_name, origin_s)],
+               [(header_name, origin)], [(header_name, parent)],
+               [(header_name, home)], [(header_name, origin_sp)],
+               [(header_name, site)],
+               [(header_name, "null"), (header_name, "*")], [(header_name, origin_s), (header_name, "*")]
+            ]
+
+create_responses(header_list, label, resp_type="basic")
+# Some basic headers with redirect
+header_list = [[(header_name, "*"), redirect_empty], [(header_name, "null"), redirect_empty]]
+create_responses(header_list, label, status_code=302, resp_type="basic")
+
+
 #endregion
