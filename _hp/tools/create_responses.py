@@ -181,10 +181,30 @@ create_responses([header_deny, header_allow], label)
 
 #region originAgentCluster/oac header
 # related to document.domain and site/origin isolation
-header_deny = [("origin-agent-cluster", "?1")]  # Set OAC, secure value
-header_allow = [("origin-agent-cluster", "?0")] # Disable OAC, insecure value
 label = "OAC"
+header_name = "origin-agent-cluster" # https://html.spec.whatwg.org/multipage/browsers.html#origin-agent-cluster
+v1 = "?1"
+v2 = "?0"
+v3 = ""
+v4 = "1"
+v5 = "0"
+v6 = "true"
+v7 = "false"
+header_deny = [("origin-agent-cluster", v1)]  # Set OAC, secure value
+header_allow = [("origin-agent-cluster", v2)] # Disable OAC, insecure value
 create_responses([header_deny, header_allow], label)
+header_list = [[(header_name, "*")], [], 
+               [(header_name, "null")], [(header_name, v1)],
+               [(header_name, v2)], [(header_name, v3)],
+               [(header_name, v4)], [(header_name, v5)],
+               [(header_name, v6)], [(header_name, v7)],
+               [(header_name, f"{v1}, {v2}, {v3}, {v4}, {v5}, {v6}, {v7}")],
+               [(header_name, f"abc, {v1}")]
+            ]
+create_responses(header_list, label, resp_type="basic")
+# Some basic headers with redirect
+header_list = [[(header_name, v1), redirect_empty], [(header_name, v2), redirect_empty]]
+create_responses(header_list, label, status_code=302, resp_type="basic")
 #endregion
 
 #region Permission access/PP
