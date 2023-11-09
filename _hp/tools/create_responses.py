@@ -12,6 +12,8 @@ home = f"{origin_s}/"
 home_p = f"{origin_sp}/"
 parent = "https://headers.websec.saarland"
 child = "https://sub.sub.headers.websec.saarland"
+parent_childs = "*.headers.websec.saarland"
+self_childs = "*.sub.headers.websec.saarland"
 
 
 # TODO: create responses for each feature group (file in /tests)
@@ -189,10 +191,29 @@ create_responses([header_deny, header_allow], label)
 # https://github.com/w3c/webappsec-permissions-policy/blob/main/features.md
 # https://fullscreen.spec.whatwg.org/#fullscreen-is-supported
 # https://w3c.github.io/webappsec-permissions-policy/#policy-controlled-feature-default-allowlist
-header_deny = [("Permissions-Policy", "fullscreen=()")]
-header_allow = [("Permissions-Policy", "fullscreen=(*)")]
 label = "PP"
+header_name = "Permissions-Policy" # https://w3c.github.io/webappsec-permissions-policy/#permissions-policy-http-header-field
+header_deny = [(header_name, "fullscreen=()")]
+header_allow = [(header_name, "fullscreen=(*)")]
 create_responses([header_deny, header_allow], label)
+header_list = [[(header_name, "*")], [], 
+               [(header_name, "null")], [(header_name, "fullscreen=")], [(header_name, "fullscreen=*")], [(header_name, "fullscreen=()")],
+               [(header_name, "fullscreen=(self)")], [(header_name, f"fullscreen=({origin_s})")],
+               [(header_name, f"fullscreen=({parent_childs})")], [(header_name, f"fullscreen=({self_childs})")],
+               [(header_name, "fullscreen=(self none)")], [(header_name, "fullscreen=(self,none)")], [(header_name, "fullscreen=(src)")], [(header_name, f"fullscreen=({home})")],
+               [(header_name, f"fullscreen=({home_p})")]
+            ]
+create_responses(header_list, label, resp_type="basic")
+# Some basic headers with redirect
+header_list = [[(header_name, "fullscreen=()"), redirect_empty], [(header_name, "fullscreen=(*)"), redirect_empty]]
+create_responses(header_list, label, status_code=302, resp_type="basic")
+# Alternative header name
+header_name = "Feature-Policy" # https://w3c.github.io/webappsec-permissions-policy/#ascii-serialization
+header_list = [[(header_name, "fullscreen *")], [(header_name, "fullscreen 'none'")],
+               [(header_name, "fullscreen 'self'")], [(header_name, "fullscreen 'src'")],
+               [(header_name, f"fullscreen {origin_s}")], [(header_name, f"fullscreen {self_childs}")],
+               [(header_name, f"fullscreen {parent_childs}")]]
+create_responses(header_list, label, resp_type="basic")
 #endregion
 
 #region Referer/Referrer-Policy
