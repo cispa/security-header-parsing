@@ -164,11 +164,25 @@ create_responses([header_deny, header_allow], label)
 
 #region Window References/COOP
 label = "COOP"
-header_name = "Cross-Origin-Opener-Policy"
-header_deny = [(header_name, "same-origin")]
-header_allow = [(header_name, "unsafe-none")]
+header_name = "Cross-Origin-Opener-Policy" # https://html.spec.whatwg.org/multipage/browsers.html#the-coop-headers
+v1 = "unsafe-none"
+v2 = "same-origin-allow-popups"
+v3 = "same-origin"
+v4 = "same-origin-plus-COEP"
+v5 = ""
+v6 = "null"
+v7 = "*"
+header_deny = [(header_name, v3)]
+header_allow = [(header_name, v1)]
 create_responses([header_deny, header_allow], label)
-
+header_list = [[(header_name, value)] for value in all_values]
+header_list = header_list + [[], 
+               [(header_name, f"{v1}, {v3}, {v4}")],
+            ]
+create_responses(header_list, label, resp_type="basic")
+# Some basic headers with redirect
+header_list = [[(header_name, v2), redirect_empty], [(header_name, v3), redirect_empty]]
+create_responses(header_list, label, status_code=302, resp_type="basic")
 #endregion
 
 #region CORS
