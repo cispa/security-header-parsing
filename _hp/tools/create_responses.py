@@ -36,10 +36,26 @@ def create_responses(header_list, label, status_code=200, resp_type="debug"):
 
 ## XFO only
 label = "XFO"
-header_name = "x-frame-options"
-header_deny = [(header_name, "DENY")]
-header_allow = [(header_name, "INVALID")]
+header_name = "x-frame-options" # https://html.spec.whatwg.org/multipage/document-lifecycle.html#the-x-frame-options-header
+v1 = "DENY"
+v2 = "SAMEORIGIN"
+v3 = "INVALID"
+v4 = "ALLOWALL"
+v5 = ""
+v6 = "null"
+v7 = "*"
+all_values = [v1, v2, v3, v4, v5, v6, v7]
+header_deny = [(header_name, v1)]
+header_allow = [(header_name, v2)]
 create_responses([header_deny, header_allow], label)
+header_list = [[(header_name, value)] for value in all_values]
+header_list = header_list + [[], 
+               [(header_name, f"{v1}, {v3}, {v4}")],
+            ]
+create_responses(header_list, label, resp_type="basic")
+# Some basic headers with redirect
+header_list = [[(header_name, v2), redirect_empty], [(header_name, v3), redirect_empty]]
+create_responses(header_list, label, status_code=302, resp_type="basic")
 
 # WPT tests: https://wpt.fyi/results/x-frame-options?label=master&label=experimental&aligned&q=x-frame
 # Basic tests: same-origin, cross-origin
@@ -153,6 +169,7 @@ v4 = "cross-origin"
 v5 = ""
 v6 = "null"
 v7 = "*"
+all_values = [v1, v2, v3, v4, v5, v6, v7]
 header_deny = [(header_name, v2)]
 header_allow = [(header_name, v4)]
 create_responses([header_deny, header_allow], label)
@@ -178,6 +195,7 @@ v4 = "cross-origin"
 v5 = ""
 v6 = "null"
 v7 = "*"
+all_values = [v1, v2, v3, v4, v5, v6, v7]
 header_deny = [(header_name, v2)]
 header_allow = [(header_name, v1)]
 create_responses([header_deny, header_allow], label)
@@ -201,6 +219,7 @@ v4 = "same-origin-plus-COEP"
 v5 = ""
 v6 = "null"
 v7 = "*"
+all_values = [v1, v2, v3, v4, v5, v6, v7]
 header_deny = [(header_name, v3)]
 header_allow = [(header_name, v1)]
 create_responses([header_deny, header_allow], label)
@@ -290,7 +309,6 @@ create_responses(header_list, label, resp_type="basic")
 header_list = [[(header_name, v2), redirect_empty], [(header_name, v3), redirect_empty]]
 create_responses(header_list, label, status_code=302, resp_type="basic")
 #endregion
-
 
 #region HSTS enforcement
 # deny and allow are not fitting terms here, but does not matter
