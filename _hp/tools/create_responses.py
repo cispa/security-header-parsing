@@ -80,10 +80,33 @@ alt_header_names = ["Frame-Options", "X-Frame-Option", "X-FRAMES-OPTIONS", "Cont
 
 ## CSP-FA
 label = "CSP-FA"
-header_name = "Content-Security-Policy"
-header_deny = [(header_name, "frame-ancestors 'none'")]
-header_allow = [(header_name, "frame-ancestors *")]
+header_name = "Content-Security-Policy" # https://w3c.github.io/webappsec-csp/#csp-header
+base = "frame-ancestors"
+v1 = f"{base}"
+v2 = f"{base} 'none'"
+v3 = f"{base} *"
+v4 = f"{base} 'self'"
+v5 = f"{base} {origin_s}"
+v6 = f"{base} {home}"
+v7 = f"{base} {parent_childs}"
+v8 = ""
+v9 = f"{base}=*"
+v10 = "default-src *"
+v11 = f"{base} http:"
+v12 = "null"
+v13 = "*"
+all_values = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13]
+header_deny = [(header_name, v2)]
+header_allow = [(header_name, v3)]
 create_responses([header_deny, header_allow], label)
+header_list = [[(header_name, value)] for value in all_values]
+header_list = header_list + [[], 
+               [(header_name, f"{v2}, {v3}, {v4}")],
+            ]
+create_responses(header_list, label, resp_type="basic")
+# Some basic headers with redirect
+header_list = [[(header_name, v2), redirect_empty], [(header_name, v3), redirect_empty]]
+create_responses(header_list, label, status_code=302, resp_type="basic")
 
 # WPT tests?: https://wpt.fyi/results/content-security-policy/frame-ancestors?label=master&label=experimental&aligned&q=frame
 # Simple framing: same-origin, cross-origin, nested (cross-cross, cross-same, same-cross, same-same)
@@ -165,19 +188,66 @@ create_responses([header_deny, header_allow], label)
 
 #region CSP script-execution
 label = "CSP-SCRIPT"
-header_name = "Content-Security-Policy"
-header_deny = [(header_name, "script-src 'none'")]
-header_allow = [(header_name, "script-src *")]
+header_name = "Content-Security-Policy" # https://w3c.github.io/webappsec-csp/#csp-header
+base = "script-src"
+v1 = f"{base}"
+v2 = f"{base} 'none'"
+v3 = f"{base} *"
+v4 = f"{base} 'self'"
+v5 = f"{base} {origin_s}"
+v6 = f"{base} {home}"
+v7 = f"{base} {parent_childs}"
+v8 = ""
+v9 = f"{base}=*"
+v10 = "default-src *"
+v11 = f"{base} http:"
+v12 = "null"
+v13 = "*"
+all_values = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13]
+header_deny = [(header_name, v2)]
+header_allow = [(header_name, v3)]
 create_responses([header_deny, header_allow], label)
+header_list = [[(header_name, value)] for value in all_values]
+header_list = header_list + [[], 
+               [(header_name, f"{v2}, {v3}, {v4}")],
+            ]
+create_responses(header_list, label, resp_type="basic")
+# Some basic headers with redirect
+header_list = [[(header_name, v2), redirect_empty], [(header_name, v3), redirect_empty]]
+create_responses(header_list, label, status_code=302, resp_type="basic")
 #endregion
 
 #region CSP subresource loading (image)
 label = "CSP-IMG"
-header_name = "Content-Security-Policy"
-header_deny = [(header_name, "img-src 'none'")]
-header_allow = [(header_name, "img-src *")]
+header_name = "Content-Security-Policy" # https://w3c.github.io/webappsec-csp/#csp-header
+base = "img-src"
+v1 = f"{base}"
+v2 = f"{base} 'none'"
+v3 = f"{base} *"
+v4 = f"{base} 'self'"
+v5 = f"{base} {origin_s}"
+v6 = f"{base} {home}"
+v7 = f"{base} {parent_childs}"
+v8 = ""
+v9 = f"{base}=*"
+v10 = "default-src *"
+v11 = f"{base} http:"
+v12 = "null"
+v13 = "*"
+all_values = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13]
+header_deny = [(header_name, v2)]
+header_allow = [(header_name, v3)]
 create_responses([header_deny, header_allow], label)
+header_list = [[(header_name, value)] for value in all_values]
+header_list = header_list + [[], 
+               [(header_name, f"{v2}, {v3}, {v4}")],
+            ]
+create_responses(header_list, label, resp_type="basic")
+# Some basic headers with redirect
+header_list = [[(header_name, v2), redirect_empty], [(header_name, v3), redirect_empty]]
+create_responses(header_list, label, status_code=302, resp_type="basic")
 #endregion
+
 
 #region HSTS enforcement
 # deny and allow are not fitting terms here, but does not matter
