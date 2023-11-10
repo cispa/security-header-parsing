@@ -155,10 +155,25 @@ create_responses([header_deny, header_allow], label)
 #region COEP
 # No non-corp ressources allowed while COEP is there, + crossOriginIsolated Flag
 label = "COEP"
-header_name = "Cross-Origin-Embedder-Policy"
-header_deny = [(header_name, "require-corp")]
-header_allow = [(header_name, "unsafe-none")]
+header_name = "Cross-Origin-Embedder-Policy" # https://html.spec.whatwg.org/multipage/browsers.html#coep
+v1 = "unsafe-none"
+v2 = "require-corp"
+v3 = "credentialless"
+v4 = "cross-origin"
+v5 = ""
+v6 = "null"
+v7 = "*"
+header_deny = [(header_name, v2)]
+header_allow = [(header_name, v1)]
 create_responses([header_deny, header_allow], label)
+header_list = [[(header_name, value)] for value in all_values]
+header_list = header_list + [[], 
+               [(header_name, f"{v1}, {v3}, {v4}")],
+            ]
+create_responses(header_list, label, resp_type="basic")
+# Some basic headers with redirect
+header_list = [[(header_name, v2), redirect_empty], [(header_name, v3), redirect_empty]]
+create_responses(header_list, label, status_code=302, resp_type="basic")
 
 #endregion
 
