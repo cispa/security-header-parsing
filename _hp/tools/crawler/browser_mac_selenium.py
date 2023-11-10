@@ -27,10 +27,6 @@ if __name__ == '__main__':
     main()
 
     # TODO: define and create different browsers
-
-    # Popups are enabled by default in Selenium in all browsers apart from Safari (https://www.browserstack.com/docs/automate/selenium/handle-permission-pop-ups#python)
-    # caps["browserstack.safari.enablePopups"] = "true"
-
     chrome_options = webdriver.ChromeOptions()
     chrome_options.browser_version = "118"
     driver = webdriver.Chrome(options=chrome_options)
