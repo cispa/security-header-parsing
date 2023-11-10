@@ -7,6 +7,12 @@ sudo apt install build-essential libssl-dev zlib1g-dev \
 libbz2-dev libreadline-dev libsqlite3-dev curl \
 libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev -y
 
+# Browser stuff https://www.selenium.dev/documentation/selenium_manager/#browser-dependencies
+sudo apt-get install libatk-bridge2.0-0
+sudo apt-get install libdbus-glib-1-2
+sudo apt install libnss3-dev libgdk-pixbuf2.0-dev libgtk-3-dev libxss-dev
+sudo apt-get install libasound2
+
 # Install pyenv + python 3.11
 curl https://pyenv.run | bash
 echo 'export PYENV_ROOT="$HOME/.pyenv"' | tee -a  ~/.bashrc ~/.install-conf

@@ -4,7 +4,7 @@ base_host = "sub.headers.websec.saarland"
 base_dir = "_hp/tests"
 
 tests = ["fetch-cors.sub.html",
-         "framing.sub.html", # labels: XFO, CSP-FA, XFOvsCSP
+         "framing.sub.html", # labels: XFO, CSP-FA, CSPvsXFO
          "fullscreen-api-pp.sub.html",
          "originAgentCluster-oac.sub.html",
          "perfAPI-tao.sub.html",
@@ -21,7 +21,7 @@ def get_tests(resp_type, browser_id, scheme):
     test_urls = []
     for url in tests:
         if "framing" in url:
-            for label in ["XFO", "CSP-FA", "XFOvsCSP"]:
+            for label in ["XFO", "CSP-FA", "CSPvsXFO"]:
                 test_urls.append(f"{scheme}://{base_host}/{base_dir}/{url}?resp_type={resp_type}&browser_id={browser_id}&label={label}")
         if "upgrade" in url and scheme == "https":
             continue

@@ -1,4 +1,4 @@
-import time
+import sys
 from utils import TIMEOUT, get_tests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -26,7 +26,9 @@ def get_browser(browser: str, version: str, binary_location=None, arguments=None
     if binary_location:
         options.binary_location = binary_location # Possible to specify other browsers? e.g., brave?
     if arguments:
-        options.add_argument(arguments) # ("--headless=new") # Possible to add arguments such as headless?
+        for argument in arguments:
+            options.add_argument(argument) # ("--headless=new") # Possible to add arguments such as headless?
+    print(options.to_capabilities())
     return driver(options=options)
 
 
@@ -36,7 +38,6 @@ def main(browser_name, browser_version, binary_location, arguments, browser_id):
         driver = get_browser(browser_name, browser_version, binary_location, arguments)
         print(driver.capabilities)
         try:
-            1/0
             for url in test_urls:
                 driver.get(url)
                 print(driver.title)
@@ -51,12 +52,22 @@ def main(browser_name, browser_version, binary_location, arguments, browser_id):
 MODE = "basic"  # "debug", "parsing"
 if __name__ == '__main__':
     # (browser_name, version, binary_location (e.g., for brave), arguments (e.g, for headless), browser_id)
-    config = [
-        ("chrome", "119", None, None, 2),
-        ("firefox", "119", None, None, 3),
-        ("safari", "17.0", None, None, 4),
-        ("edge", "119", None, None, 5)
-    ]
+    if sys.platform == "darwin":
+        config = [
+            ("chrome", "119", None, None, 5),
+            ("firefox", "119", None, None, 6),
+            ("safari", "17.0", None, None, 7),
+            ("edge", "119", None, None, 8)
+        ]
+    # Linux Ubuntu
+    else:
+        # Headless for now as no Xvfb or similar configured
+        config = [
+            ("chrome", "119", None, ["--headless=new"], 13),
+            ("firefox", "119", None, ["-headless"], 14),
+            # ("safari", "17.0", None, None, 4), No Safari on Linux
+            ("edge", "119", None, ["--headless=new"], 15)
+        ]
     for t in config:
         main(*t)
 

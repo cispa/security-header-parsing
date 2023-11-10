@@ -20,7 +20,14 @@ for (name, version) in [("chrome", "119"), ("firefox", "119"), ("safari", "17.0"
     create_browser(name, version, os, headless_mode, automation_mode, "")
 
 # Linux browsers managed by Selenium
-#TODO
+os = "Ubuntu 22.04"
+automation_mode = "selenium"
+for (name, version) in [("chrome", "119"), ("firefox", "119"), ("edge", "119")]:
+    if name == "firefox":
+        headless_mode = "headless"
+    else:
+        headless_mode = "headless-new"
+    create_browser(name, version, os, headless_mode, automation_mode, "")
 
 # Android browsers
 #TODO
