@@ -152,10 +152,22 @@ other = {}
 label = "CSPvsXFO"
 h1 = "Content-Security-Policy"
 h2 = "X-Frame-Options"
-header_deny = [(h1, "frame-ancestors 'none'"), (h2, 'DENY')]
-header_allow = [(h1, "frame-ancestors *"), (h2, 'INVALID')]
+deny_cf = (h1, "frame-ancestors 'none'")
+deny_x = (h2, 'DENY')
+allowall_cf = (h1, '*')
+allowall_x = (h2, 'INVALID')
+allowsome_cf = (h1, f"frame-ancestors {parent_childs}")
+allowsome_x = (h2, "SAMEORIGIN")
+header_deny = [deny_cf, deny_x]
+header_allow = [allowall_cf, allowall_x]
 create_responses([header_deny, header_allow], label)
-
+header_list = [[deny_cf, allowall_x], [deny_cf, allowsome_x], [allowall_cf, allowsome_x],
+               [deny_x, allowall_cf], [deny_x, allowsome_cf]
+            ]
+create_responses(header_list, label, resp_type="basic")
+# Some basic headers with redirect
+header_list = [[(header_name, v2), redirect_empty], [(header_name, v3), redirect_empty]]
+create_responses(header_list, label, status_code=302, resp_type="basic")
 #endregion
 
 #region CORP
