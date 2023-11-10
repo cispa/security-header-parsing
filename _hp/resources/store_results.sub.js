@@ -134,6 +134,11 @@ async function save_result(tests, status) {
     }
   });
 
+  // Append a "finished" div which we can await for in non self-driving tests
+  d = document.createElement("div");
+  d.id = "finished";
+  document.body.appendChild(d);
+
   // Self-driving test!
   const start_id = parseInt(urlParams.get("start_id"), 10) || 0;
   const chunk_size = parseInt(urlParams.get("chunk_size"), 10) || 1;
