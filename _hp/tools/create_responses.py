@@ -247,17 +247,32 @@ create_responses(header_list, label, status_code=302, resp_type="basic")
 
 #region CORS
 # For testing we only need one AC-XX headers pair
-header_deny = [("Access-Control-Allow-Origin", "null")]
-header_allow = [("Access-Control-Allow-Origin", "https://sub.headers.websec.saarland"),
-                 ("Access-Control-Allow-Credentials", "true"),
-                 ("Access-Control-Allow-Methods", "TEST"),
-                 ("Access-Control-Allow-Headers", "Test"),
-                 ("Access-Control-Expose-Headers", "Test"),
+label = "CORS" # https://fetch.spec.whatwg.org/#http-responses
+acao = "Access-Control-Allow-Orgin"
+acac = "Access-Control-Allow-Credentials"
+acam = "Access-Control-Allow-Methods"
+acah = "Access-Control-Allow-Headers"
+aceh = "Access-Control-Expose-Headers"
+base_resp = [("Test", "Test")]
+header_deny = [(acao, "null")]
+header_allow = [(acao, origin_s),
+                 (acac, "true"),
+                 (acam, "TEST"),
+                 (acah, "Test"),
+                 (aceh, "Test"),
                  ("Test", "Test"),
                  # ("Access-Control-Max-Age", "10") # Caching
                 ]
-label = "CORS"
 create_responses([header_deny, header_allow], label)
+header_list = [base_resp + [(acao, origin)],
+               base_resp + [(acac, "true")],
+               base_resp + [(acao, "*")] + [(acac, "true")],
+               base_resp + [(acao, origin_s)] + [(acac, "true")] + [(acam, "TEST")] + [(acah, "Test")] + [(aceh, "Test")]
+               ]
+create_responses(header_list, label, resp_type="basic")
+# Some basic headers with redirect
+header_list = [[(acao, origin_s), redirect_empty], [(acao, "*"), redirect_empty]]
+create_responses(header_list, label, status_code=302, resp_type="basic")
 #endregion
 
 #region CSP script-execution
