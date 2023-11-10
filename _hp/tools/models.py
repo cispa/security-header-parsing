@@ -9,10 +9,10 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 
 # Setup the config
-try:    
-    proj_config= json.load(open("config.json"))
+try:
+    proj_config = json.load(open("config.json"))
 except OSError:
-    proj_config= json.load(open("_hp/tools/config.json"))
+    proj_config = json.load(open("_hp/tools/config.json"))
 
 DB_URL = proj_config['DB_URL']
 
@@ -24,28 +24,30 @@ class BaseModel(Base):
     """Base model each model inherits from."""
     __abstract__ = True
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow,
+                        onupdate=datetime.utcnow)
 
 
 class TestCase(BaseModel):
     """Model for all implemented tests."""
     __tablename__ = 'TestCase'
-    id = Column(Integer, primary_key=True)   
+    id = Column(Integer, primary_key=True)
     # feature_group: e.g., Framing, Script Execution, ...
     feature_group = Column(String)
-    # test_file: name of the file this tests is in 
+    # test_file: name of the file this tests is in
     test_file = Column(String)
     # test_name: e.g., cross-origin simple framing, ...
     test_name = Column(String)
     # Additional Information (?)
     additional_info = Column(String)
-    
+
     # Helper
     result = relationship('Result', back_populates='testcase')
 
     # Combination of feature_group, test_file, test_name should be unique
     __table_args__ = (
-        UniqueConstraint('feature_group', 'test_file', 'test_name', name='uq_test'),
+        UniqueConstraint('feature_group', 'test_file',
+                         'test_name', name='uq_test'),
     )
 
 
@@ -56,13 +58,20 @@ class Browser(BaseModel):
     name = Column(String)
     version = Column(String)
     os = Column(String)
+    headless_mode = Column(
+        Enum('real', 'xvfb', 'headless', 'headless-new', name='headless_mode'))
+    automation_mode = Column(Enum(
+        'manual', 'intent', 'selenium', 'playwright', 'other', name='automation_mode'))
+    # For example playwright or selenium version?
+    add_info = Column(String)
 
     # Helper
     result: Mapped[List["Result"]] = relationship(back_populates='browser')
 
-     # Combination of name, version, os should be unique
+    # Combination of name, version, os should be unique
     __table_args__ = (
-        UniqueConstraint('name', 'version', 'os', name='uq_browser'),
+        UniqueConstraint('name', 'version', 'os', 'headless_mode',
+                         'automation_mode', name='uq_browser'),
     )
 
 
@@ -83,14 +92,16 @@ class Response(BaseModel):
 
     # Helper
     result = relationship('Result', back_populates='response')
-     
+
     # Combination of header, status_code, http_ver, label should be unique
     __table_args__ = (
-        UniqueConstraint('raw_header', 'status_code', 'label', 'resp_type', name='uq_response'),
+        UniqueConstraint('raw_header', 'status_code', 'label',
+                         'resp_type', name='uq_response'),
     )
 
 # All the above tables get created before we run the tests
 # Only the result table below is filled during the experiment
+
 
 class Result(BaseModel):
     """Model to save the results of our tests."""
@@ -99,21 +110,26 @@ class Result(BaseModel):
     # Result of the test
     # outcome_type: Type of result value (e.g., Int, undefined, ..) (mostly object as the outcome should be JSON)
     outcome_type = Column(String)
-    # outcome_value: JSONB result value 
+    # outcome_value: JSONB result value
     outcome_value = Column(JSONB)
 
     # Provided by testharness.js
-    test_name = Column(String)   # Alternative for testcase_id? Otherwise we need to figure out how each wpt-test knows it's own testcase_id?
+    # Alternative for testcase_id? Otherwise we need to figure out how each wpt-test knows it's own testcase_id?
+    test_name = Column(String)
     test_status = Column(Integer)
     test_message = Column(String)
     test_stack = Column(String)
 
-    # Origin relations 
+    # Origin relations
     org_scheme = Column(Enum('http', 'https', 'http2', name='scheme'))
-    org_host = Column(Enum('sub.headers.websec.saarland', '', name='ohost')) # Should always be sub.headers.websec.saarland!
+    # Should always be sub.headers.websec.saarland!
+    org_host = Column(Enum('sub.headers.websec.saarland', '', name='ohost'))
     resp_scheme = Column(Enum('http', 'https', 'http2', name='scheme'))
-    resp_host = Column(Enum('sub.headers.websec.saarland', 'sub.sub.headers.websec.saarland', 'headers.websec.saarland', 'headers.webappsec.eu', name='rhost')) # Should be one of sub.headers.websec.saarland (same-orgin), headers.websec.saarland (parent-domain; same-site), sub.sub.headers.websec.saarland (sub-domain; same-site), or headers.webappsec.eu (cross-site)
-    relation_info = Column(String) # E.g., direct, sandbox/srcdoc, nested (chain), nested (parent), nested (top-level), or something else
+    # Should be one of sub.headers.websec.saarland (same-orgin), headers.websec.saarland (parent-domain; same-site), sub.sub.headers.websec.saarland (sub-domain; same-site), or headers.webappsec.eu (cross-site)
+    resp_host = Column(Enum('sub.headers.websec.saarland', 'sub.sub.headers.websec.saarland',
+                       'headers.websec.saarland', 'headers.webappsec.eu', name='rhost'))
+    # E.g., direct, sandbox/srcdoc, nested (chain), nested (parent), nested (top-level), or something else
+    relation_info = Column(String)
 
     # Foreign keys
     browser_id: Mapped[int] = mapped_column(ForeignKey("Browser.id"))
@@ -131,7 +147,8 @@ class Result(BaseModel):
     # 3. Something else?
     status = Column(Enum('FREE', 'PROCESSING', 'FINISHED', name='status'))
 
-# Run the DB Stuff 
+
+# Run the DB Stuff
 # Create a SQLAlchemy engine
 engine = create_engine(DB_URL)
 
@@ -145,8 +162,11 @@ Session = sessionmaker(bind=engine)
 if __name__ == "__main__":
     with Session() as session:
         # Always make sure that the unknown browser exist with ID=1!
-        b: Browser = Browser(name="Unknown", version="Unknown", os="Unknown")
-        t: TestCase = TestCase(feature_group="Unknown", test_file="Unknown", test_name="Unknown")
-        r: Response = Response(raw_header=[("X-Frame-Options", "SAMEORIGIN"), ("Content-Type", "text/html")], status_code=200, label="Unknown", resp_type="debug")
-        session.add_all([b,t,r])
+        b: Browser = Browser(name="Unknown", version="Unknown",
+                             os="Unknown", headless_mode="real", automation_mode="manual")
+        t: TestCase = TestCase(feature_group="Unknown",
+                               test_file="Unknown", test_name="Unknown")
+        r: Response = Response(raw_header=[("X-Frame-Options", "SAMEORIGIN"), ("Content-Type",
+                               "text/html")], status_code=200, label="Unknown", resp_type="debug")
+        session.add_all([b, t, r])
         session.commit()

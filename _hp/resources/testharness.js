@@ -4,6 +4,7 @@
 /* Documentation: https://web-platform-tests.org/writing-tests/testharness-api.html
  * (../docs/_writing-tests/testharness-api.md) */
 
+// TODO make configurable?
 test_timeout = 10000;
 
  (function (global_scope)
@@ -13,7 +14,6 @@ test_timeout = 10000;
          output: true,
          harness_timeout:{
              "normal": test_timeout,
-             //"normal": 1000, // TODO: specify a useful timeout for our tests?!
              "long": 60000
          },
          test_timeout: null,
