@@ -23,7 +23,7 @@ def get_tests(resp_type, browser_id, scheme):
         if "framing" in url:
             for label in ["XFO", "CSP-FA", "XFOvsCSP"]:
                 test_urls.append(f"{scheme}://{base_host}/{base_dir}/{url}?resp_type={resp_type}&browser_id={browser_id}&label={label}")
-        if "upgrade" in url and scheme == "http":
+        if "upgrade" in url and scheme == "https":
             continue
         else:
             test_urls.append(f"{scheme}://{base_host}/{base_dir}/{url}?resp_type={resp_type}&browser_id={browser_id}")
