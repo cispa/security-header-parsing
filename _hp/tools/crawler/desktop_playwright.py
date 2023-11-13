@@ -20,29 +20,35 @@ def main(browser_name, browser_version, headless, browser_id):
         for scheme in ["http", "https"]:
             test_urls = get_tests(resp_type=MODE, browser_id=browser_id, scheme=scheme)
             browser: Browser = get_browser(browser_name, headless, playwright)
-            print(browser.browser_type)
+            print(browser.browser_type, scheme)
             try:
                 for url in test_urls:
-                    page = browser.new_page()
-                    page.goto(url)
-                    print(url)
-                    print(page.title())
-                    # Wait until the results are saved on the server (after finishing fetch request, a div with id "finished" is added to the DOM)
-                    page.locator("#finished").wait_for(timeout=TIMEOUT*1000, state="attached")
-                    print("Page finished")
-                    #page.close()
+                    try:
+                        page = browser.new_page()
+                        page.goto(url)
+                        print(url)
+                        print(page.title())
+                        # Wait until the results are saved on the server (after finishing fetch request, a div with id "finished" is added to the DOM)
+                        page.locator("#finished").wait_for(timeout=TIMEOUT*1000, state="attached")
+                        print("Page finished")
+                        input("Next!")
+                        page.close()
+                    except Exception as e:
+                        print(e)
+                    finally:
+                        input("Next!")
             except Exception as e:
                 print("Exception occured!")
                 print(e)
             finally:
                 browser.close()
 
-MODE = "basic"  # "debug", "parsing"
+MODE = "debug"  # "debug", "basic", "parsing"
 if __name__ == '__main__':
     # (browser_name, version, headless, browser_id)
     if sys.platform == "darwin":
         config = [
-            #("chromium", "119", False, 23),
+            ("chromium", "119", False, 23),
             ("firefox", "118", False, 24),
             ("webkit", "17.4", False, 25),
         ]
