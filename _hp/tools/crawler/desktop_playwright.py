@@ -21,9 +21,11 @@ def main(browser_name, browser_version, headless, browser_id):
             test_urls = get_tests(resp_type=MODE, browser_id=browser_id, scheme=scheme)
             browser: Browser = get_browser(browser_name, headless, playwright)
             print(browser.browser_type, scheme)
+            browser.close()
             try:
                 for url in test_urls:
                     try:
+                        browser: Browser = get_browser(browser_name, headless, playwright)
                         page = browser.new_page()
                         page.goto(url)
                         print(url)
@@ -37,13 +39,18 @@ def main(browser_name, browser_version, headless, browser_id):
                         print(e)
                     finally:
                         input("Next!")
+                        try:
+                            browser.close()
+                        except Exception as e:
+                            print(e)
+                            print("Could not close browser")
             except Exception as e:
                 print("Exception occured!")
                 print(e)
             finally:
                 browser.close()
 
-MODE = "debug"  # "debug", "basic", "parsing"
+MODE = "basic"  # "debug", "basic", "parsing"
 if __name__ == '__main__':
     # (browser_name, version, headless, browser_id)
     if sys.platform == "darwin":
