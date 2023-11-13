@@ -39,10 +39,16 @@ def main(browser_name, browser_version, binary_location, arguments, browser_id):
         print(driver.capabilities)
         try:
             for url in test_urls:
-                driver.get(url)
-                print(driver.title)
-                # Wait until the results are saved on the server (after finishing fetch request, a div with id "finished" is added to the DOM)
-                WebDriverWait(driver, TIMEOUT).until(EC.presence_of_element_located((By.ID, "finished")))
+                try:
+                    # TODO: currently we do not use a new page/browser instance for each test? Maybe we should start doing this?
+                    driver.get(url)
+                    print(driver.title)
+                    # Wait until the results are saved on the server (after finishing fetch request, a div with id "finished" is added to the DOM)
+                    WebDriverWait(driver, TIMEOUT).until(EC.presence_of_element_located((By.ID, "finished")))
+                except Exception as e:
+                    print("Exception!", e)
+                finally:
+                    input("Next!")
         except Exception as e:
             print("Exception occured!")
             print(e)
