@@ -42,7 +42,7 @@
             }
             // CORS request such that we can access r.redirected
             r = await fetch(test_url, { "method": "GET" });
-            console.log(r);
+            //console.log(r);
             t.report_outcome({ "response.redirected": r.redirected });
             assert_equals(r.bodyUsed, false, "Second request finished");
         }, test_name);

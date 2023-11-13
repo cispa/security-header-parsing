@@ -39,7 +39,7 @@
       let resp = 1;
       let nest = 1;
       let final_url = url + response_id + `&count=${i.id}&nest=${nest}&origin=${origin}&element=${test_info}&resp=${resp}`;
-      console.log(final_url);
+      //console.log(final_url);
       let w;
       if (test_info == "window.open") {
         w = window.open(final_url, "_blank");
