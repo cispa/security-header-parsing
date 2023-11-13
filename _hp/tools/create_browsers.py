@@ -30,7 +30,11 @@ for (name, version) in [("chrome", "119"), ("firefox", "119"), ("edge", "119")]:
     create_browser(name, version, os, headless_mode, automation_mode, "")
 
 # Android browsers
-#TODO
+os = "Android 11"
+automation_mode = "adb"
+headless_mode = "real"
+for (name, version) in [("firefox", "119.1.1")]:
+    create_browser(name, version, os, headless_mode, automation_mode, "")
 
 # iPhone browsers
 #TODO
