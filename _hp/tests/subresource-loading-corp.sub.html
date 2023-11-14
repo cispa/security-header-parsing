@@ -33,16 +33,21 @@
     if (test_info == "direct") {
       async_test(t => {
         t.set_test_info(url, test_info);
-        const i = document.createElement(element)
+        const i = document.createElement(element);
+        let timer = t.step_timeout(() => {
+          t.report_outcome("timeout: no event fired");
+          t.done();
+        }, 0.9 * test_timeout);
         i.onload = () => {
+          clearTimeout(timer);
           t.report_outcome("load");
           t.done();
         }
         i.onerror = () => {
+          clearTimeout(timer);
           t.report_outcome("error");
           t.done();
         }
-        // TODO: webkit does not fire load/error for objects for some errors? Add a no event received timeout?
         let final_url = url + response_id + `&nest=0&resp=1`
         i.src = final_url;
         i.data = final_url;
