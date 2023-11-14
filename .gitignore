@@ -57,3 +57,7 @@ scratch
 _hp/tools/crawler/android/android_emulator/licenses
 _hp/tools/crawler/android/android_emulator/platform-tools
 _hp/tools/crawler/android/android_emulator/emulators
+_hp/tools/crawler/android/android_emulators/emulator
+_hp/tools/crawler/android/android_emulators/licenses
+_hp/tools/crawler/android/android_emulators/platform-tools
+_hp/tools/crawler/android/browsers-cached
