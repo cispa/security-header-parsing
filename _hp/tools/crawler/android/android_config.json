@@ -59,7 +59,9 @@
 	"brave":{
 	   "package_name":"com.brave.browser",
 	   "intent":"org.chromium.chrome.browser.ChromeTabbedActivity",
-	   "apk_file":""
+	   "apk_file":"BraveMonox64.apk",
+	   "version":"119.1.1",
+	   "id": 30
 	},
 	"brave_beta":{
 	   "package_name":"com.brave.browser_beta",
