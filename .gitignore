@@ -54,3 +54,6 @@ scratch
 # Cert files
 *.key
 *.pem
+_hp/tools/crawler/android/android_emulator/licenses
+_hp/tools/crawler/android/android_emulator/platform-tools
+_hp/tools/crawler/android/android_emulator/emulators

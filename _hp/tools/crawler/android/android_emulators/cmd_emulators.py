@@ -11,6 +11,33 @@ CMDLINE_TOOL_PATH = os.path.join(CURRENT_PATH, 'cmdline-tools/latest/bin')
 PLATFORM_PATH = os.path.join(CURRENT_PATH, 'platform-tools')
 EMULATOR_PATH = os.path.join(CURRENT_PATH, 'emulator')
 
+def enable_popup(device_id, package_name):
+	if package_name.startswith('org.mozilla.firefox'):
+		cmd_text = f'{PLATFORM_PATH}/adb -s {device_id} shell ls /data/data/{package_name}/files/mozilla/'
+		cmd_output = subprocess.run(cmd_text, shell=True, check=True, capture_output=True, text=True).stdout.strip()
+		profile_dir = ''
+		for line in cmd_output.split('\n'):
+			if line.endswith('.default'):
+				profile_dir = line
+				break	
+		
+		Path(f'browsers-cached/{package_name}').mkdir(parents=True, exist_ok=True)
+		pref_file = f'/data/data/{package_name}/files/mozilla/{profile_dir}/prefs.js'
+		local_pref_file = f'browsers-cached/{package_name}/prefs.js'
+
+		cmd_text = f'{PLATFORM_PATH}/adb -s {device_id} pull {pref_file} browsers-cached/{package_name}/'
+		subprocess.run(cmd_text, shell=True)
+		time.sleep(1)			
+		with open(local_pref_file,'a+') as file:				
+			file.write('user_pref("dom.disable_open_during_load", false);\n')
+		cmd_text = f'{PLATFORM_PATH}/adb -s {device_id} push {local_pref_file} {pref_file}'
+		subprocess.run(cmd_text, shell=True)		
+		time.sleep(1)
+
+def send_url_intent(device_id, package_name, activity_name, url):	
+	cmd_text = f'{PLATFORM_PATH}/adb -s {device_id} shell am start -n {package_name}/{activity_name} -a android.intent.action.VIEW -d "{url}"'	
+	subprocess.run(cmd_text, shell=True)
+
 def get_available_device():
 	cmd_text = f'{PLATFORM_PATH}/adb devices'
 	cmd_output = subprocess.run(cmd_text, shell=True, check=True, capture_output=True, text=True).stdout.strip()	
@@ -54,7 +81,29 @@ def install_app(apk, file_path, device):
 	install_p = subprocess.Popen(install_cmd, stdout=subprocess.PIPE)
 	count = 0
 	while apk not in get_installed_apps(device):
+		if count >= 10:
+			return False
 		print("Please wait while installing the app...")
+		count += 1
+		time.sleep(5)		
+
+	return True
+
+def uninstall_app(apk, device):
+	if apk not in get_installed_apps(device):
+		print(f'{device} has not installed {apk}!')
+		return
+	print(f'Uninstalling {apk} on devices {device}')
+
+	uninstall_cmd = [f'{PLATFORM_PATH}/adb', '-s', device, 'uninstall']	
+	uninstall_cmd.append(apk)
+
+	uninstall_p = subprocess.Popen(uninstall_cmd, stdout=subprocess.PIPE)
+	count = 0
+	while apk in get_installed_apps(device):
+		if count >= 10:
+			return False
+		print("Please wait while uninstalling the app...")
 		count += 1
 		time.sleep(5)		
 
