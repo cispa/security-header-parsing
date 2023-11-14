@@ -1,0 +1,4 @@
+[submodule "_hp/tools/crawler/android/android-emulator"]
+	path = _hp/tools/crawler/android/android-emulator
+	url = git@projects.cispa.saarland:swag/android-emulator.git
+	branch = send-intent
