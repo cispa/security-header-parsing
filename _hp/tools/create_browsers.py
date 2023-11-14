@@ -16,6 +16,7 @@ def create_browser(name, version, os, headless_mode, automation_mode, add_info):
 os = "macOS 14.0"
 automation_mode = "selenium"
 headless_mode = "real"
+# TODO: add Brave?!
 for (name, version) in [("chrome", "119"), ("firefox", "119"), ("safari", "17.0"), ("edge", "119")]:
     create_browser(name, version, os, headless_mode, automation_mode, "")
 

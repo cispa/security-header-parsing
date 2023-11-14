@@ -64,6 +64,7 @@ if __name__ == '__main__':
             ("firefox", "119", None, None, 6),
             ("safari", "17.0", None, None, 7),
             ("edge", "119", None, None, 8)
+            # TODO: add brave
         ]
     # Linux Ubuntu
     else:
