@@ -36,14 +36,19 @@ class APP:
 		self.device_id = device_id
 
 def run_test(parameter):
+	browser_factor = 1	
+
 	for app in parameter.app_list:		
 		print(f'Testing: {app.package_name}, on device ID: {app.device_id}, with URL: {app.test_url}')		
 		emulators.install_app(app.package_name, app.apk_file, app.device_id)		
-		time.sleep(5)
+		if app.package_name == 'com.UCMobile.intl':
+			browser_factor = 2
+
+		time.sleep(5*browser_factor)
 		
 		# starting the browser to create init profile
 		emulators.send_url_intent(app.device_id, app.package_name, app.activity_name, 'www.google.com')
-		time.sleep(2)
+		time.sleep(2*browser_factor)
 		emulators.enable_popup(app.device_id, app.package_name)
 		
 		encoded_test_url = app.test_url.replace('&','\&')
@@ -52,7 +57,7 @@ def run_test(parameter):
 		time.sleep(TIMEOUT*1000)
 		
 		emulators.uninstall_app(app.package_name, app.device_id)
-		time.sleep(5)
+		time.sleep(5*browser_factor)
 
 def main(browser_config):
 	browser_id = browser_config['id']

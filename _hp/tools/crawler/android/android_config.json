@@ -81,7 +81,9 @@
 	"ucmobile":{
 	   "package_name":"com.UCMobile.intl",
 	   "intent":"com.UCMobile.main.UCMobile",
-	   "apk_file":""
+	   "apk_file":"com.UCMobile.intl_13.3.8.1305.apk",
+	   "version":"13.3.8.1305",
+	   "id": 31
 	},
 	"talpa":{
 	   "package_name":"com.talpa.hibrowser",
