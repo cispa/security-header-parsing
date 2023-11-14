@@ -3585,6 +3585,7 @@ test_timeout = 10000;
                          }
  
                          test.phase = test.phases.COMPLETE;
+                         test.cleanup();
                      });
  
              // Timeouts that occur while a test is in the "cleanup" phase
