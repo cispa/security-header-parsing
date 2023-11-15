@@ -19,15 +19,19 @@ headless_mode = "real"
 for (name, version) in [("chrome", "119"), ("firefox", "119"), ("safari", "17.0"), ("edge", "119"), ("brave", "1.60.114 (119.0.6045.124)")]:
     create_browser(name, version, os, headless_mode, automation_mode, "")
 
-# Linux browsers managed by Selenium
+# Linux browsers managed by Selenium (+ manual work for brave)
 os = "Ubuntu 22.04"
 automation_mode = "selenium"
-for (name, version) in [("chrome", "119"), ("firefox", "119"), ("edge", "119")]:
-    if name == "firefox":
-        headless_mode = "headless"
-    else:
-        headless_mode = "headless-new"
-    create_browser(name, version, os, headless_mode, automation_mode, "")
+for headless in [True, False]:
+    for (name, version) in [("chrome", "119"), ("firefox", "119"), ("edge", "119"), ("brave", "1.60.114 (119.0.6045.124)"), ("brave", "1.59.120 (118.0.5993.88)")]:
+        if headless:
+            if name == "firefox":
+                headless_mode = "headless"
+            else:
+                headless_mode = "headless-new"
+        else:
+            headless_mode = "xvfb"
+        create_browser(name, version, os, headless_mode, automation_mode, "")
 
 # Android browsers
 os = "Android 11"

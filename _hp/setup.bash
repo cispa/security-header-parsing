@@ -12,6 +12,10 @@ sudo apt-get install libatk-bridge2.0-0
 sudo apt-get install libdbus-glib-1-2
 sudo apt install libnss3-dev libgdk-pixbuf2.0-dev libgtk-3-dev libxss-dev
 sudo apt-get install libasound2
+sudo apt install unzip
+
+# Xvfb stuff
+sudo apt install x11vnc xvfb fluxbox
 
 # Install pyenv + python 3.11
 curl https://pyenv.run | bash

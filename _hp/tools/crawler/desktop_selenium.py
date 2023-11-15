@@ -11,7 +11,7 @@ def get_browser(browser: str, version: str, binary_location=None, arguments=None
     if browser in ["chrome", "brave"]:
         options = webdriver.ChromeOptions()
         driver = webdriver.Chrome
-        # Optional use different ChromeDriver version!
+        # Optional use different ChromeDriver version!, default is chosen from the given browser_version
         #if browser == "brave":
         #    service = Service("/Applications/chromedriver")
     elif browser == "firefox":
@@ -69,20 +69,44 @@ if __name__ == '__main__':
             #("firefox", "119", None, None, 6),
             #("safari", "17.0", None, None, 7),
             #("edge", "119", None, None, 8),
-            # TODO: disable autoupdates that might break this?
+            # Download .dmg from https://github.com/brave/brave-browser/releases and install
+            # TODO: disable autoupdates that might break the version?; could not figure out how to do this on Mac :(
             ("brave", "119", "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser", None, 37),
         ]
     # Linux Ubuntu
     else:
-        # Headless for now as no Xvfb or similar configured
         config = [
+            # Headless (new)
             ("chrome", "119", None, ["--headless=new"], 13),
             ("firefox", "119", None, ["-headless"], 14),
             # ("safari", "17.0", None, None, 4), No Safari on Linux
-            ("edge", "119", None, ["--headless=new"], 15)
+            ("edge", "119", None, ["--headless=new"], 15),
+            # Brave (different version)
+            # mkdir ~/brave-versions
+            # mkdir ~/brave-versions/brave-version
+            # CD into the folder and download *.linux-amd64.zip from https://github.com/brave/brave-browser/releases and unzip
+            # The ZIP versions seem to not auto update and one can install as many as wanted (only on linux though?)
+            # v1.59.120 (Chromium 118): wget https://github.com/brave/brave-browser/releases/download/v1.59.120/brave-browser-1.59.120-linux-amd64.zip
+            # Note: if you specify the wrong chromium version, selenium will ignore the binary location and download CFT instead??
+            ("brave", "118", "/home/ubuntu/brave-versions/v1.59.120/brave-browser", ["--headless=new"], 60),
+            # v1.60.114 (Chromium 119): wget https://github.com/brave/brave-browser/releases/download/v1.60.114/brave-browser-1.60.114-linux-amd64.zip
+            ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", ["--headless=new"], 59),
+            # Headfull
+            ("chrome", "119", None, None, 71),
+            ("firefox", "119", None, None, 72),
+            ("edge", "119", None, None, 73),
+            ("brave", "118", "/home/ubuntu/brave-versions/v1.59.120/brave-browser", None, 75),
+            ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None, 74),
         ]
+
     for t in config:
         main(*t)
+
+    # Headfull (linux):
+    # Xvfb :99 -screen 0 1920x1080x24 &
+    # x11vnc -display :99 -bg -shared -forever -passwd abc -xkb -rfbport 5900
+    # export DISPLAY=:99 && fluxbox -log fluxbox.log &
+    # export DISPLAY=:99 && python desktop_selenium.py
 
     # Alternative idea with grid
     # java -jar selenium-server-4.15.0.jar standalone --selenium-manager True

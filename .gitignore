@@ -54,3 +54,4 @@ scratch
 # Cert files
 *.key
 *.pem
+fluxbox.log
