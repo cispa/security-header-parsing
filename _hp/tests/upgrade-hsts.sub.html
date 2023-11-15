@@ -30,7 +30,6 @@
                 });
             });
             // Visit URL that (might) set HSTS
-            // TODO: WebKit and Firefox only honor HSTS on top-level requests and not on fetchs?, thus tests are not working
             // No-CORS request such that we do not have to care about ACAO
             let r = await fetch(url + response_id, { "method": "GET", "mode": "no-cors" });
             assert_equals(r.bodyUsed, false, "Initial request succeeded");
@@ -64,7 +63,7 @@
     const label = 'HSTS';
     // Use hosts[alt][] to test a different origin as the one we are on (not poison ourselves)
     if (location.protocol == "http:") {
-        run_tests(test_declarations, path, label, ["http://{{hosts[alt][]}}", "https://{{hosts[alt][]}}"]);
+        run_tests(test_declarations, path, label, ["http://sub.{{host}}", "https://sub.{{host}}"]);
     } else {
         // Due to mixed content blocking we cannot fetch http on https and our tests would fail
         // These tests only are meaningful if we visit the test site on http (alternatively we would need to use passive content/non-fetch)

@@ -31,7 +31,7 @@
         - Create one testcase for everything one wants to test
         - Then run these for all corresponding responses and relevant origin configurations
         - How to provide parameters to the tests
-            - http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html?browser=<browser_id>&start_id=<id>&end_id=<id>&chunk_size=<chunk_size>
+            - http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html?browser=<browser_id>&first_id=<id>&last_id=<id>
     - tools/
         - Non web files
         - config.json: DB connection and co.

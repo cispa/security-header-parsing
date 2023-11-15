@@ -4,11 +4,16 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
 
 def get_browser(browser: str, version: str, binary_location=None, arguments=None):
-    if browser == "chrome":
+    service = None
+    if browser in ["chrome", "brave"]:
         options = webdriver.ChromeOptions()
         driver = webdriver.Chrome
+        # Optional use different ChromeDriver version!
+        #if browser == "brave":
+        #    service = Service("/Applications/chromedriver")
     elif browser == "firefox":
         options = webdriver.FirefoxOptions()
         driver = webdriver.Firefox
@@ -24,12 +29,12 @@ def get_browser(browser: str, version: str, binary_location=None, arguments=None
     
     options.browser_version = version
     if binary_location:
-        options.binary_location = binary_location # Possible to specify other browsers? e.g., brave?
+        options.binary_location = binary_location # Possible to specify other browsers e.g., brave
     if arguments:
         for argument in arguments:
-            options.add_argument(argument) # ("--headless=new") # Possible to add arguments such as headless?
+            options.add_argument(argument) # ("--headless=new") # Possible to add arguments such as headless
     print(options.to_capabilities())
-    return driver(options=options)
+    return driver(options=options, service=service)
 
 
 def main(browser_name, browser_version, binary_location, arguments, browser_id):
@@ -60,10 +65,12 @@ if __name__ == '__main__':
     # (browser_name, version, binary_location (e.g., for brave), arguments (e.g, for headless), browser_id)
     if sys.platform == "darwin":
         config = [
-            ("chrome", "119", None, None, 5),
-            ("firefox", "119", None, None, 6),
-            ("safari", "17.0", None, None, 7),
-            ("edge", "119", None, None, 8)
+            #("chrome", "119", None, None, 5),
+            #("firefox", "119", None, None, 6),
+            #("safari", "17.0", None, None, 7),
+            #("edge", "119", None, None, 8),
+            # TODO: disable autoupdates that might break this?
+            ("brave", "119", "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser", None, 37),
         ]
     # Linux Ubuntu
     else:
