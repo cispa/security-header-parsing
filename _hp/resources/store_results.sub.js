@@ -37,33 +37,40 @@ function waitForMessageFrom(frame, test) {
   });
 }
 
-// Run all tests
+// Run all tests for origin relations and similar!
 function run_tests(test_declarations, path, label, origins) {
-  for (let test of test_declarations) {
-    // Run all tests for origin relations and similar!
-    let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
-    const resp_type = urlParams.get("resp_type") || "debug";
-    if (!origins) {
-      origins = get_test_origins(resp_type);
+  let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+  const resp_type = urlParams.get("resp_type") || "debug"; // Default resp_type is debug
+  const first_id = parseInt(urlParams.get("first_id"), 10) || null;
+  const last_id = parseInt(urlParams.get("last_id"), 10) || null;
+  // Fetch origin relations if not specified
+  if (!origins) {
+    origins = get_test_origins(resp_type);
+  }
+
+  // If &first_id=<first_id>&last_id=<last_id>; run on the specified ids
+  if (first_id && last_id) {
+    for (var response_id = first_id; response_id < last_id + 1; response_id++) {
+      for (var origin of origins) {
+        for (let test of test_declarations) {
+          test(`${origin}${path}`, origin, response_id);
+        }
+      }
     }
-    // Test self-driving tests:
-    const start_id = parseInt(urlParams.get("start_id"), 10) || 0;
-    const chunk_size = parseInt(urlParams.get("chunk_size"), 10) || 1;
-    const end_id = parseInt(urlParams.get("end_id"), 10) || 1;
-
-    // Currently for testing get resp_ids via the label endpoint!
-    // Later: From start_id to end_id (provided by  the testrunner via query parameters &start_id=<id>&end_id=<id>&chunk_size=<chunk_size>)
-    // TODO: iterate over the fixed ids instead of fetching them dynamically
-    //for (var response_id=start_id; response_id < Math.min(end_id, start_id + chunk_size); i++){
-
+  }
+  // For (manual) testing get resp_ids via the label endpoint!
+  else {
     fetch(`${location.origin}/_hp/server/get_resp_ids.py?label=${label}&resp_type=${resp_type}`).then(resp => resp.json()).then(ids => {
       for (var response_id of ids) {
         for (var origin of origins) {
-          test(`${origin}${path}`, origin, response_id);
+          for (let test of test_declarations) {
+            test(`${origin}${path}`, origin, response_id);
+          }
         }
       }
     });
   }
+
 }
 
 function nested_test(frame_element, sandbox, url, response_id, element, test_info, test_name) {
@@ -134,19 +141,9 @@ async function save_result(tests, status) {
     }
   });
 
-  // Append a "finished" div which we can await for in non self-driving tests
+  // Append a "finished" div which we can await for in Selenium/Playwright based tests
   d = document.createElement("div");
   d.id = "finished";
   document.body.appendChild(d);
-
-  // Self-driving test!
-  const start_id = parseInt(urlParams.get("start_id"), 10) || 0;
-  const chunk_size = parseInt(urlParams.get("chunk_size"), 10) || 1;
-  const end_id = parseInt(urlParams.get("end_id"), 10) || 1;
-  console.log(start_id, chunk_size, end_id);
-  if (start_id + chunk_size < end_id) {
-    urlParams.set('start_id', start_id + chunk_size);
-    window.location.href = window.location.pathname + '?' + urlParams.toString();
-  }
 };
 add_completion_callback(save_result);
