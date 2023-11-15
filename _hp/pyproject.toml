@@ -12,6 +12,7 @@ psycopg2-binary = "2.9.7"
 requests = "2.31.0"
 selenium = "^4.15.2"
 playwright = "1.39.0"
+httpx = "^0.25.1"
 
 
 [build-system]
