@@ -37,18 +37,16 @@ class APP:
 def run_test(parameter):
 	for app in parameter.app_list:		
 		print(f'Testing: {app.package_name}, on device ID: {app.device_id}, with URL: {app.test_url}')				
-		return
+		
 		# starting the browser to create init profile
 		emulators.send_url_intent(app.device_id, app.package_name, app.activity_name, 'www.google.com')
-		time.sleep(2)
-		emulators.enable_popup(app.device_id, app.package_name)
+		time.sleep(5)		
 		
 		encoded_test_url = app.test_url.replace('&','\&')
 		
 		emulators.send_url_intent(app.device_id, app.package_name, app.activity_name, encoded_test_url)
-		time.sleep(TIMEOUT*1000)		
+		time.sleep(TIMEOUT*1000)				
 		
-		time.sleep(5)
 
 def main(browser_list, config_dict):
 	app_list = list()
