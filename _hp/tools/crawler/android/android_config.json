@@ -2,92 +2,19 @@
 	"chrome":{
 	   "package_name":"com.android.chrome",
 	   "intent":"com.google.android.apps.chrome.Main",
-	   "apk_file":""
-	},
-	"apus":{
-	   "package_name":"com.apusapps.browser",
-	   "intent":"com.superapps.browser.main.SuperBrowserActivity",
-	   "apk_file":""
-	},
-	"xbrowser":{
-	   "package_name":"com.xbrowser.play",
-	   "intent":"com.mmbox.xbrowser.BrowserActivity",
-	   "apk_file":""
-	},
-	"via":{
-	   "package_name":"mark.via.gp",
-	   "intent":"mark.via.Shell",
-	   "apk_file":""
-	},
-	"duckduckgo":{
-	   "package_name":"com.duckduckgo.mobile.android",
-	   "intent":"com.duckduckgo.app.browser.BrowserActivity",
-	   "apk_file":""
-	},
-	"firefox":{
-	   "package_name":"org.mozilla.firefox",
-	   "intent":"org.mozilla.fenix.IntentReceiverActivity",
-	   "apk_file":"fenix-119.1.1-x86.apk",
-	   "version":"119.1.1",
-	   "id": 29
-	},
-	"firefox_beta":{
-	   "package_name":"org.mozilla.firefox_beta",
-	   "intent":"org.mozilla.fenix.IntentReceiverActivity",
-	   "apk_file":""
+	   "version":"",
+	   "id": 50
 	},
 	"opera":{
 	   "package_name":"com.opera.browser",
-	   "intent":"com.opera.android.BrowserActivity",
-	   "apk_file":""
-	},
-	"opera_mini":{
-	   "package_name":"com.opera.mini.native",
-	   "intent":"com.opera.mini.android.Browser",
-	   "apk_file":""
-	},
-	"puffin":{
-	   "package_name":"com.cloudmosa.puffinFree",
-	   "intent":"com.cloudmosa.app.FreeNormalActivity",
-	   "apk_file":""
-	},
-	"mx":{
-	   "package_name":"com.mx.browser",
-	   "intent":"com.mx.browser.MxSplashActivity",
-	   "apk_file":""
+	   "intent":"com.opera.android.BrowserActivity",	   
+	   "version":"78.4.4143.75735",
+	   "id": 32
 	},
 	"brave":{
 	   "package_name":"com.brave.browser",
-	   "intent":"org.chromium.chrome.browser.ChromeTabbedActivity",
-	   "apk_file":"BraveMonox64.apk",
+	   "intent":"org.chromium.chrome.browser.ChromeTabbedActivity",	   
 	   "version":"119.1.1",
 	   "id": 30
-	},
-	"brave_beta":{
-	   "package_name":"com.brave.browser_beta",
-	   "intent":"org.chromium.chrome.browser.ChromeTabbedActivity",
-	   "apk_file":""
-	},
-	"tor":{
-	   "package_name":"org.torproject.torbrowser",
-	   "intent":"org.mozilla.fenix.IntentReceiverActivity",
-	   "apk_file":""
-	},
-	"tor_alpha":{
-	   "package_name":"org.torproject.torbrowser_alpha",
-	   "intent":"org.mozilla.fenix.IntentReceiverActivity",
-	   "apk_file":""
-	},
-	"ucmobile":{
-	   "package_name":"com.UCMobile.intl",
-	   "intent":"com.UCMobile.main.UCMobile",
-	   "apk_file":"com.UCMobile.intl_13.3.8.1305.apk",
-	   "version":"13.3.8.1305",
-	   "id": 31
-	},
-	"talpa":{
-	   "package_name":"com.talpa.hibrowser",
-	   "intent":"com.talpa.hibrowser.app.HiBrowserActivity",
-	   "apk_file":""
 	}
  }
