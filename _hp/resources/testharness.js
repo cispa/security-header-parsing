@@ -5,7 +5,7 @@
  * (../docs/_writing-tests/testharness-api.md) */
 
 // TODO make configurable?
-test_timeout = 10000;
+test_timeout = 5000;
 
  (function (global_scope)
  {

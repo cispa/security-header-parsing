@@ -53,7 +53,8 @@ def main(browser_name, browser_version, binary_location, arguments, browser_id):
                 except Exception as e:
                     print("Exception!", e)
                 finally:
-                    input("Next!")
+                    #input("Next!")
+                    pass
         except Exception as e:
             print("Exception occured!")
             print(e)

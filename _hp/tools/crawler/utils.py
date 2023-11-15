@@ -1,6 +1,6 @@
 import httpx
 
-TIMEOUT = 11  # Seconds; test timeout is 10000 miliseconds and we want to make sure we wait long enough to save the results
+TIMEOUT = 6  # Seconds; test timeout is 5000 miliseconds and we want to make sure we wait long enough to save the results
 
 base_host = "sub.headers.websec.saarland"
 base_dir = "_hp/tests"
