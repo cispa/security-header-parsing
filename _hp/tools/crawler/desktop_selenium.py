@@ -111,7 +111,7 @@ if __name__ == '__main__':
             #("edge", "119", None, None, 8),
             # Download .dmg from https://github.com/brave/brave-browser/releases and install
             # E.g., https://github.com/brave/brave-browser/releases/tag/v1.60.118, rename the file
-            ("brave", "119", "/Applications/Brave Browser 1.60.118/.app/Contents/MacOS/Brave Browser", ["--disable-brave-update"], 37),
+            ("brave", "119", "/Applications/Brave Browser 1.60.118.app/Contents/MacOS/Brave Browser", ["--disable-brave-update"], 37),
         ]
     # Linux Ubuntu
     else:
