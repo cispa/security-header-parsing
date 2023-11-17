@@ -55,3 +55,4 @@ scratch
 *.key
 *.pem
 fluxbox.log
+log.log-main
