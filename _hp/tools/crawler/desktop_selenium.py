@@ -5,6 +5,34 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
+import traceback
+
+class Tee(object):
+    def __init__(self, filename, name):
+        self.file = open(f"{filename}-{name}", 'a')
+        self.stdout = sys.stdout
+        self.name = name
+
+    def __enter__(self):
+        sys.stdout = self
+        return self.file
+
+    def __exit__(self, exc_type, exc_value, tb):
+        sys.stdout = self.stdout
+        if exc_type is not None:
+            self.file.write(traceback.format_exc())
+        self.file.close()
+
+    def write(self, data):
+        if data != "\n" and data != " " and data != "":
+            data = f"{self.name}: {data}"
+        self.file.write(data)
+        self.stdout.write(data)
+
+    def flush(self):
+        self.file.flush()
+        self.stdout.flush()
+
 
 def get_browser(browser: str, version: str, binary_location=None, arguments=None):
     service = None
@@ -112,7 +140,8 @@ if __name__ == '__main__':
         ]
 
     for t in config:
-        main(*t)
+        with Tee("log.log", "main") as f:
+            main(*t)
 
     # Headfull (linux):
     # Xvfb :99 -screen 0 1920x1080x24 &
