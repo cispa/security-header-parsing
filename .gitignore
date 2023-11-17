@@ -56,5 +56,5 @@ scratch
 *.pem
 # Other custom ignores
 fluxbox.log
-log.log-main # Does not work?
+*.log
 .ipynb_checkpoints
