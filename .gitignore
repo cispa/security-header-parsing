@@ -54,5 +54,7 @@ scratch
 # Cert files
 *.key
 *.pem
+# Other custom ignores
 fluxbox.log
-log.log-main
+log.log-main # Does not work?
+.ipynb_checkpoints
