@@ -44,10 +44,13 @@ def main(browser_name, browser_version, binary_location, arguments, browser_id):
         # Max page load timeout
         driver.set_page_load_timeout(TIMEOUT*2)
         print(driver.capabilities)
+        # Store the ID of the original window
+        original_window = driver.current_window_handle
         try:
             for url in test_urls:
                 try:
-                    # TODO: currently we do not use a new page/browser instance for each test? Maybe we should start doing this?
+                    # Create a new window for each test/URL; another option would be to restart the driver for each test but that is even slower
+                    driver.switch_to.new_window('window')
                     if "upgrade" in url:
                         driver.get(HSTS_DEACTIVATE)
                     driver.get(url)
@@ -58,7 +61,11 @@ def main(browser_name, browser_version, binary_location, arguments, browser_id):
                     print("Exception!", e)
                     print(driver.current_url)
                 finally:
-                    pass
+                    # input("Next")  # Option to manualy debug
+                    # Close the current window
+                    driver.close()
+                    # Switch back to the old tab or window
+                    driver.switch_to.window(original_window)
         except Exception as e:
             print("Exception occured!")
             print(e)
