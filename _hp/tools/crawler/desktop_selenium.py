@@ -1,5 +1,5 @@
 import sys
-from utils import TIMEOUT, get_tests
+from utils import TIMEOUT, get_tests, HSTS_DEACTIVATE
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -41,19 +41,23 @@ def main(browser_name, browser_version, binary_location, arguments, browser_id):
     for scheme in ["http", "https"]:
         test_urls = get_tests(resp_type=MODE, browser_id=browser_id, scheme=scheme)
         driver = get_browser(browser_name, browser_version, binary_location, arguments)
+        # Max page load timeout
+        driver.set_page_load_timeout(TIMEOUT*2)
         print(driver.capabilities)
         try:
             for url in test_urls:
                 try:
                     # TODO: currently we do not use a new page/browser instance for each test? Maybe we should start doing this?
+                    if "upgrade" in url:
+                        driver.get(HSTS_DEACTIVATE)
                     driver.get(url)
                     print(driver.title)
                     # Wait until the results are saved on the server (after finishing fetch request, a div with id "finished" is added to the DOM)
                     WebDriverWait(driver, TIMEOUT).until(EC.presence_of_element_located((By.ID, "finished")))
                 except Exception as e:
                     print("Exception!", e)
+                    print(driver.current_url)
                 finally:
-                    #input("Next!")
                     pass
         except Exception as e:
             print("Exception occured!")

@@ -4,6 +4,7 @@ TIMEOUT = 6  # Seconds; test timeout is 5000 miliseconds and we want to make sur
 
 base_host = "sub.headers.websec.saarland"
 base_dir = "_hp/tests"
+HSTS_DEACTIVATE = f"https://{base_host}/_hp/common/empty.html?pipe=header(strict-transport-security,max-age=0)|status(200)"
 
 # [(test_file_name, label_name, number_of_response_ids)]
 # Comment: Num tests per resp_id: <basic/debug>, parsing (for one base URL; x2 as most tests are loaded from both HTTP and HTTPS)
