@@ -153,7 +153,7 @@ if __name__ == '__main__':
             ("brave", "118", "/home/ubuntu/brave-versions/v1.59.120/brave-browser", None, 75),
             ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None, 74),
         ]
-        debug = True
+        debug = False
         if debug:
             config = [
                 ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None, 74),
