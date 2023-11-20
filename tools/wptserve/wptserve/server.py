@@ -262,7 +262,9 @@ class BaseWebTestRequestHandler(http.server.BaseHTTPRequestHandler):
             
             if request.protocol_version == "HTTP/1.1" and request.GET.get("scheme") == "http" and request.url.startswith("https"):
                 # Due to automatic HTTPS Upgrades and block-mixed content we have to kill the connection to be able to test HSTS https://chromestatus.com/feature/6056181032812544
-                print("Received HTTPS request to http origin: kill connection, probably due to HTTPS upgrades")
+                # In general, if we want to test HTTP we want to test HTTP and not HTTPS; thus do not reply to upgraded requests on the landing page
+                # Only the landing page has scheme=scheme in the URL, thus it should work
+                # print("Received HTTPS request to http origin: kill connection, probably due to HTTPS upgrades")
                 raise ValueError("Invalid https request! Kill connection")
 
             self.logger.debug(f"{request.method} {request.request_path}")
