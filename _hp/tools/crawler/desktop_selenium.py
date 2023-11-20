@@ -86,11 +86,13 @@ def main(browser_name, browser_version, binary_location, arguments, browser_id):
                 try:
                     # Create a new window for each test/URL; another option would be to restart the driver for each test but that is even slower
                     driver.switch_to.new_window('window')
+                    new_window = driver.current_window_handle
                     if "upgrade" in url:
                         driver.get(HSTS_DEACTIVATE)
                     driver.get(url)
                     # print(driver.title)
                     # Wait until the results are saved on the server (after finishing fetch request, a div with id "finished" is added to the DOM)
+                    driver.switch_to.window(new_window)
                     WebDriverWait(driver, TIMEOUT).until(
                         EC.presence_of_element_located((By.ID, "finished")))
                 except Exception as e:
@@ -151,9 +153,15 @@ if __name__ == '__main__':
             ("brave", "118", "/home/ubuntu/brave-versions/v1.59.120/brave-browser", None, 75),
             ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None, 74),
         ]
+        debug_firefox = False
+        if debug_firefox:
+            config = [
+                ("firefox", "119", None, None, 1)
+            ]
 
+    now = f"{datetime.datetime.now()}"
     for t in config:
-        with Tee("log.log", "main") as f:
+        with Tee("desktop-selenium", now) as f:
             main(*t)
 
     # Headfull (linux):
