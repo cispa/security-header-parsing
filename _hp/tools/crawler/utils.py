@@ -35,7 +35,7 @@ def get_tests(resp_type, browser_id, scheme):
         else:
             for first_id, last_id in get_resp_ids(label, resp_type, num_resp_ids):
                 test_urls.append(
-                    f"{scheme}://{base_host}/{base_dir}/{url}?resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}")
+                    f"{scheme}://{base_host}/{base_dir}/{url}?resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}")
     return test_urls
 
 

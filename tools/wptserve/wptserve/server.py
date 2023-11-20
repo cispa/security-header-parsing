@@ -260,9 +260,9 @@ class BaseWebTestRequestHandler(http.server.BaseHTTPRequestHandler):
                 response.write()
                 return
             
-            if request.protocol_version == "HTTP/1.1" and request.request_path.startswith("/_hp/tests/upgrade-hsts.sub.html") and request.url.startswith("https"):
+            if request.protocol_version == "HTTP/1.1" and request.GET.get("scheme") == "http" and request.url.startswith("https"):
                 # Due to automatic HTTPS Upgrades and block-mixed content we have to kill the connection to be able to test HSTS https://chromestatus.com/feature/6056181032812544
-                print("Received HTTPS request to upgrade-hsts.sub.html: kill connection, probably due to HTTPS upgrades")
+                print("Received HTTPS request to http origin: kill connection, probably due to HTTPS upgrades")
                 raise ValueError("Invalid https request! Kill connection")
 
             self.logger.debug(f"{request.method} {request.request_path}")

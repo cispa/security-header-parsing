@@ -153,10 +153,10 @@ if __name__ == '__main__':
             ("brave", "118", "/home/ubuntu/brave-versions/v1.59.120/brave-browser", None, 75),
             ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None, 74),
         ]
-        debug_firefox = False
-        if debug_firefox:
+        debug = True
+        if debug:
             config = [
-                ("firefox", "119", None, None, 1)
+                ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None, 74),
             ]
 
     now = f"{datetime.datetime.now()}"
