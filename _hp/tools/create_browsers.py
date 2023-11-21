@@ -15,9 +15,18 @@ def create_browser(name, version, os, headless_mode, automation_mode, add_info):
 # MAC (local) browsers with Selenium automation
 os = "macOS 14.0"
 automation_mode = "selenium"
-headless_mode = "real"
-for (name, version) in [("chrome", "119"), ("firefox", "119"), ("safari", "17.0"), ("edge", "119"), ("brave", "1.60.114 (119.0.6045.124)")]:
-    create_browser(name, version, os, headless_mode, automation_mode, "")
+for headless in [True, False]:
+    for (name, version) in [("chrome", "119"), ("firefox", "119"), ("safari", "17.0"), ("edge", "119"), ("brave", "1.60.118 (119.0.6045.163)")]:
+        if headless:
+            if name == "firefox":
+                headless_mode = "headless"
+            elif name == "safari":
+                continue
+            else:
+                headless_mode = "headless-new"
+        else:
+            headless_mode = "real"
+        create_browser(name, version, os, headless_mode, automation_mode, "")
 
 # Linux browsers managed by Selenium (+ manual work for brave)
 os = "Ubuntu 22.04"

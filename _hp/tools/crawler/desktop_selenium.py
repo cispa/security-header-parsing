@@ -124,14 +124,21 @@ if __name__ == '__main__':
     # (browser_name, version, binary_location (e.g., for brave), arguments (e.g, for headless), browser_id)
     if sys.platform == "darwin":
         config = [
-            # ("chrome", "119", None, None, 5),
-            # ("firefox", "119", None, None, 6),
-            # ("safari", "17.0", None, None, 7),
-            # ("edge", "119", None, None, 8),
+            ("chrome", "119", None, None, 5),
+            ("firefox", "119", None, None, 6),
+            ("safari", "17.0", None, None, 7),
+            ("edge", "119", None, None, 8),
             # Download .dmg from https://github.com/brave/brave-browser/releases and install
             # E.g., https://github.com/brave/brave-browser/releases/tag/v1.60.118, rename the file
             ("brave", "119", "/Applications/Brave Browser 1.60.118.app/Contents/MacOS/Brave Browser",
              ["--disable-brave-update"], 37),
+
+            ("chrome", "119", None, ["--headless=new"], 113),
+            ("firefox", "119", None, ["-headless"], 114),
+            # ("safari", "17.0", None, None, 4), No Safari headless exist
+            ("edge", "119", None, ["--headless=new"], 115),
+            ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser",
+             ["--headless=new"], 116),
         ]
     # Linux Ubuntu
     else:
