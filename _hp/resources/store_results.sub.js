@@ -130,7 +130,8 @@ async function save_result(tests, status) {
     message: status.message,
     stack: status.stack,
     org_scheme: org_scheme,
-    org_host: org_host
+    org_host: org_host,
+    full_url: document.location.href
   };
   await fetch('https://{{host}}:{{ports[https][0]}}/_hp/server/store_results.py', {
     method: 'POST',

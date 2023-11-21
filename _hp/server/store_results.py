@@ -12,6 +12,7 @@ def main(request, response):
             browser_id = req["browser_id"]
             org_scheme = req["org_scheme"]
             org_host = req["org_host"]
+            full_url = req["full_url"]
 
             for test in req["tests"]:
                 # print(test)
@@ -37,7 +38,7 @@ def main(request, response):
                             test_name=test_name, test_status=test_status, test_message=test_message, test_stack=test_stack,
                             browser_id=browser_id, testcase_id=testcase_id, response_id=response_id, status='FINISHED',
                             resp_scheme=resp_scheme, resp_host=resp_host, relation_info=relation,
-                            org_host=org_host, org_scheme=org_scheme)
+                            org_host=org_host, org_scheme=org_scheme, full_url=full_url)
                 session.add(res)
                 # print("\n Stored Successfully \n")
             res = {'Status': 'Success'}

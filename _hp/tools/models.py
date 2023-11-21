@@ -147,6 +147,9 @@ class Result(BaseModel):
     # 3. Something else?
     status = Column(Enum('FREE', 'PROCESSING', 'FINISHED', name='status'))
 
+    # For easier manual debugging
+    full_url = Column(String)
+
 
 # Run the DB Stuff
 # Create a SQLAlchemy engine
