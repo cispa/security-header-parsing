@@ -91,8 +91,14 @@ def main(browser_name, browser_version, binary_location, arguments, browser_id):
                         driver.get(HSTS_DEACTIVATE)
                     driver.get(url)
                     # print(driver.title)
+                    # Switch back to the original window (if the test opens new ones)
+                    # Only required on firefox; Brave does not like it
+                    try:
+                        if browser_name == "firefox":
+                            driver.switch_to.window(new_window)
+                    except Exception as e:
+                        print("Switch failed:", e)
                     # Wait until the results are saved on the server (after finishing fetch request, a div with id "finished" is added to the DOM)
-                    driver.switch_to.window(new_window)
                     WebDriverWait(driver, TIMEOUT).until(
                         EC.presence_of_element_located((By.ID, "finished")))
                 except Exception as e:
@@ -108,6 +114,7 @@ def main(browser_name, browser_version, binary_location, arguments, browser_id):
         except Exception as e:
             print("Major Exception occured!", e)
         finally:
+            driver.close()
             driver.quit()
             print(f"Finish {browser_name} ({browser_version}) ({scheme})")
 
@@ -157,6 +164,7 @@ if __name__ == '__main__':
         if debug:
             config = [
                 ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None, 74),
+                ("firefox", "119", None, None, 72),
             ]
 
     now = f"{datetime.datetime.now()}"
