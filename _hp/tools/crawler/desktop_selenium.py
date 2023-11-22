@@ -7,6 +7,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 import traceback
 import datetime
+import argparse
+import json
 
 
 class Tee(object):
@@ -69,10 +71,21 @@ def get_browser(browser: str, version: str, binary_location=None, arguments=None
     return driver(options=options, service=service)
 
 
-def main(browser_name, browser_version, binary_location, arguments, browser_id):
+def main(browser_name, browser_version, binary_location, arguments, browser_id, resp_type, run_mode, debug_input):
+    
     for scheme in ["http", "https"]:
-        test_urls = get_tests(
-            resp_type=MODE, browser_id=browser_id, scheme=scheme)
+        if run_mode == "run_all":
+            test_urls = get_tests(
+                resp_type=resp_type, browser_id=browser_id, scheme=scheme)
+        elif run_mode == "repeat":
+            with open("../analysis/repeat.json", "r") as f:
+                test_urls = json.load(f).get(str(browser_id), [])
+                test_urls = list(filter(lambda s: s.startswith(f"{scheme}://"), test_urls))
+            if not len(test_urls):
+                continue
+        else:
+            raise Exception(f"Unknown run mode: {run_mode}")
+        
         driver = get_browser(browser_name, browser_version,
                              binary_location, arguments)
         # Max page load timeout
@@ -106,7 +119,9 @@ def main(browser_name, browser_version, binary_location, arguments, browser_id):
                     print(driver.current_url)
                     print(url)
                 finally:
-                    # input("Next")  # Option to manualy debug
+                    # Option to manualy debug
+                    if debug_input:
+                        input("Next")
                     # Close the current window
                     driver.close()
                     # Switch back to the old tab or window
@@ -114,13 +129,28 @@ def main(browser_name, browser_version, binary_location, arguments, browser_id):
         except Exception as e:
             print("Major Exception occured!", e)
         finally:
-            driver.close()
-            driver.quit()
+            try:
+                # Quit will fail with the additional close in safari?
+                if browser_name != "safari":
+                    driver.close()
+                driver.quit()
+            except Exception as e:
+                print(f"Failed quitting the browser", e)
             print(f"Finish {browser_name} ({browser_version}) ({scheme})")
 
 
-MODE = "basic"  # "debug", "parsing"
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Run tests on Desktop Selenium.")
+    parser.add_argument("--resp_type", choices=["basic", "debug", "parsing"], default="basic",
+                        help="Specify the response type (default: basic)")
+    parser.add_argument("--debug_browsers", action="store_true",
+                        help="Toggle on debugging for browser selection")
+    parser.add_argument("--debug_input", action="store_true",
+                        help="Toggle on debugging for input(Next) during the run.")
+    parser.add_argument("--run_mode", choices=["run_all", "repeat"], default="run_all",
+                        help="Specify the mode (default: run_all)")
+    args = parser.parse_args()
+
     # (browser_name, version, binary_location (e.g., for brave), arguments (e.g, for headless), browser_id)
     if sys.platform == "darwin":
         config = [
@@ -167,17 +197,16 @@ if __name__ == '__main__':
             ("brave", "118", "/home/ubuntu/brave-versions/v1.59.120/brave-browser", None, 75),
             ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None, 74),
         ]
-        debug = False
-        if debug:
-            config = [
-                ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None, 74),
-                ("firefox", "119", None, None, 72),
-            ]
+    if args.debug_browsers:
+        config = [
+            ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None, 74),
+            ("firefox", "119", None, None, 72),
+        ]
 
     now = f"{datetime.datetime.now()}"
     for t in config:
         with Tee("desktop-selenium", now) as f:
-            main(*t)
+            main(*t, args.resp_type, args.run_mode, args.debug_input)
 
     # Headfull (linux):
     # Xvfb :99 -screen 0 1920x1080x24 &
