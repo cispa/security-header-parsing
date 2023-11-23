@@ -55,7 +55,7 @@
     const simple_fetch = access_fetch_test.bind(null, 'GET', "omit", new Headers(), "simple");
     const custom_method = access_fetch_test.bind(null, "TEST", "omit", new Headers(), "custom_method");
     const custom_headers = access_fetch_test.bind(null, "GET", "omit", new Headers({ "Test": "Test" }), "custom_headers")
-    const credentials_fetch = access_fetch_test.bind(null, "GET", "include", new Headers(), "credendials")
+    const credentials_fetch = access_fetch_test.bind(null, "GET", "include", new Headers(), "credentials")
     // Other tests? caching, ..
     let test_declarations;
     if (resp_type === "parsing") {
