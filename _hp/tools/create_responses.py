@@ -249,7 +249,7 @@ create_responses(header_list, label, status_code=302, resp_type="basic")
 #region CORS
 # For testing we only need one AC-XX headers pair
 label = "CORS" # https://fetch.spec.whatwg.org/#http-responses
-acao = "Access-Control-Allow-Orgin"
+acao = "Access-Control-Allow-Origin"
 acac = "Access-Control-Allow-Credentials"
 acam = "Access-Control-Allow-Methods"
 acah = "Access-Control-Allow-Headers"
