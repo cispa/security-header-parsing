@@ -143,6 +143,7 @@ ninja_csp_fa = {"default-src 'none'", "self", "*", "frame-ancestors self", "fram
 
 # Other values?
 # Spaces, typo in frame-ancestors, ...
+# frame-ancestors 'null' (only allow null origin? e.g., sandboxed frame?)
 other = {}
 
 # Alternative names
