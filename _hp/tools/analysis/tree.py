@@ -24,14 +24,15 @@ base_dir = f"trees/{datetime.today().strftime('%Y-%m-%dT%H:%M')}"
 
 
 config = {
-    "ntrees": 1,
+    "ntrees": 10,
     "max_depth": 0, # Limit the depth of the tree (0: unlimited)
     "min_rows": 1,  # Minimum number of rows for a leaf node
     "stopping_rounds": 0,
     "stopping_metric": "auto",
     "seed": 0,
     "mtries": -2, 
-    "sample_rate": 1,
+    "sample_rate": 0.8,
+    "nfolds": 10,
     "min_split_improvement": 0, # 0.01
     "binomial_double_trees": True,
     "score_each_iteration": True,
@@ -137,8 +138,9 @@ def make_tree(df, prediction_properties, test_name):
     num_columns = len(df.columns)
     
     df = df.astype(str)
-    display(df.head())
-    create_trees_chefboost(df, test_name)
+
+    # Quite slow and not very helpful?
+    # create_trees_chefboost(df, test_name)
 
     df = df.astype("category")
     df["outcome_str"] = df["outcome_str"].apply(replace_string)
