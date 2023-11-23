@@ -58,3 +58,7 @@ scratch
 fluxbox.log
 *.log
 .ipynb_checkpoints
+
+helpers/
+trees/
+outputs/
