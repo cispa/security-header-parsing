@@ -597,6 +597,23 @@ files = [
 ]
 
 [[package]]
+name = "h2o"
+version = "3.44.0.2"
+description = "H2O, Fast Scalable Machine Learning, for python"
+optional = false
+python-versions = "*"
+files = [
+    {file = "h2o-3.44.0.2.tar.gz", hash = "sha256:e36434807ede774e8bbae3bcf7ef6432338501b27e0c1a94c9e23cc811ff2d08"},
+]
+
+[package.dependencies]
+requests = "*"
+tabulate = "*"
+
+[package.extras]
+kerberos = ["gssapi", "pykerberos (>=1.1.8,<2.0.0)", "winkerberos (>=0.5.0)"]
+
+[[package]]
 name = "httpcore"
 version = "1.0.2"
 description = "A minimal low-level HTTP client."
@@ -2303,6 +2320,20 @@ pure-eval = "*"
 tests = ["cython", "littleutils", "pygments", "pytest", "typeguard"]
 
 [[package]]
+name = "tabulate"
+version = "0.9.0"
+description = "Pretty-print tabular data"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "tabulate-0.9.0-py3-none-any.whl", hash = "sha256:024ca478df22e9340661486f85298cff5f6dcdba14f3813e8830015b9ed1948f"},
+    {file = "tabulate-0.9.0.tar.gz", hash = "sha256:0095b12bf5966de529c0feb1fa08671671b3368eec77d7ef7ab114be2c068b3c"},
+]
+
+[package.extras]
+widechars = ["wcwidth"]
+
+[[package]]
 name = "terminado"
 version = "0.18.0"
 description = "Tornado websocket backend for the Xterm.js Javascript terminal emulator library."
@@ -2547,4 +2578,4 @@ h11 = ">=0.9.0,<1"
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11"
-content-hash = "a3a411bb718765ea412400d53cb02e011b0ccc0f3f1e0bfdc05cede14531f9e9"
+content-hash = "e24a80044adc77b7a8ff2bd9087abf4a9dba2b7c4f461ba298b3ab2a2de8d5de"
