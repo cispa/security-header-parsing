@@ -35,7 +35,6 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000):
             continue
         else:
             for first_id, last_id in get_resp_ids(label, resp_type, num_resp_ids):
-                # TODO: add several URLs in case of only one popup at a time?!
                 # If there are more popups than max_popups add URLs for each popup count, only add run_no_popups to the first one
                 if num_popups > max_popups:
                     buckets = [list(range(start, min(start + max_popups, num_popups + 1))) for start in range(1, num_popups + 1, max_popups)]
