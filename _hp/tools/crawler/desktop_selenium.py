@@ -78,7 +78,7 @@ def main(browser_name, browser_version, binary_location, arguments, browser_id, 
             test_urls = get_tests(
                 resp_type=resp_type, browser_id=browser_id, scheme=scheme)
         elif run_mode == "repeat":
-            with open("../analysis/repeat.json", "r") as f:
+            with open("../repeat.json", "r") as f:
                 test_urls = json.load(f).get(str(browser_id), [])
                 test_urls = list(filter(lambda s: s.startswith(f"{scheme}://"), test_urls))
             if not len(test_urls):
