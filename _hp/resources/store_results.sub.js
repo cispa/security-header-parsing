@@ -43,17 +43,30 @@ function run_tests(test_declarations, path, label, origins) {
   const resp_type = urlParams.get("resp_type") || "debug"; // Default resp_type is debug
   const first_id = parseInt(urlParams.get("first_id"), 10) || null;
   const last_id = parseInt(urlParams.get("last_id"), 10) || null;
+  const first_popup = parseInt(urlParams.get("first_popup"), 10) || null;
+  const last_popup = parseInt(urlParams.get("last_popup"), 10) || null;
+  const run_no_popup = urlParams.get("run_no_popup") || 'yes';
   // Fetch origin relations if not specified
   if (!origins) {
     origins = get_test_origins(resp_type);
   }
 
   // If &first_id=<first_id>&last_id=<last_id>; run on the specified ids
+  let popup_count = 0;
   if (first_id && last_id) {
     for (var response_id = first_id; response_id < last_id + 1; response_id++) {
       for (var origin of origins) {
         for (let test of test_declarations) {
-          test(`${origin}${path}`, origin, response_id);
+          if (test.popup) {
+            popup_count = popup_count + 1;
+            if (popup_count >= first_popup && popup_count <= last_popup) {
+              test(`${origin}${path}`, origin, response_id);
+            }
+          } else {
+            if (run_no_popup == 'yes') {
+              test(`${origin}${path}`, origin, response_id);
+            }
+          }
         }
       }
     }
@@ -70,7 +83,7 @@ function run_tests(test_declarations, path, label, origins) {
       }
     });
   }
-
+  console.log(`All popups: ${popup_count}`);
 }
 
 function nested_test(frame_element, sandbox, url, response_id, element, test_info, test_name) {
