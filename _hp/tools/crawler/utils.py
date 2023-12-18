@@ -1,5 +1,19 @@
 import httpx
 
+from sqlalchemy import ClauseElement
+from sqlalchemy.exc import IntegrityError
+
+try:
+    from models import Session, Browser
+except:
+    import sys
+    from pathlib import Path
+    file = Path(__file__).resolve()
+    parent, root = file.parent, file.parents[1]
+    sys.path.append(str(root))
+    from models import Session, Browser
+
+
 TIMEOUT = 6  # Seconds; test timeout is 5000 miliseconds and we want to make sure we wait long enough to save the results
 
 base_host = "sub.headers.websec.saarland"
@@ -59,3 +73,39 @@ def get_resp_ids(label, resp_type, num_resp_ids):
     # TODO: use num_resp_ids to return continuous chunks of resp_ids with a maximum length of num_resp_ids
     # For now: each chunk is always size 1, regardless of parameter
     return [(resp_id, resp_id) for resp_id in resp_ids]
+
+
+def get_or_create(session, model, defaults=None, **kwargs):
+    instance = session.query(model).filter_by(**kwargs).first()
+    if instance:
+        return instance, False
+    else:
+        params = dict((k, v) for k, v in kwargs.items() if not isinstance(v, ClauseElement))
+        params.update(defaults or {})
+        instance = model(**params)
+        session.add(instance)
+        session.commit()
+        return instance, True
+
+def get_or_create_browser(name, version, os, headless_mode, automation_mode, add_info):
+    with Session() as session:
+        try:
+            # Using the get_or_create function
+            browser, created = get_or_create(
+                session,
+                Browser,
+                defaults=dict(),
+                name=name,
+                version=version,
+                os=os,
+                headless_mode=headless_mode,
+                automation_mode=automation_mode,
+                add_info=add_info
+            )
+            if created:
+                print("New Browser created")
+            return browser.id
+
+        except IntegrityError as e:
+            session.rollback()
+            print("IntegrityError", e)

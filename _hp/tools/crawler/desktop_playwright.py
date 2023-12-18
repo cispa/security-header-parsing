@@ -1,5 +1,7 @@
+##### Legacy Code: Do not use #####
+
 import sys
-from utils import TIMEOUT, get_tests
+from utils import TIMEOUT, get_tests, get_or_create_browser
 from playwright.sync_api import sync_playwright, Playwright, Browser
 
 def get_browser(browser: str, headless: bool, playwright: Playwright):

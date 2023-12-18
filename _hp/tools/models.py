@@ -8,11 +8,15 @@ from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, UniqueCons
 from sqlalchemy.dialects.postgresql import JSONB
 
 
+
 # Setup the config
 try:
     proj_config = json.load(open("config.json"))
 except OSError:
-    proj_config = json.load(open("_hp/tools/config.json"))
+    try:
+        proj_config = json.load(open("_hp/tools/config.json"))
+    except OSError:
+        proj_config = json.load(open("../config.json"))
 
 DB_URL = proj_config['DB_URL']
 
@@ -163,13 +167,13 @@ Session = sessionmaker(bind=engine)
 
 # Create dummy data entries
 if __name__ == "__main__":
+    from crawler.utils import get_or_create
     with Session() as session:
         # Always make sure that the unknown browser exist with ID=1!
-        b: Browser = Browser(name="Unknown", version="Unknown",
+        b = get_or_create(session, Browser, name="Unknown", version="Unknown",
                              os="Unknown", headless_mode="real", automation_mode="manual")
-        t: TestCase = TestCase(feature_group="Unknown",
+        t = get_or_create(session, TestCase, feature_group="Unknown",
                                test_file="Unknown", test_name="Unknown")
-        r: Response = Response(raw_header=[("X-Frame-Options", "SAMEORIGIN"), ("Content-Type",
+        r = get_or_create(session, Response, raw_header=[("X-Frame-Options", "SAMEORIGIN"), ("Content-Type",
                                "text/html")], status_code=200, label="Unknown", resp_type="debug")
-        session.add_all([b, t, r])
-        session.commit()
+        print(b, t, r)

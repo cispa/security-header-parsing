@@ -1,53 +1,11 @@
-# TODO: fill the Browser table with all browsers used!
-from models import Session, Browser
-from sqlalchemy.exc import IntegrityError
-
-def create_browser(name, version, os, headless_mode, automation_mode, add_info):
-    with Session() as session:
-        try:
-            r = Browser(name=name, version=version, os=os, headless_mode=headless_mode, automation_mode=automation_mode, add_info=add_info)
-            session.add(r)
-            session.commit()
-        except IntegrityError as e:
-            session.rollback()
-            print("IntegrityError probably response already exists")
-
-# MAC (local) browsers with Selenium automation
-os = "macOS 14.0"
-automation_mode = "selenium"
-for headless in [True, False]:
-    for (name, version) in [("chrome", "119"), ("firefox", "119"), ("safari", "17.0"), ("edge", "119"), ("brave", "1.60.118 (119.0.6045.163)")]:
-        if headless:
-            if name == "firefox":
-                headless_mode = "headless"
-            elif name == "safari":
-                continue
-            else:
-                headless_mode = "headless-new"
-        else:
-            headless_mode = "real"
-        create_browser(name, version, os, headless_mode, automation_mode, "")
-
-# Linux browsers managed by Selenium (+ manual work for brave)
-os = "Ubuntu 22.04"
-automation_mode = "selenium"
-for headless in [True, False]:
-    for (name, version) in [("chrome", "119"), ("firefox", "119"), ("edge", "119"), ("brave", "1.60.114 (119.0.6045.124)"), ("brave", "1.59.120 (118.0.5993.88)")]:
-        if headless:
-            if name == "firefox":
-                headless_mode = "headless"
-            else:
-                headless_mode = "headless-new"
-        else:
-            headless_mode = "xvfb"
-        create_browser(name, version, os, headless_mode, automation_mode, "")
+from crawler.utils import get_or_create_browser
 
 # Android browsers
 os = "Android 11"
 automation_mode = "intent"
 headless_mode = "real"
 for (name, version) in [("firefox", "119.1.1"), ("brave", "1.60.116"), ("ucmobile", "13.3.8.1305"), ("opera", "78.4.4143.75735")]:
-    create_browser(name, version, os, headless_mode, automation_mode, "")
+    get_or_create_browser(name, version, os, headless_mode, automation_mode, "")
 
 # iPhone browsers
 #TODO
@@ -57,13 +15,13 @@ os = "macOS 14.0"
 automation_mode = "playwright"
 headless_mode = "real"
 for (name, version) in [("chrome", "119"), ("firefox", "118"), ("WebKit", "17.4")]:
-    create_browser(name, version, os, headless_mode, automation_mode, "Playwright=v1.39")
+    get_or_create_browser(name, version, os, headless_mode, automation_mode, "Playwright=v1.39")
 
 # Linux browsers managed by Playwright
 os = "Ubuntu 22.04"
 automation_mode = "playwright"
 headless_mode = "headless"
 for (name, version) in [("chrome", "119"), ("firefox", "118"), ("WebKit", "17.4")]:
-    create_browser(name, version, os, headless_mode, automation_mode, "Playwright=v1.39")
+    get_or_create_browser(name, version, os, headless_mode, automation_mode, "Playwright=v1.39")
 
 # More browser categories?

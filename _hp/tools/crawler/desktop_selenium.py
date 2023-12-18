@@ -1,5 +1,6 @@
 import sys
 from utils import TIMEOUT, get_tests, HSTS_DEACTIVATE
+from create_browsers import get_or_create_browser
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -154,30 +155,30 @@ if __name__ == '__main__':
     # (browser_name, version, binary_location (e.g., for brave), arguments (e.g, for headless), browser_id)
     if sys.platform == "darwin":
         config = [
-            ("chrome", "119", None, None, 5),
-            ("firefox", "119", None, None, 6),
-            ("safari", "17.0", None, None, 7),
-            ("edge", "119", None, None, 8),
+            ("chrome", "119", None, None, get_or_create_browser("chrome", "119", "macOS 14.0", "real", "Selenium", "")),
+            ("firefox", "119", None, None, get_or_create_browser("firefox", "119", "macOS 14.0", "real", "Selenium", "")),
+            ("safari", "17.0", None, None, get_or_create_browser("safari", "17.0", "macOS 14.0", "real", "Selenium", "")),
+            ("edge", "119", None, None, get_or_create_browser("edge", "119", "macOS 14.0", "real", "Selenium", "")),
             # Download .dmg from https://github.com/brave/brave-browser/releases and install
             # E.g., https://github.com/brave/brave-browser/releases/tag/v1.60.118, rename the file
             ("brave", "119", "/Applications/Brave Browser 1.60.118.app/Contents/MacOS/Brave Browser",
-             ["--disable-brave-update"], 37),
+             ["--disable-brave-update"], get_or_create_browser("brave", "1.60.118 (119.0.6045.163)", "macOS 14.0", "real", "Selenium", "")),
 
-            ("chrome", "119", None, ["--headless=new"], 113),
-            ("firefox", "119", None, ["-headless"], 114),
+            ("chrome", "119", None, ["--headless=new"], get_or_create_browser("chrome", "119", "macOS 14.0", "headless-new", "Selenium", "")),
+            ("firefox", "119", None, ["-headless"], get_or_create_browser("firefox", "119", "macOS 14.0", "headless", "Selenium", "")),
             # ("safari", "17.0", None, None, 4), No Safari headless exist
-            ("edge", "119", None, ["--headless=new"], 115),
-            ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser",
-             ["--headless=new"], 116),
+            ("edge", "119", None, ["--headless=new"], get_or_create_browser("edge", "119", "macOS 14.0", "headless-new", "Selenium", "")),
+            ("brave", "119", "/Applications/Brave Browser 1.60.118.app/Contents/MacOS/Brave Browser",
+             ["--headless=new"], get_or_create_browser("brave", "1.60.118 (119.0.6045.163)", "macOS 14.0", "headless-new", "Selenium", "")),
         ]
     # Linux Ubuntu
     else:
         config = [
             # Headless (new)
-            ("chrome", "119", None, ["--headless=new"], 13),
-            ("firefox", "119", None, ["-headless"], 14),
+            ("chrome", "119", None, ["--headless=new"], get_or_create_browser("chrome", "119", "Ubuntu 22.04", "headless-new", "Selenium", "")),
+            ("firefox", "119", None, ["-headless"], get_or_create_browser("firefox", "119", "Ubuntu 22.04", "headless", "Selenium", "")),
             # ("safari", "17.0", None, None, 4), No Safari on Linux
-            ("edge", "119", None, ["--headless=new"], 15),
+            ("edge", "119", None, ["--headless=new"], get_or_create_browser("edge", "119", "Ubuntu 22.04", "headless-new", "Selenium", "")),
             # Brave (different version)
             # mkdir ~/brave-versions
             # mkdir ~/brave-versions/brave-version
@@ -186,24 +187,28 @@ if __name__ == '__main__':
             # v1.59.120 (Chromium 118): wget https://github.com/brave/brave-browser/releases/download/v1.59.120/brave-browser-1.59.120-linux-amd64.zip
             # Note: if you specify the wrong chromium version, selenium will ignore the binary location and download CFT instead??
             ("brave", "118", "/home/ubuntu/brave-versions/v1.59.120/brave-browser",
-             ["--headless=new"], 60),
+             ["--headless=new"], get_or_create_browser("brave", "1.59.120 (118.0.5993.88)", "Ubuntu 22.04", "headless-new", "Selenium", "")),
             # v1.60.114 (Chromium 119): wget https://github.com/brave/brave-browser/releases/download/v1.60.114/brave-browser-1.60.114-linux-amd64.zip
             ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser",
-             ["--headless=new"], 59),
+             ["--headless=new"], get_or_create_browser("brave", "1.60.114 (119.0.6045.124)", "Ubuntu 22.04", "headless-new", "Selenium", "")),
             # Headfull
-            ("chrome", "119", None, None, 71),
-            ("firefox", "119", None, None, 72),
-            ("edge", "119", None, None, 73),
-            ("brave", "118", "/home/ubuntu/brave-versions/v1.59.120/brave-browser", None, 75),
-            ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None, 74),
+            ("chrome", "119", None, None, get_or_create_browser("chrome", "119", "Ubuntu 22.04", "xvfb", "Selenium", "")),
+            ("firefox", "119", None, None, get_or_create_browser("firefox", "119", "Ubuntu 22.04", "xvfb", "Selenium", "")),
+            ("edge", "119", None, None, get_or_create_browser("edge", "119", "Ubuntu 22.04", "xvfb", "Selenium", "")),
+            ("brave", "118", "/home/ubuntu/brave-versions/v1.59.120/brave-browser", None,
+             get_or_create_browser("brave", "1.59.120 (118.0.5993.88)", "Ubuntu 22.04", "xvfb", "Selenium", "")),
+            ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None,
+             get_or_create_browser("brave", "1.60.114 (119.0.6045.124)", "Ubuntu 22.04", "xvfb", "Selenium", "")),
         ]
     if args.debug_browsers:
         config = [
-            ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None, 74),
-            ("firefox", "119", None, None, 72),
+            ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None,
+             get_or_create_browser("brave", "1.60.114 (119.0.6045.124)", "Ubuntu 22.04", "xvfb", "Selenium", "")),
+            ("firefox", "119", None, None, get_or_create_browser("firefox", "119", "Ubuntu 22.04", "xvfb", "Selenium", "")),
         ]
 
     now = f"{datetime.datetime.now()}"
+    print(config)
     for t in config:
         with Tee("desktop-selenium", now) as f:
             main(*t, args.resp_type, args.run_mode, args.debug_input)
