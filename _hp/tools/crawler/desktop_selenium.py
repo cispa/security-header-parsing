@@ -155,21 +155,21 @@ if __name__ == '__main__':
     # (browser_name, version, binary_location (e.g., for brave), arguments (e.g, for headless), browser_id)
     if sys.platform == "darwin":
         config = [
-            ("chrome", "119", None, None, get_or_create_browser("chrome", "119", "macOS 14.0", "real", "Selenium", "")),
-            ("firefox", "119", None, None, get_or_create_browser("firefox", "119", "macOS 14.0", "real", "Selenium", "")),
-            ("safari", "17.0", None, None, get_or_create_browser("safari", "17.0", "macOS 14.0", "real", "Selenium", "")),
-            ("edge", "119", None, None, get_or_create_browser("edge", "119", "macOS 14.0", "real", "Selenium", "")),
+            ("chrome", "120", None, None, get_or_create_browser("chrome", "120", "macOS 14.2", "real", "Selenium", "")),
+            ("firefox", "120", None, None, get_or_create_browser("firefox", "120", "macOS 14.2", "real", "Selenium", "")),
+            ("safari", "17.2", None, None, get_or_create_browser("safari", "17.2", "macOS 14.2", "real", "Selenium", "")),
+            ("edge", "120", None, None, get_or_create_browser("edge", "120", "macOS 14.2", "real", "Selenium", "")),
             # Download .dmg from https://github.com/brave/brave-browser/releases and install
             # E.g., https://github.com/brave/brave-browser/releases/tag/v1.60.118, rename the file
             ("brave", "119", "/Applications/Brave Browser 1.60.118.app/Contents/MacOS/Brave Browser",
-             ["--disable-brave-update"], get_or_create_browser("brave", "1.60.118 (119.0.6045.163)", "macOS 14.0", "real", "Selenium", "")),
+             ["--disable-brave-update"], get_or_create_browser("brave", "1.60.118 (119.0.6045.163)", "macOS 14.2", "real", "Selenium", "")),
 
-            ("chrome", "119", None, ["--headless=new"], get_or_create_browser("chrome", "119", "macOS 14.0", "headless-new", "Selenium", "")),
-            ("firefox", "119", None, ["-headless"], get_or_create_browser("firefox", "119", "macOS 14.0", "headless", "Selenium", "")),
+            ("chrome", "120", None, ["--headless=new"], get_or_create_browser("chrome", "120", "macOS 14.2", "headless-new", "Selenium", "")),
+            ("firefox", "120", None, ["-headless"], get_or_create_browser("firefox", "120", "macOS 14.2", "headless", "Selenium", "")),
             # ("safari", "17.0", None, None, 4), No Safari headless exist
-            ("edge", "119", None, ["--headless=new"], get_or_create_browser("edge", "119", "macOS 14.0", "headless-new", "Selenium", "")),
+            ("edge", "120", None, ["--headless=new"], get_or_create_browser("edge", "120", "macOS 14.2", "headless-new", "Selenium", "")),
             ("brave", "119", "/Applications/Brave Browser 1.60.118.app/Contents/MacOS/Brave Browser",
-             ["--headless=new"], get_or_create_browser("brave", "1.60.118 (119.0.6045.163)", "macOS 14.0", "headless-new", "Selenium", "")),
+             ["--headless=new"], get_or_create_browser("brave", "1.60.118 (119.0.6045.163)", "macOS 14.2", "headless-new", "Selenium", "")),
         ]
     # Linux Ubuntu
     else:
