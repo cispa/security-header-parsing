@@ -69,7 +69,7 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000):
 
 def get_resp_ids(label, resp_type, num_resp_ids):
     resp_ids = httpx.get(
-        f"https://{base_host}/_hp/server/get_resp_ids.py?label={label}&resp_type={resp_type}").json()
+        f"https://{base_host}/_hp/server/get_resp_ids.py?label={label}&resp_type={resp_type}", verify=False).json()
     # TODO: use num_resp_ids to return continuous chunks of resp_ids with a maximum length of num_resp_ids
     # For now: each chunk is always size 1, regardless of parameter
     return [(resp_id, resp_id) for resp_id in resp_ids]
