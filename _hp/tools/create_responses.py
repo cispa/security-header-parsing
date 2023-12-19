@@ -1,5 +1,4 @@
 from models import Response, Session
-from sqlalchemy.exc import IntegrityError
 
 from crawler.utils import get_or_create
 
