@@ -44,7 +44,11 @@ def run_test(parameter):
 		encoded_test_url = app.test_url.replace('&','\&')
 		
 		emulators.send_url_intent(app.device_id, app.package_name, app.activity_name, encoded_test_url)
-		time.sleep(TIMEOUT*1000)				
+		factor = 100
+		if app.package_name == 'com.android.chrome':
+			factor = 10
+
+		time.sleep(TIMEOUT*factor)				
 		
 
 def main(browser_list, config_dict):

@@ -2,7 +2,7 @@
 	"chrome":{
 	   "package_name":"com.android.chrome",
 	   "intent":"com.google.android.apps.chrome.Main",
-	   "version":"120.0.6099.44"	   
+	   "version":"120.0.6099.44"	   	   
 	},
 	"opera":{
 	   "package_name":"com.opera.browser",
