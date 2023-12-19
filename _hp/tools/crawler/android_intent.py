@@ -44,9 +44,10 @@ def run_test(parameter):
 		encoded_test_url = app.test_url.replace('&','\&')
 		
 		emulators.send_url_intent(app.device_id, app.package_name, app.activity_name, encoded_test_url)
-		factor = 100
-		if app.package_name == 'com.android.chrome':
-			factor = 10
+		
+		# chrome, firefox are fast, factor = 10 looks good so far
+		# pending for other browsers
+		factor = 10
 
 		time.sleep(TIMEOUT*factor)				
 		
