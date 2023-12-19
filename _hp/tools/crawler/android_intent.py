@@ -53,6 +53,8 @@ def main(browser_list, config_dict):
 	for browser_name in browser_list:
 		browser_config = config_dict[browser_name]
 
+		print(browser_config)
+		return
 		browser_id = browser_config['id']
 		test_urls = list()
 		for scheme in ["http", "https"]:

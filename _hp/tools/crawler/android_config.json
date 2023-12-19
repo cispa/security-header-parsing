@@ -1,0 +1,27 @@
+{
+	"chrome":{
+	   "package_name":"com.android.chrome",
+	   "intent":"com.google.android.apps.chrome.Main",
+	   "version":"120.0.6099.44"	   
+	},
+	"opera":{
+	   "package_name":"com.opera.browser",
+	   "intent":"com.opera.android.BrowserActivity",	   
+	   "version":"78.4.4143.75735"	   
+	},
+	"brave":{
+	   "package_name":"com.brave.browser",
+	   "intent":"org.chromium.chrome.browser.ChromeTabbedActivity",	   
+	   "version":"1.60.116"
+	},
+	"firefox": {
+		"package_name":"org.mozilla.firefox",
+	   	"intent":"org.mozilla.fenix.IntentReceiverActivity",	   
+	   	"version":"119.1.1"
+	},
+	"ucmobile": {
+		"package_name":"com.UCMobile.intl",
+	   	"intent":"com.UCMobile.main.UCMobile",	   
+	   	"version":"13.3.8.1305"
+	}
+ }
