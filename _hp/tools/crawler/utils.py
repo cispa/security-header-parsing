@@ -14,7 +14,24 @@ except:
     from models import Session, Browser
 
 
-TIMEOUT = 6  # Seconds; test timeout is 5000 miliseconds and we want to make sure we wait long enough to save the results
+# TODO: use GLOBAL_TEST_TIMEOUT and SINGLE_TEST_TIMEOUT in the tests/tesharness.js
+# Time until all tests on a page have to be finished (called done())
+GLOBAL_TEST_TIMEOUT = 5000/1000 # Seconds see https://projects.cispa.saarland/swag/wpt/-/blob/master/_hp/resources/testharness.js?ref_type=heads#L8
+# Time after a single test marks itself as "no message received"
+SINGLE_TEST_TIMEOUT = 0.9 * GLOBAL_TEST_TIMEOUT
+
+# Time it takes to open the browser and perform the inital request to the test page
+# TODO: this is different for different browsers, some mobile browsers are really slow; use a dict?
+BROWSER_START_TIMEOUT = 1 
+# Time to wait for the final request to finish
+FINAL_REQ_TIMEOUT = 1
+
+# TODO: in desktop_selenium we currently have a max_page_load of 2xTIMEOUT and wait for a maximum of TIMEOUT after the page is loaded; we can't replicate this behavior in mobile?
+# Also we finish early when we see the #finished div in the page
+TIMEOUT = BROWSER_START_TIMEOUT + GLOBAL_TEST_TIMEOUT + FINAL_REQ_TIMEOUT
+
+
+
 
 base_host = "sub.headers.websec.saarland"
 base_dir = "_hp/tests"
