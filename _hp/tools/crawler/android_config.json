@@ -19,6 +19,11 @@
 	   	"intent":"org.mozilla.fenix.IntentReceiverActivity",	   
 	   	"version":"119.1.1"
 	},
+	"firefox_beta": {
+		"package_name":"org.mozilla.firefox_beta",
+	   	"intent":"org.mozilla.fenix.IntentReceiverActivity",	   
+	   	"version":"122.0b1"
+	},
 	"ucmobile": {
 		"package_name":"com.UCMobile.intl",
 	   	"intent":"com.UCMobile.main.UCMobile",	   

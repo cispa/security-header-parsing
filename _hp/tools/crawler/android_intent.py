@@ -12,9 +12,6 @@ HOME_PATH = str(Path.home())
 MODE = 'basic'
 sys.path.append('/Users/tin.nguyen/develop/cispa/android-emulator/')
 
-APK_DIR = os.path.join(HOME_PATH, 'develop/cispa/apk-browsers')
-
-
 from utils import get_tests, get_or_create_browser, TIMEOUT
 from multiprocessing import Pool
 import cmd_emulators as emulators
@@ -44,12 +41,8 @@ def run_test(parameter):
 		encoded_test_url = app.test_url.replace('&','\&')
 		
 		emulators.send_url_intent(app.device_id, app.package_name, app.activity_name, encoded_test_url)
-		
-		# chrome, firefox are fast, factor = 10 looks good so far
-		# pending for other browsers
-		factor = 10
-
-		time.sleep(TIMEOUT*factor)				
+				
+		time.sleep(TIMEOUT)				
 		
 
 def main(browser_list, config_dict):
