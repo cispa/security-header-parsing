@@ -14,11 +14,10 @@ except:
     from models import Session, Browser
 
 
-# TODO: use GLOBAL_TEST_TIMEOUT and SINGLE_TEST_TIMEOUT in the tests/tesharness.js
 # Time until all tests on a page have to be finished (called done())
-GLOBAL_TEST_TIMEOUT = 5000/1000 # Seconds see https://projects.cispa.saarland/swag/wpt/-/blob/master/_hp/resources/testharness.js?ref_type=heads#L8
+GLOBAL_TEST_TIMEOUT = 5 # Also known as test_timeout in testharness.sub.js
 # Time after a single test marks itself as "no message received"
-SINGLE_TEST_TIMEOUT = 0.9 * GLOBAL_TEST_TIMEOUT
+SINGLE_TEST_TIMEOUT = 0.9 * GLOBAL_TEST_TIMEOUT # 0.9 is hardcoded in the tests (0.9 * test_timeout)
 
 # Time it takes to open the browser and perform the inital request to the test page
 # TODO: this is different for different browsers, some mobile browsers are really slow; use a dict?
@@ -74,13 +73,13 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000):
                         first_popup = bucket[0]
                         last_popup = bucket[-1]
                         test_urls.append(
-                            f"{scheme}://{base_host}/{base_dir}/{url}?resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}&first_popup={first_popup}&last_popup={last_popup}&run_no_popup={run_no_popup}")
+                            f"{scheme}://{base_host}/{base_dir}/{url}?timeout={GLOBAL_TEST_TIMEOUT}&resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}&first_popup={first_popup}&last_popup={last_popup}&run_no_popup={run_no_popup}")
                         run_no_popup = "no"
                     print(buckets)
                 # Otherwise run all tests
                 else:
                     test_urls.append(
-                        f"{scheme}://{base_host}/{base_dir}/{url}?resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}")
+                        f"{scheme}://{base_host}/{base_dir}/{url}?timeout={GLOBAL_TEST_TIMEOUT}&resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}")
     return test_urls
 
 

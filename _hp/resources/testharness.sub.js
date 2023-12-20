@@ -5,7 +5,7 @@
  * (../docs/_writing-tests/testharness-api.md) */
 
 // TODO make configurable?
-test_timeout = 5000;
+test_timeout = parseInt({{GET[timeout]}}, 10) * 1000 || 5000;
 
  (function (global_scope)
  {

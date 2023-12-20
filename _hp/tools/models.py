@@ -117,7 +117,7 @@ class Result(BaseModel):
     # outcome_value: JSONB result value
     outcome_value = Column(JSONB)
 
-    # Provided by testharness.js
+    # Provided by testharness.sub.js
     # Alternative for testcase_id? Otherwise we need to figure out how each wpt-test knows it's own testcase_id?
     test_name = Column(String)
     test_status = Column(Integer)
