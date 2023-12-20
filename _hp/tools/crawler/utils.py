@@ -15,9 +15,11 @@ except:
 
 
 # Time until all tests on a page have to be finished (called done())
+# TODO: make configurable for different tests and/or browsers! (or e.g., higher timeouts for repeats)
 GLOBAL_TEST_TIMEOUT = 5 # Also known as test_timeout in testharness.sub.js
+
 # Time after a single test marks itself as "no message received"
-SINGLE_TEST_TIMEOUT = 0.9 * GLOBAL_TEST_TIMEOUT # 0.9 is hardcoded in the tests (0.9 * test_timeout)
+# SINGLE_TEST_TIMEOUT = 0.9 * GLOBAL_TEST_TIMEOUT # 0.9 is hardcoded in the tests (0.9 * test_timeout)
 
 # Time it takes to open the browser and perform the inital request to the test page
 # TODO: this is different for different browsers, some mobile browsers are really slow; use a dict?
