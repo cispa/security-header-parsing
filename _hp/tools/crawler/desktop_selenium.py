@@ -1,3 +1,4 @@
+from multiprocessing import Pool
 import sys
 from utils import TIMEOUT, get_tests, HSTS_DEACTIVATE
 from create_browsers import get_or_create_browser
@@ -140,6 +141,10 @@ def main(browser_name, browser_version, binary_location, arguments, browser_id, 
             print(f"Finish {browser_name} ({browser_version}) ({scheme})")
 
 
+def worker_function(t, resp_type, run_mode, debug_input):
+    main_result = main(*t, resp_type, run_mode, debug_input)
+    return main_result
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run tests on Desktop Selenium.")
     parser.add_argument("--resp_type", choices=["basic", "debug", "parsing"], default="basic",
@@ -209,10 +214,12 @@ if __name__ == '__main__':
 
     now = f"{datetime.datetime.now()}"
     print(config)
-    for t in config:
-        with Tee("desktop-selenium", now) as f:
-            main(*t, args.resp_type, args.run_mode, args.debug_input)
-
+    pool = Pool(processes=20)
+    with Tee("desktop-selenium", now) as f:
+        args = (args.resp_type, args.run_mode, args.debug_input)
+        results = [pool.apply_async(worker_function, (t, *args)) for t in config]
+    pool.close()
+    pool.join()
     # Headfull (linux):
     # Xvfb :99 -screen 0 1920x1080x24 &
     # x11vnc -display :99 -bg -shared -forever -passwd abc -xkb -rfbport 5900
