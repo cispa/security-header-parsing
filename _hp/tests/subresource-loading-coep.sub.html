@@ -16,7 +16,6 @@
 
 
 <script>
-    let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
     let resp_type = urlParams.get("resp_type") || "debug";
     var count = 0;
     function subresource_loading_test(element, sandbox, test_info, url, origin, response_id) {

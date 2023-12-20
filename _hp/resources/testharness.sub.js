@@ -3,9 +3,8 @@
 
 /* Documentation: https://web-platform-tests.org/writing-tests/testharness-api.html
  * (../docs/_writing-tests/testharness-api.md) */
-
-// TODO make configurable?
-test_timeout = parseInt({{GET[timeout]}}, 10) * 1000 || 5000;
+let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
 
  (function (global_scope)
  {

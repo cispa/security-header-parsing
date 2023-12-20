@@ -39,7 +39,6 @@ function waitForMessageFrom(frame, test) {
 
 // Run all tests for origin relations and similar!
 function run_tests(test_declarations, path, label, origins) {
-  let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
   const resp_type = urlParams.get("resp_type") || "debug"; // Default resp_type is debug
   const first_id = parseInt(urlParams.get("first_id"), 10) || null;
   const last_id = parseInt(urlParams.get("last_id"), 10) || null;
@@ -125,7 +124,6 @@ function nested_test(frame_element, sandbox, url, response_id, element, test_inf
 
 // Store result helpers!
 async function save_result(tests, status) {
-  let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
   console.log(tests);
   var test_results = tests.map(function (x) {
     return {
