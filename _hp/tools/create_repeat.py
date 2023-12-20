@@ -24,7 +24,9 @@ def calc_repeat():
     df = get_data(Config(), initial_data)
     
     def clean_url(url):
-        return re.sub(r"browser_id=(\d+)", "browser_id=2", url)
+        url = re.sub(r"browser_id=(\d+)", "browser_id=1", url)
+        url = re.sub(r"first_popup=(\d+)&last_popup=(\d+)&run_no_popup=(yes|no)", "", url)
+        return url
     df["clean_url"] = df["full_url"].apply(clean_url)
 
     all_browsers = set(df["browser_id"].unique()) 
@@ -43,6 +45,7 @@ def calc_repeat():
                 d = to_repeat[browser_id]
             except KeyError:
                 d = set()
+            # TODO: for mobile browsers the first_popup, last_popup, run_no_popup has to be added again?
             d.add(re.sub("browser_id=(\d+)", f"browser_id={browser_id}", clean_url))
             to_repeat[browser_id] = d
     with open("repeat.json", "w") as f:
