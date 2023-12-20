@@ -43,8 +43,8 @@ function run_tests(test_declarations, path, label, origins) {
   const resp_type = urlParams.get("resp_type") || "debug"; // Default resp_type is debug
   const first_id = parseInt(urlParams.get("first_id"), 10) || null;
   const last_id = parseInt(urlParams.get("last_id"), 10) || null;
-  const first_popup = parseInt(urlParams.get("first_popup"), 10) || null;
-  const last_popup = parseInt(urlParams.get("last_popup"), 10) || null;
+  const first_popup = parseInt(urlParams.get("first_popup"), 10) || 0;
+  const last_popup = parseInt(urlParams.get("last_popup"), 10) || Infinity;
   const run_no_popup = urlParams.get("run_no_popup") || 'yes';
   // Fetch origin relations if not specified
   if (!origins) {
