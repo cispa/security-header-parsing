@@ -47,6 +47,7 @@ def calc_repeat():
             except KeyError:
                 d = set()
             # TODO: for mobile browsers the first_popup, last_popup, run_no_popup has to be added again?
+            # TODO: add timeout again (maybe a higher one?)
             d.add(re.sub("browser_id=(\d+)", f"browser_id={browser_id}", clean_url))
             to_repeat[browser_id] = d
     with open("repeat.json", "w") as f:
