@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>URL Rotator</title>
+</head>
+<body>
+	<script>
+		var myWindow;
+
+		let urls = $$$URLS$$$;	
+		
+		let counter = 0;
+		let openWindow;
+
+		function openWin(url) {
+			openWindow = window.open(url, "_blank");
+		}
+
+		function closeWin(){
+			openWindow.close();
+		}
+
+		let int = setInterval(function(){
+			if(openWindow) closeWin();
+			openWin(urls[counter]);
+			counter++;
+
+			if (counter >= urls.length) clearInterval(int)
+		}, $$$TIMEOUT$$$)
+	</script>
+</body>
+</html>
