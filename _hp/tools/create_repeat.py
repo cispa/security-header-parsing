@@ -11,6 +11,8 @@ from analysis.utils import get_data, Config
 # However this should not matter too much as test results should be stable (see stability analysis below)
 # Question: how to increase the TIMEOUT in these reruns to make the chances of additional time outs as low as possible?
 
+# In total 189*2=378 URLs to visit exist for the basic mode!
+
 def calc_repeat():
     # Load all data
     initial_data = """
@@ -19,8 +21,10 @@ def calc_repeat():
     "Browser".name, "Browser".version, "Browser".headless_mode, "Browser".os, "Browser".automation_mode, "Browser".add_info
     FROM "Result"
     JOIN "Response" ON "Result".response_id = "Response".id JOIN "Browser" ON "Result".browser_id = "Browser".id
-    WHERE "Browser".name != 'Unknown' and "Response".resp_type != 'debug';
+    WHERE "Browser".name != 'Unknown' and "Response".resp_type != 'debug'
+    and "Browser".id not in (4, 28, 30);
     """
+    # 4 ucmobile (Android), 28 opera (iOS), 30 safari (iOS) currently not working
     df = get_data(Config(), initial_data)
     
     def clean_url(url):

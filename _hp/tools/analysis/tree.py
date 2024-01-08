@@ -12,7 +12,6 @@ import shutil
 from anytree import AnyNode, RenderTree
 from anytree.exporter import JsonExporter
 
-from datetime import datetime
 
 import warnings
 warnings.filterwarnings("ignore", "Dropping bad") # Ignore the warning that some columns are constant (they will just be ignored)
@@ -20,7 +19,6 @@ warnings.filterwarnings("ignore", "Sample rate") # Ignore that we do not have a 
 
 
 h2o_jar = "helpers/h2o-3.44.0.2/h2o.jar"
-base_dir = f"trees/{datetime.today().strftime('%Y-%m-%dT%H:%M')}" 
 
 
 config = {
@@ -55,7 +53,7 @@ def create_tree(hf, test_property, prediction_properties):
 
     return tree_model
 
-def convert_tree(tree_model, tree_name, tree_id=0):
+def convert_tree(tree_model, tree_name, tree_id=0, base_dir=None):
     """Converts a tree to a mojo, dot and png and save everything."""
     mojo_path = f"{base_dir}/mojo/{tree_name}.mojo"
     dot_path = f"{base_dir}/dot/{tree_name}.gv"
@@ -86,7 +84,7 @@ def add_childs(parent, node):
     else:
         AnyNode(path=f"{parent.split}:{right_split}", pred=right_child.prediction, parent=parent)
 
-def convert_anytree(tree_model, tree_name, df):
+def convert_anytree(tree_model, tree_name, df, base_dir):
     """Convert h2o tree to anytree."""
     vals = json.loads(df["outcome_str"].value_counts().to_frame().reset_index().rename(columns={"outcome_str": "outcome"}).to_json(orient="index"))
     path = f"{base_dir}/obs/{tree_name}.json"
@@ -108,7 +106,7 @@ def convert_anytree(tree_model, tree_name, df):
         except h2o.exceptions.H2OResponseError:
             pass
 
-def create_tree_dirs():
+def create_tree_dirs(base_dir):
     """Create the dirs for the decision trees if not existing already."""
     Path(f"{base_dir}/mojo/").mkdir(parents=True, exist_ok=True)
     Path(f"{base_dir}/dot/").mkdir(parents=True, exist_ok=True)
@@ -122,7 +120,7 @@ def create_tree_dirs():
         json.dump(config, f)
 
 
-def create_trees_chefboost(data, name):
+def create_trees_chefboost(data, name, base_dir):
     data["raw_header"] = data["raw_header"].apply(lambda x: x.replace("'", ""))
     data["outcome_str"] = data["outcome_str"].apply(lambda x: x.replace("'", ""))
     for algo in ["ID3", "C4.5", "CART", "CHAID"]:
@@ -130,9 +128,9 @@ def create_trees_chefboost(data, name):
         model = chef.fit(data, config = config, target_label = 'outcome_str')
         shutil.move("outputs/rules/rules.py", f"{base_dir}/py/{name}_{algo}.py")
 
-def make_tree(df, prediction_properties, test_name):
+def make_tree(df, prediction_properties, test_name, base_dir):
     h2o.connect()
-    create_tree_dirs()
+    create_tree_dirs(base_dir)
     tree_name = f"{test_name}"
     if len(df) < 20:
         config["nfolds"] = 0
@@ -144,7 +142,7 @@ def make_tree(df, prediction_properties, test_name):
     df = df.astype(str)
 
     # Quite slow and not very helpful?
-    # create_trees_chefboost(df, test_name)
+    # create_trees_chefboost(df, test_name, base_dir)
 
     df = df.astype("category")
     df["outcome_str"] = df["outcome_str"].apply(replace_string)
@@ -152,8 +150,8 @@ def make_tree(df, prediction_properties, test_name):
     hf = h2o.H2OFrame(df, column_types=["enum" for _ in range(num_columns)])
 
     tree_model = create_tree(hf, "outcome_str", prediction_properties)
-    img_path = convert_tree(tree_model, tree_name)
-    convert_anytree(tree_model, tree_name, df)
+    img_path = convert_tree(tree_model, tree_name, tree_id=0, base_dir=base_dir)
+    convert_anytree(tree_model, tree_name, df, base_dir)
     
     return tree_model
 
