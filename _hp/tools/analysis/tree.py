@@ -132,7 +132,7 @@ def make_tree(df, prediction_properties, test_name, base_dir):
     h2o.connect()
     create_tree_dirs(base_dir)
     tree_name = f"{test_name}"
-    if len(df) < 20:
+    if len(df) < 30:
         config["nfolds"] = 0
     else:
         config["nfolds"] = 10
