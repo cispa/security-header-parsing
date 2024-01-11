@@ -357,6 +357,8 @@ header_list = [[(header_name, "*")], [],
                [(header_name, f"{v1}, {v2}, {v3}, {v4}, {v5}, {v6}, {v7}")],
                [(header_name, f"abc, {v1}")]
             ]
+# TODO
+# [["Strict-Transport-Security", "max-age=20"], ["Strict-Transport-Security", "max-age=20; includeSubDomains"], ["Strict-Transport-Security", "includeSubDomains"], ["Strict-Transport-Security", ""], ["Strict-Transport-Security", "max-age=20; includeSubDomains; preload"], ["Strict-Transport-Security", "max-age=0"], ["Strict-Transport-Security", "max-age=-5"]]
 create_responses(header_list, label, resp_type="basic")
 # Some basic headers with redirect
 header_list = [[(header_name, v1), redirect_empty], [(header_name, v2), redirect_empty]]
