@@ -8,7 +8,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
 
  (function (global_scope)
  {
-     // default timeout is 10 seconds, test can override if needed
+     // default timeout is 5 seconds, test can override if needed
      var settings = {
          output: true,
          harness_timeout:{

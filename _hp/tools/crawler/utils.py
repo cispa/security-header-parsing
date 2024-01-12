@@ -27,8 +27,8 @@ BROWSER_START_TIMEOUT = 1
 # Time to wait for the final request to finish
 FINAL_REQ_TIMEOUT = 1
 
-# TODO: in desktop_selenium we currently have a max_page_load of 2xTIMEOUT and wait for a maximum of TIMEOUT after the page is loaded; we can't replicate this behavior in mobile?
-# Also we finish early when we see the #finished div in the page
+# Note: in desktop_selenium we currently have a max_page_load of 2xTIMEOUT and wait for a maximum of TIMEOUT after the page is loaded; we can't replicate this behavior in mobile?
+# Also we finish early when we see the #finished div in the page with Selenium which we cannot do on mobile
 TIMEOUT = BROWSER_START_TIMEOUT + GLOBAL_TEST_TIMEOUT + FINAL_REQ_TIMEOUT
 
 
