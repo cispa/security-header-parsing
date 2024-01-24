@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 
 from sqlalchemy.orm import mapped_column, Mapped, declarative_base, relationship, sessionmaker
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, UniqueConstraint, Enum, create_engine
+from sqlalchemy import Column, LargeBinary, String, Integer, ForeignKey, DateTime, UniqueConstraint, Enum, create_engine
 from sqlalchemy.dialects.postgresql import JSONB
 
 
@@ -84,7 +84,7 @@ class Response(BaseModel):
     __tablename__ = 'Response'
     id = Column(Integer, primary_key=True)
     # Raw header information as JSON: [("X-Test", "PASS"), ("Content-Type", "text/plain")]
-    raw_header = Column(JSONB)
+    raw_header = Column(LargeBinary)
     # The status code WPT should use
     status_code = Column(Integer, default=200)
     # Additional information about a response
@@ -102,6 +102,7 @@ class Response(BaseModel):
         UniqueConstraint('raw_header', 'status_code', 'label',
                          'resp_type', name='uq_response'),
     )
+
 
 # All the above tables get created before we run the tests
 # Only the result table below is filled during the experiment
@@ -174,6 +175,6 @@ if __name__ == "__main__":
                              os="Unknown", headless_mode="real", automation_mode="manual")
         t = get_or_create(session, TestCase, feature_group="Unknown",
                                test_file="Unknown", test_name="Unknown")
-        r = get_or_create(session, Response, raw_header=[("X-Frame-Options", "SAMEORIGIN"), ("Content-Type",
-                               "text/html")], status_code=200, label="Unknown", resp_type="debug")
+        r = get_or_create(session, Response, raw_header=json.dumps([("X-Frame-Options", "SAMEORIGIN"), ("Content-Type",
+                               "text/html")]).encode("utf-8"), status_code=200, label="Unknown", resp_type="debug")
         print(b, t, r)

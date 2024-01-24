@@ -1,3 +1,4 @@
+import json
 from wptserve.handlers import handler
 from _hp.tools.models import Response, Session
 from functools import lru_cache
@@ -10,6 +11,7 @@ def get_response(resp_id):
     with Session() as session:
         try:
             response = session.query(Response).filter_by(id=resp_id).first()
+            response.raw_header = json.loads(response.raw_header.decode("utf-8"))
             print("Header:", response.raw_header, os.getpid(),
                   threading.current_thread().ident)
         except Exception as e:

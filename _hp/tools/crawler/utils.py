@@ -41,7 +41,15 @@ HSTS_DEACTIVATE = f"https://{base_host}/_hp/common/empty.html?pipe=header(strict
 # [(test_file_name, label_name, number_of_response_ids)]
 # Comment: Num tests per resp_id: <basic/debug>, parsing (for one base URL; x2 as most tests are loaded from both HTTP and HTTPS)
 test_info = [
+    # Only for basic tests!
     ("fetch-cors.sub.html", "CORS", 1, 0, 0),  # Tests: 32 (8*4), 4
+    # Only for parsing tests!
+    ("fetch-cors.sub.html", "CORS-ACAO", 1, 0, 0),  # Tests: 32 (8*4), 4
+    ("fetch-cors.sub.html", "CORS-ACAC", 1, 0, 0),  # Tests: 32 (8*4), 4
+    ("fetch-cors.sub.html", "CORS-ACAM", 1, 0, 0),  # Tests: 32 (8*4), 4
+    ("fetch-cors.sub.html", "CORS-ACAH", 1, 0, 0),  # Tests: 32 (8*4), 4
+    ("fetch-cors.sub.html", "CORS-ACEH", 1, 0, 0),  # Tests: 32 (8*4), 4
+    # All tests!
     ("framing.sub.html", "XFO", 1, 0, 0),  # Tests:  72 (8*9), 2
     ("framing.sub.html", "CSP-FA", 1, 0, 0),  # Tests:  72 (8*9), 2
     ("framing.sub.html", "CSPvsXFO", 1, 0, 0),  # Tests:  72 (8*9), 2
@@ -65,6 +73,11 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000):
         num_popups = popup_parsing if resp_type == "parsing" else popup_basic
         if "upgrade" in url and scheme == "https":
             continue
+        if label.startswith("CORS"):
+            if label != "CORS" and resp_type != "parsing":
+                continue
+            if label == "CORS" and resp_type == "parsing":
+                continue
         else:
             for first_id, last_id in get_resp_ids(label, resp_type, num_resp_ids):
                 # If there are more popups than max_popups add URLs for each popup count, only add run_no_popups to the first one

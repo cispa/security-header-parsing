@@ -1,6 +1,7 @@
 from models import Response, Session
 
 from crawler.utils import get_or_create
+import json
 
 # Common area
 # Redirect to empty response, has ACAO *, other than that no special headers!
@@ -23,7 +24,7 @@ self_childs = "*.sub.headers.websec.saarland"
 def create_responses(header_list, label, status_code=200, resp_type="debug"):
     with Session() as session:
         for header in header_list:
-         r, created = get_or_create(session, Response, raw_header=header, status_code=status_code, label=label, resp_type=resp_type)
+         r, created = get_or_create(session, Response, raw_header=json.dumps(header).encode("utf-8"), status_code=status_code, label=label, resp_type=resp_type)
          if created:
             print(r)
 
