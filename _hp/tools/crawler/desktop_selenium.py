@@ -1,5 +1,7 @@
 from multiprocessing import Pool
 import sys
+
+from tqdm import tqdm
 from utils import TIMEOUT, get_tests, HSTS_DEACTIVATE
 from create_browsers import get_or_create_browser
 from selenium import webdriver
@@ -11,11 +13,13 @@ import traceback
 import datetime
 import argparse
 import json
+import multiprocessing
+from pathlib import Path
 
 
 class Tee(object):
     def __init__(self, filename, name):
-        self.file = open(f"{filename}-{name}.log", 'a')
+        self.file = open(f"{filename}.log", 'a')
         self.stdout = sys.stdout
         self.name = name
 
@@ -33,7 +37,7 @@ class Tee(object):
         if data != "\n" and data != " " and data != "":
             data = f"{datetime.datetime.now()}-{self.name}: {data}"
         self.file.write(data)
-        self.stdout.write(data)
+        # self.stdout.write(data)
 
     def flush(self):
         self.file.flush()
@@ -73,77 +77,71 @@ def get_browser(browser: str, version: str, binary_location=None, arguments=None
     return driver(options=options, service=service)
 
 
-def main(browser_name, browser_version, binary_location, arguments, browser_id, resp_type, run_mode, debug_input):
-    
-    for scheme in ["http", "https"]:
-        if run_mode == "run_all":
-            test_urls = get_tests(
-                resp_type=resp_type, browser_id=browser_id, scheme=scheme)
-        elif run_mode == "repeat":
-            with open("../repeat.json", "r") as f:
-                test_urls = json.load(f).get(str(browser_id), [])
-                test_urls = list(filter(lambda s: s.startswith(f"{scheme}://"), test_urls))
-            if not len(test_urls):
-                continue
-        else:
-            raise Exception(f"Unknown run mode: {run_mode}")
-        
-        driver = get_browser(browser_name, browser_version,
-                             binary_location, arguments)
-        # Max page load timeout
-        driver.set_page_load_timeout(TIMEOUT*2)
-        print(f"Start {browser_name} ({browser_version}) ({scheme})")
-        print(driver.capabilities)
-        # Store the ID of the original window
-        original_window = driver.current_window_handle
-        try:
-            for url in test_urls:
-                try:
-                    # Create a new window for each test/URL; another option would be to restart the driver for each test but that is even slower
-                    driver.switch_to.new_window('window')
-                    new_window = driver.current_window_handle
-                    if "upgrade" in url:
-                        driver.get(HSTS_DEACTIVATE)
-                    driver.get(url)
-                    # print(driver.title)
-                    # Switch back to the original window (if the test opens new ones)
-                    # Only required on firefox; Brave does not like it
-                    try:
-                        if browser_name == "firefox":
-                            driver.switch_to.window(new_window)
-                    except Exception as e:
-                        print("Switch failed:", e)
-                    # Wait until the results are saved on the server (after finishing fetch request, a div with id "finished" is added to the DOM)
-                    WebDriverWait(driver, TIMEOUT).until(
-                        EC.presence_of_element_located((By.ID, "finished")))
-                except Exception as e:
-                    print("Exception!", e)
-                    print(driver.current_url)
-                    print(url)
-                finally:
-                    # Option to manualy debug
-                    if debug_input:
-                        input("Next")
-                    # Close the current window
-                    driver.close()
-                    # Switch back to the old tab or window
-                    driver.switch_to.window(original_window)
-        except Exception as e:
-            print("Major Exception occured!", e)
-        finally:
+def run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls):    
+    driver = get_browser(browser_name, browser_version,
+                            binary_location, arguments)
+    # Max page load timeout
+    driver.set_page_load_timeout(TIMEOUT*2)
+    print(f"Start {browser_name} ({browser_version})")
+    print(driver.capabilities)
+    # Store the ID of the original window
+    original_window = driver.current_window_handle
+    try:
+        for url in test_urls:
             try:
-                # Quit will fail with the additional close in safari?
-                if browser_name != "safari":
-                    driver.close()
-                driver.quit()
+                # Create a new window for each test/URL; another option would be to restart the driver for each test but that is even slower
+                driver.switch_to.new_window('window')
+                new_window = driver.current_window_handle
+                if "upgrade" in url:
+                    driver.get(HSTS_DEACTIVATE)
+                driver.get(url)
+                # print(driver.title)
+                # Switch back to the original window (if the test opens new ones)
+                # Only required on firefox; Brave does not like it
+                try:
+                    if browser_name == "firefox":
+                        driver.switch_to.window(new_window)
+                except Exception as e:
+                    print("Switch failed:", e)
+                # Wait until the results are saved on the server (after finishing fetch request, a div with id "finished" is added to the DOM)
+                WebDriverWait(driver, TIMEOUT).until(
+                    EC.presence_of_element_located((By.ID, "finished")))
             except Exception as e:
-                print(f"Failed quitting the browser", e)
-            print(f"Finish {browser_name} ({browser_version}) ({scheme})")
+                print("Exception!", e)
+                print(driver.current_url)
+                print(url)
+            finally:
+                # Option to manualy debug
+                if debug_input:
+                    input("Next")
+                # Close the current window
+                driver.close()
+                # Switch back to the old tab or window
+                driver.switch_to.window(original_window)
+    except Exception as e:
+        print("Major Exception occured!", e)
+    finally:
+        try:
+            # Closing twice is necessary for brave; Safari crashes when closing twice
+            if browser_name != "safari":
+                driver.close()
+            driver.quit()
+        except Exception as e:
+            print(f"Failed quitting the browser", e)
+        print(f"Finish {browser_name} ({browser_version})")
 
 
-def worker_function(t, resp_type, run_mode, debug_input):
-    main_result = main(*t, resp_type, run_mode, debug_input)
-    return main_result
+def worker_function(args):
+    name = multiprocessing.current_process().name
+    num = int(name.rsplit("-", maxsplit=1)[1]) - 1
+    log_path, browser_name, browser_version, binary_location, arguments, debug_input, test_urls = args
+    with Tee(f"{log_path}{browser_name}-{browser_version}", num):
+        run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls)
+
+
+def setup_process(log_path):
+    pass
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run tests on Desktop Selenium.")
@@ -155,9 +153,11 @@ if __name__ == '__main__':
                         help="Toggle on debugging for input(Next) during the run.")
     parser.add_argument("--run_mode", choices=["run_all", "repeat"], default="run_all",
                         help="Specify the mode (default: run_all)")
+    parser.add_argument("--num_browsers", default=40, type=int, help="How many browsers to start in parallel (max).")
+    parser.add_argument("--max_urls_until_restart", default=100, type=int, help="Maximum number of URLs until the browser is restated.")
     args = parser.parse_args()
 
-    # (browser_name, version, binary_location (e.g., for brave), arguments (e.g, for headless), browser_id)
+    # (browser_name, version, binary_location (e.g., for brave), arguments (e.g, for headless), browser_id
     if sys.platform == "darwin":
         config = [
             ("chrome", "120", None, None, get_or_create_browser("chrome", "120", "macOS 14.2.1", "real", "selenium", "")),
@@ -190,9 +190,9 @@ if __name__ == '__main__':
             # CD into the folder and download *.linux-amd64.zip from https://github.com/brave/brave-browser/releases and unzip
             # The ZIP versions seem to not auto update and one can install as many as wanted (only on linux though?)
             # v1.59.120 (Chromium 118): wget https://github.com/brave/brave-browser/releases/download/v1.59.120/brave-browser-1.59.120-linux-amd64.zip
-            # Note: if you specify the wrong chromium version, selenium will ignore the binary location and download CFT instead??
-            ("brave", "118", "/home/ubuntu/brave-versions/v1.59.120/brave-browser",
-             ["--headless=new"], get_or_create_browser("brave", "1.59.120 (118.0.5993.88)", "Ubuntu 22.04", "headless-new", "selenium", "")),
+            # Note: if you specify the wrong chromium version for brave, selenium will ignore the binary location and download CFT instead??
+            #("brave", "118", "/home/ubuntu/brave-versions/v1.59.120/brave-browser",
+            # ["--headless=new"], get_or_create_browser("brave", "1.59.120 (118.0.5993.88)", "Ubuntu 22.04", "headless-new", "selenium", "")),
             # v1.60.114 (Chromium 119): wget https://github.com/brave/brave-browser/releases/download/v1.60.114/brave-browser-1.60.114-linux-amd64.zip
             ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser",
              ["--headless=new"], get_or_create_browser("brave", "1.60.114 (119.0.6045.124)", "Ubuntu 22.04", "headless-new", "selenium", "")),
@@ -200,8 +200,8 @@ if __name__ == '__main__':
             ("chrome", "119", None, None, get_or_create_browser("chrome", "119", "Ubuntu 22.04", "xvfb", "selenium", "")),
             ("firefox", "119", None, None, get_or_create_browser("firefox", "119", "Ubuntu 22.04", "xvfb", "selenium", "")),
             ("edge", "119", None, None, get_or_create_browser("edge", "119", "Ubuntu 22.04", "xvfb", "selenium", "")),
-            ("brave", "118", "/home/ubuntu/brave-versions/v1.59.120/brave-browser", None,
-             get_or_create_browser("brave", "1.59.120 (118.0.5993.88)", "Ubuntu 22.04", "xvfb", "selenium", "")),
+            #("brave", "118", "/home/ubuntu/brave-versions/v1.59.120/brave-browser", None,
+            # get_or_create_browser("brave", "1.59.120 (118.0.5993.88)", "Ubuntu 22.04", "xvfb", "selenium", "")),
             ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None,
              get_or_create_browser("brave", "1.60.114 (119.0.6045.124)", "Ubuntu 22.04", "xvfb", "selenium", "")),
         ]
@@ -213,13 +213,33 @@ if __name__ == '__main__':
         ]
 
     now = f"{datetime.datetime.now()}"
-    print(config)
-    pool = Pool(processes=20)
-    with Tee("desktop-selenium", now) as f:
-        args = (args.resp_type, args.run_mode, args.debug_input)
-        results = [pool.apply_async(worker_function, (t, *args)) for t in config]
-    pool.close()
-    pool.join()
+    log_path = f"logs/desktop-selenium-{now}/"
+    Path(log_path).mkdir(parents=True, exist_ok=True)
+
+    all_args = []
+    for scheme in ["http", "https"]:
+        for browser_name, browser_version, binary_location, arguments, browser_id in config:
+            if args.run_mode == "run_all":
+                test_urls = get_tests(
+                    resp_type=args.resp_type, browser_id=browser_id, scheme=scheme)
+            elif args.run_mode == "repeat":
+                with open("../repeat.json", "r") as f:
+                    test_urls = json.load(f).get(str(browser_id), [])
+                    test_urls = list(filter(lambda s: s.startswith(f"{scheme}://"), test_urls))
+                if not len(test_urls):
+                    continue
+            else:
+                raise Exception(f"Unknown run mode: {args.run_mode}")
+        
+            url_chunks = [test_urls[i:i + args.max_urls_until_restart] for i in range(0, len(test_urls), args.max_urls_until_restart)]
+            for url_chunk in url_chunks:
+                all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, url_chunk))
+
+
+    with Pool(processes=args.num_browsers, initializer=setup_process, initargs=(log_path,)) as p:
+        r = list(tqdm(p.imap_unordered(worker_function, all_args), total=len(all_args), desc="Header Parsing Progress (URL Chunks)", leave=True, position=0))
+        print(r)
+
     # Headfull (linux):
     # Xvfb :99 -screen 0 1920x1080x24 &
     # x11vnc -display :99 -bg -shared -forever -passwd abc -xkb -rfbport 5900

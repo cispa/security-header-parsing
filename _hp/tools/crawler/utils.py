@@ -38,7 +38,8 @@ base_host = "sub.headers.websec.saarland"
 base_dir = "_hp/tests"
 HSTS_DEACTIVATE = f"https://{base_host}/_hp/common/empty.html?pipe=header(strict-transport-security,max-age=0)|status(200)"
 
-# [(test_file_name, label_name, number_of_response_ids)]
+# [(test_file_name, label_name, number_of_response_ids, num_popup_parsing, num_popup_basic)]
+# TODO: maybe increate number_of_response_ids for some tests to increase the speed?
 # Comment: Num tests per resp_id: <basic/debug>, parsing (for one base URL; x2 as most tests are loaded from both HTTP and HTTPS)
 test_info = [
     # Only for basic tests!
@@ -71,30 +72,31 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000):
     test_urls = []
     for url, label, num_resp_ids, popup_parsing, popup_basic in test_info:
         num_popups = popup_parsing if resp_type == "parsing" else popup_basic
+        # HSTS test are not executed for HTTPS
         if "upgrade" in url and scheme == "https":
             continue
+        # CORS tests are different for parsing/basic mode
         if label.startswith("CORS"):
             if label != "CORS" and resp_type != "parsing":
                 continue
             if label == "CORS" and resp_type == "parsing":
                 continue
-        else:
-            for first_id, last_id in get_resp_ids(label, resp_type, num_resp_ids):
-                # If there are more popups than max_popups add URLs for each popup count, only add run_no_popups to the first one
-                if num_popups > max_popups:
-                    buckets = [list(range(start, min(start + max_popups, num_popups + 1))) for start in range(1, num_popups + 1, max_popups)]
-                    run_no_popup = "yes"
-                    for bucket in buckets:
-                        first_popup = bucket[0]
-                        last_popup = bucket[-1]
-                        test_urls.append(
-                            f"{scheme}://{base_host}/{base_dir}/{url}?timeout={GLOBAL_TEST_TIMEOUT}&resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}&first_popup={first_popup}&last_popup={last_popup}&run_no_popup={run_no_popup}")
-                        run_no_popup = "no"
-                    print(buckets)
-                # Otherwise run all tests
-                else:
+        for first_id, last_id in get_resp_ids(label, resp_type, num_resp_ids):
+            # If there are more popups than max_popups add URLs for each popup count, only add run_no_popups to the first one
+            if num_popups > max_popups:
+                buckets = [list(range(start, min(start + max_popups, num_popups + 1))) for start in range(1, num_popups + 1, max_popups)]
+                run_no_popup = "yes"
+                for bucket in buckets:
+                    first_popup = bucket[0]
+                    last_popup = bucket[-1]
                     test_urls.append(
-                        f"{scheme}://{base_host}/{base_dir}/{url}?timeout={GLOBAL_TEST_TIMEOUT}&resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}")
+                        f"{scheme}://{base_host}/{base_dir}/{url}?timeout={GLOBAL_TEST_TIMEOUT}&resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}&first_popup={first_popup}&last_popup={last_popup}&run_no_popup={run_no_popup}")
+                    run_no_popup = "no"
+                print(buckets)
+            # Otherwise run all tests
+            else:
+                test_urls.append(
+                    f"{scheme}://{base_host}/{base_dir}/{url}?timeout={GLOBAL_TEST_TIMEOUT}&resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}")
     return test_urls
 
 
@@ -121,7 +123,6 @@ def get_or_create(session, model, defaults=None, **kwargs):
 def get_or_create_browser(name, version, os, headless_mode, automation_mode, add_info):
     with Session() as session:
         try:
-            # Using the get_or_create function
             browser, created = get_or_create(
                 session,
                 Browser,
