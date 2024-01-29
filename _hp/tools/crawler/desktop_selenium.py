@@ -114,7 +114,7 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
 
     finally:
         # Closing the browser should take less than 30s
-        with CustomTimeout(30):
+        with CustomErrorTimeout(30):
             try:
                 # Closing twice is necessary for brave; Safari crashes when closing twice, Firefox has some timeout issues here
                 if browser_name not in ["safari", "firefox"]:
