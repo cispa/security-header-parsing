@@ -8,14 +8,21 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.service import Service
 import traceback
 import datetime
 import argparse
 import json
 import multiprocessing
 from pathlib import Path
+from Timeout import SignalTimeout
 
+class CustomTimeout(BaseException):
+    pass
+
+class CustomErrorTimeout(SignalTimeout):
+    def timeout_handler(self, signum, frame) -> None:
+        """Handle timeout (SIGALRM) signal"""
+        raise CustomTimeout
 
 class Tee(object):
     def __init__(self, filename, name):
@@ -73,20 +80,22 @@ def get_browser(browser: str, version: str, binary_location=None, arguments=None
         for argument in arguments:
             # ("--headless=new") # Possible to add arguments such as headless
             options.add_argument(argument)
-    print(options.to_capabilities())
+    # print(options.to_capabilities())
     return driver(options=options, service=service)
 
 
-def run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls):    
-    driver = get_browser(browser_name, browser_version,
-                            binary_location, arguments)
-    # Max page load timeout
-    driver.set_page_load_timeout(TIMEOUT*2)
-    print(f"Start {browser_name} ({browser_version})")
-    print(driver.capabilities)
-    # Store the ID of the original window
-    original_window = driver.current_window_handle
+def run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls):  
     try:
+        start = datetime.datetime.now()  
+        driver = get_browser(browser_name, browser_version,
+                            binary_location, arguments)
+        # Max page load timeout
+        driver.set_page_load_timeout(TIMEOUT*2)
+        print(f"Start {browser_name} ({browser_version})")
+        # print(driver.capabilities)
+        # Store the ID of the original window
+        original_window = driver.current_window_handle
+        url = None
         for url in test_urls:
             try:
                 # Create a new window for each test/URL; another option would be to restart the driver for each test but that is even slower
@@ -102,14 +111,12 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
                     if browser_name == "firefox":
                         driver.switch_to.window(new_window)
                 except Exception as e:
-                    print("Switch failed:", e)
+                    print(f"Switch failed {type(e)}\n{e}")
                 # Wait until the results are saved on the server (after finishing fetch request, a div with id "finished" is added to the DOM)
                 WebDriverWait(driver, TIMEOUT).until(
                     EC.presence_of_element_located((By.ID, "finished")))
             except Exception as e:
-                print("Exception!", e)
-                print(driver.current_url)
-                print(url)
+                print(f"Exception occured: driver.curent_url: {driver.current_url} URL: {url}, Exception: {type(e)}\n{e}")
             finally:
                 # Option to manualy debug
                 if debug_input:
@@ -119,7 +126,9 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
                 # Switch back to the old tab or window
                 driver.switch_to.window(original_window)
     except Exception as e:
-        print("Major Exception occured!", e)
+        print(f"Major Exception occured! Last URL: {url} Exception: {type(e)}\n{e}")
+    except CustomTimeout as e:
+        print(f"CustomTimeout occured! Last URL: {url}")
     finally:
         try:
             # Closing twice is necessary for brave; Safari crashes when closing twice
@@ -127,16 +136,18 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
                 driver.close()
             driver.quit()
         except Exception as e:
-            print(f"Failed quitting the browser", e)
-        print(f"Finish {browser_name} ({browser_version})")
+            print(f"Failed quitting the browser:  {type(e)}\n{e}")
+
+        print(f"Finish {browser_name} ({browser_version}). Took: {datetime.datetime.now() - start}")
 
 
 def worker_function(args):
     name = multiprocessing.current_process().name
     num = int(name.rsplit("-", maxsplit=1)[1]) - 1
-    log_path, browser_name, browser_version, binary_location, arguments, debug_input, test_urls = args
+    log_path, browser_name, browser_version, binary_location, arguments, debug_input, test_urls, timeout = args
     with Tee(f"{log_path}{browser_name}-{browser_version}", num):
-        run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls)
+        with CustomErrorTimeout(timeout):
+            run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls)
 
 
 def setup_process(log_path):
@@ -153,8 +164,9 @@ if __name__ == '__main__':
                         help="Toggle on debugging for input(Next) during the run.")
     parser.add_argument("--run_mode", choices=["run_all", "repeat"], default="run_all",
                         help="Specify the mode (default: run_all)")
-    parser.add_argument("--num_browsers", default=40, type=int, help="How many browsers to start in parallel (max).")
+    parser.add_argument("--num_browsers", default=80, type=int, help="How many browsers to start in parallel (max).")
     parser.add_argument("--max_urls_until_restart", default=100, type=int, help="Maximum number of URLs until the browser is restated.")
+    parser.add_argument("--timeout_task", default=1000, type=int, help="Timeout for a single task (max_urls_until_restart URLs in one browser) in seconds.")
     args = parser.parse_args()
 
     # (browser_name, version, binary_location (e.g., for brave), arguments (e.g, for headless), browser_id
@@ -233,7 +245,7 @@ if __name__ == '__main__':
         
             url_chunks = [test_urls[i:i + args.max_urls_until_restart] for i in range(0, len(test_urls), args.max_urls_until_restart)]
             for url_chunk in url_chunks:
-                all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, url_chunk))
+                all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, url_chunk, args.timeout_task))
 
 
     with Pool(processes=args.num_browsers, initializer=setup_process, initargs=(log_path,)) as p:
