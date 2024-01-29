@@ -6,7 +6,7 @@ import os
 import threading
 
 
-@lru_cache(maxsize=5000)
+@lru_cache(maxsize=500000)
 def get_response(resp_id):
     with Session() as session:
         try:
