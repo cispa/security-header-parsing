@@ -472,6 +472,20 @@ files = [
 ]
 
 [[package]]
+name = "ecs-logging"
+version = "2.1.0"
+description = "Logging formatters for ECS (Elastic Common Schema) in Python"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "ecs_logging-2.1.0-py3-none-any.whl", hash = "sha256:02581a56b7fc6cbae2de121a4a398ba3bd73d7bb2d67cd029a8a03df0b144098"},
+    {file = "ecs_logging-2.1.0.tar.gz", hash = "sha256:222cc158d4331157d128bc903629010f7724eab8ba4b642efbffd0cb482f4cde"},
+]
+
+[package.extras]
+develop = ["elastic-apm", "mock", "pytest", "pytest-cov", "structlog"]
+
+[[package]]
 name = "executing"
 version = "2.0.1"
 description = "Get the currently executing AST node of a frame, and other information"
@@ -2672,4 +2686,4 @@ h11 = ">=0.9.0,<1"
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11"
-content-hash = "c0a6ccc0a49448fec5083d6b36080a7b7a8b4abe7e1ea4caf97ac7b19af0cba5"
+content-hash = "9798ef4fb78c66b7f371397bc9752dafd1880c2d886829d1c88428e43aa83038"

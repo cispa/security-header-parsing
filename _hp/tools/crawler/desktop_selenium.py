@@ -15,6 +15,8 @@ import json
 import multiprocessing
 from pathlib import Path
 from Timeout import SignalTimeout
+import logging
+import ecs_logging
 
 class CustomTimeout(BaseException):
     pass
@@ -23,32 +25,6 @@ class CustomErrorTimeout(SignalTimeout):
     def timeout_handler(self, signum, frame) -> None:
         """Handle timeout (SIGALRM) signal"""
         raise CustomTimeout
-
-class Tee(object):
-    def __init__(self, filename, name):
-        self.file = open(f"{filename}.log", 'a')
-        self.stdout = sys.stdout
-        self.name = name
-
-    def __enter__(self):
-        sys.stdout = self
-        return self.file
-
-    def __exit__(self, exc_type, exc_value, tb):
-        sys.stdout = self.stdout
-        if exc_type is not None:
-            self.file.write(traceback.format_exc())
-        self.file.close()
-
-    def write(self, data):
-        if data != "\n" and data != " " and data != "":
-            data = f"{datetime.datetime.now()}-{self.name}: {data}"
-        self.file.write(data)
-        # self.stdout.write(data)
-
-    def flush(self):
-        self.file.flush()
-        self.stdout.flush()
 
 
 def get_browser(browser: str, version: str, binary_location=None, arguments=None):
@@ -84,20 +60,25 @@ def get_browser(browser: str, version: str, binary_location=None, arguments=None
     return driver(options=options, service=service)
 
 
-def run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls):  
+def run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger: logging.Logger):  
     try:
+        url = None
+        all_urls = len(test_urls)
+        cur_url = 0
+        extra = {"browser": browser_name, "browser_version": browser_version, "binary_location": binary_location, "arguments": arguments}
+
         start = datetime.datetime.now()  
         driver = get_browser(browser_name, browser_version,
                             binary_location, arguments)
         # Max page load timeout
         driver.set_page_load_timeout(TIMEOUT*2)
-        print(f"Start {browser_name} ({browser_version})")
+        logger.info(f"Start {browser_name} ({browser_version})", extra=extra)
         # print(driver.capabilities)
         # Store the ID of the original window
         original_window = driver.current_window_handle
-        url = None
         for url in test_urls:
             try:
+                logger.debug(f"Attempting: {url}", extra=extra)
                 # Create a new window for each test/URL; another option would be to restart the driver for each test but that is even slower
                 driver.switch_to.new_window('window')
                 new_window = driver.current_window_handle
@@ -110,44 +91,59 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
                 try:
                     if browser_name == "firefox":
                         driver.switch_to.window(new_window)
-                except Exception as e:
-                    print(f"Switch failed {type(e)}\n{e}")
+                except Exception:
+                    logger.error("Switching browser window failed", exc_info=True, extra=extra)
                 # Wait until the results are saved on the server (after finishing fetch request, a div with id "finished" is added to the DOM)
                 WebDriverWait(driver, TIMEOUT).until(
                     EC.presence_of_element_located((By.ID, "finished")))
-            except Exception as e:
-                print(f"Exception occured: driver.curent_url: {driver.current_url} URL: {url}, Exception: {type(e)}\n{e}")
+                cur_url += 1
+            except Exception:
+                logger.error(f"Visiting: {url} driver.current_url {driver.current_url} failed", exc_info=True, extra=extra)
             finally:
-                # Option to manualy debug
+                # Option to manually debug
                 if debug_input:
                     input("Next")
                 # Close the current window
                 driver.close()
                 # Switch back to the old tab or window
                 driver.switch_to.window(original_window)
-    except Exception as e:
-        print(f"Major Exception occured! Last URL: {url} Exception: {type(e)}\n{e}")
-    except CustomTimeout as e:
-        print(f"CustomTimeout occured! Last URL: {url}")
-    finally:
-        try:
-            # Closing twice is necessary for brave; Safari crashes when closing twice
-            if browser_name != "safari":
-                driver.close()
-            driver.quit()
-        except Exception as e:
-            print(f"Failed quitting the browser:  {type(e)}\n{e}")
+    except Exception:
+        logger.error(f"Major Exeception occured! Visited {cur_url}/{all_urls}. Last URL: {url}", exc_info=True, extra=extra)
+    except CustomTimeout:
+        logger.error(f"CustomTimeout occured! Visited {cur_url}/{all_urls}. Last URL: {url}", exc_info=True, extra=extra)
 
-        print(f"Finish {browser_name} ({browser_version}). Took: {datetime.datetime.now() - start}")
+    finally:
+        # Closing the browser should take less than 30s
+        with CustomTimeout(30):
+            try:
+                # Closing twice is necessary for brave; Safari crashes when closing twice, Firefox has some timeout issues here
+                if browser_name not in ["safari", "firefox"]:
+                    driver.close()
+                driver.quit()
+            except CustomTimeout:
+                logger.error("CustomTimeout while closing the browser", exc_info=True, extra=extra)
+            except Exception as e:
+                logger.error("Exception while closing the browser", exc_info=True, extra=extra)
+            finally:
+                logger.info(f"Finish {browser_name} ({browser_version}). Took: {datetime.datetime.now() - start}", extra=extra)
 
 
 def worker_function(args):
-    name = multiprocessing.current_process().name
-    num = int(name.rsplit("-", maxsplit=1)[1]) - 1
     log_path, browser_name, browser_version, binary_location, arguments, debug_input, test_urls, timeout = args
-    with Tee(f"{log_path}{browser_name}-{browser_version}", num):
-        with CustomErrorTimeout(timeout):
-            run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls)
+    
+    log_filename = f"{log_path}-{browser_name}-{browser_version}.json"
+    file_handler = logging.FileHandler(log_filename)
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(ecs_logging.StdlibFormatter())
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(file_handler)
+
+    with CustomErrorTimeout(timeout):
+        try:
+            run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger)
+        except (CustomTimeout, Exception):
+            logger.error("Fatal outer exception!", exc_info=True)
 
 
 def setup_process(log_path):
@@ -225,7 +221,7 @@ if __name__ == '__main__':
         ]
 
     now = f"{datetime.datetime.now()}"
-    log_path = f"logs/desktop-selenium-{now}/"
+    log_path = f"logs/desktop-selenium/{now}"
     Path(log_path).mkdir(parents=True, exist_ok=True)
 
     all_args = []
