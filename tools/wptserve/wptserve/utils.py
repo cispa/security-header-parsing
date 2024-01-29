@@ -37,7 +37,11 @@ def isomorphic_encode(s: AnyStr) -> bytes:
         return s
 
     if isinstance(s, str):
-        return s.encode("iso-8859-1")
+        try:
+            return s.encode("iso-8859-1")
+        # We want to allow utf-8 in header names and values!
+        except UnicodeEncodeError:
+            return s.encode("utf-8", errors="surrogateescape")
 
     raise TypeError("Unexpected value (expecting string-like): %r" % s)
 
