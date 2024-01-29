@@ -133,10 +133,10 @@ def worker_function(args):
     
     log_filename = f"{log_path}-{browser_name}-{browser_version}.json"
     file_handler = logging.FileHandler(log_filename)
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(ecs_logging.StdlibFormatter())
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     logger.addHandler(file_handler)
 
     with CustomErrorTimeout(timeout):
