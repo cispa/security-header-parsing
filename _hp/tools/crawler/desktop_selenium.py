@@ -8,23 +8,57 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import traceback
 import datetime
 import argparse
 import json
-import multiprocessing
 from pathlib import Path
 from Timeout import SignalTimeout
 import logging
 import ecs_logging
+import psutil
+
 
 class CustomTimeout(BaseException):
     pass
+
 
 class CustomErrorTimeout(SignalTimeout):
     def timeout_handler(self, signum, frame) -> None:
         """Handle timeout (SIGALRM) signal"""
         raise CustomTimeout
+
+
+def get_child_processes(parent_pid):
+    try:
+        # Get the process by PID
+        parent_process = psutil.Process(parent_pid)
+
+        # Get all child processes
+        child_processes = parent_process.children(recursive=True)
+        child_processes.append(parent_process)
+        return child_processes
+    except psutil.NoSuchProcess:
+        return []
+    
+
+def kill_processes(pid_list):
+    for process in pid_list:
+        try:
+            process.terminate()
+        except psutil.NoSuchProcess:
+            pass
+    
+    try:
+        psutil.wait_procs(pid_list, timeout=5)
+    except psutil.NoSuchProcess:
+        pass
+
+    for process in pid_list:
+        try:
+            if process.is_running():
+                process.kill()
+        except psutil.NoSuchProcess:
+            pass
 
 
 def get_browser(browser: str, version: str, binary_location=None, arguments=None):
@@ -63,6 +97,7 @@ def get_browser(browser: str, version: str, binary_location=None, arguments=None
 def run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger: logging.Logger):  
     try:
         url = None
+        processes = []
         all_urls = len(test_urls)
         cur_url = 0
         extra = {"browser": browser_name, "browser_version": browser_version, "binary_location": binary_location, "arguments": arguments}
@@ -70,6 +105,7 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
         start = datetime.datetime.now()  
         driver = get_browser(browser_name, browser_version,
                             binary_location, arguments)
+        processes = get_child_processes(driver.service.process.pid)
         # Max page load timeout
         driver.set_page_load_timeout(TIMEOUT*2)
         logger.info(f"Start {browser_name} ({browser_version})", extra=extra)
@@ -126,6 +162,7 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
                 logger.error("Exception while closing the browser", exc_info=True, extra=extra)
             finally:
                 logger.info(f"Finish {browser_name} ({browser_version}). Took: {datetime.datetime.now() - start}", extra=extra)
+                return processes
 
 
 def worker_function(args):
@@ -136,15 +173,23 @@ def worker_function(args):
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(ecs_logging.StdlibFormatter())
     logger = logging.getLogger(__name__)
+    
     logger.setLevel(logging.INFO)
     logger.addHandler(file_handler)
 
     with CustomErrorTimeout(timeout):
+        processes = []
         try:
-            run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger)
+            processes = run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger)
         except (CustomTimeout, Exception):
             logger.error("Fatal outer exception!", exc_info=True)
-
+        finally:
+            # Sometimes driver.quit and similar do not work, thus we kill the processes explicitely once again
+            # Another approach would be to have a separate watchdog process to kill stale drivers + browsers
+            kill_processes(processes)
+    
+    # We only want to have one log handler per process
+    logger.removeHandler(file_handler)
 
 def setup_process(log_path):
     pass
@@ -160,7 +205,7 @@ if __name__ == '__main__':
                         help="Toggle on debugging for input(Next) during the run.")
     parser.add_argument("--run_mode", choices=["run_all", "repeat"], default="run_all",
                         help="Specify the mode (default: run_all)")
-    parser.add_argument("--num_browsers", default=80, type=int, help="How many browsers to start in parallel (max).")
+    parser.add_argument("--num_browsers", default=60, type=int, help="How many browsers to start in parallel (max).")
     parser.add_argument("--max_urls_until_restart", default=100, type=int, help="Maximum number of URLs until the browser is restated.")
     parser.add_argument("--timeout_task", default=1000, type=int, help="Timeout for a single task (max_urls_until_restart URLs in one browser) in seconds.")
     args = parser.parse_args()
