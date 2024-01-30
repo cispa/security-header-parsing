@@ -1,5 +1,7 @@
 from multiprocessing import Pool
+import multiprocessing
 import sys
+import time
 
 from tqdm import tqdm
 from utils import TIMEOUT, get_tests, HSTS_DEACTIVATE
@@ -101,14 +103,13 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
         all_urls = len(test_urls)
         cur_url = 0
         extra = {"browser": browser_name, "browser_version": browser_version, "binary_location": binary_location, "arguments": arguments}
-
+        logger.info(f"Start {browser_name} ({browser_version})", extra=extra)
         start = datetime.datetime.now()  
         driver = get_browser(browser_name, browser_version,
                             binary_location, arguments)
         processes = get_child_processes(driver.service.process.pid)
         # Max page load timeout
         driver.set_page_load_timeout(TIMEOUT*2)
-        logger.info(f"Start {browser_name} ({browser_version})", extra=extra)
         # print(driver.capabilities)
         # Store the ID of the original window
         original_window = driver.current_window_handle
@@ -173,7 +174,7 @@ def worker_function(args):
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(ecs_logging.StdlibFormatter())
     logger = logging.getLogger(__name__)
-    
+    logger.propagate = False
     logger.setLevel(logging.INFO)
     logger.addHandler(file_handler)
 
@@ -191,9 +192,27 @@ def worker_function(args):
     # We only want to have one log handler per process
     logger.removeHandler(file_handler)
 
-def setup_process(log_path):
-    pass
 
+def setup_process(log_path):
+    # Slowly start all processes, one new every second
+    name = multiprocessing.current_process().name
+    num = int(name.rsplit("-", maxsplit=1)[1]) - 1
+    time.sleep(num)  
+
+
+file_handler = logging.FileHandler(f"logs/desktop-selenium/{datetime.datetime.now().date().strftime('%Y-%m-%d')}_unraisable.log")
+file_handler.setFormatter(ecs_logging.StdlibFormatter())
+
+# Set up logging to a file with the specified level and handler
+logging.basicConfig(level=logging.ERROR, handlers=[file_handler])
+
+def unraisable_hook(unraisable):
+    # Log unraisable exceptions to a file
+    for item in unraisable:
+        logging.error("Unraisable exception", exc_info=item.exc_info)
+
+# Set the unraisable hook globally
+sys.unraisablehook = unraisable_hook
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run tests on Desktop Selenium.")
@@ -291,7 +310,7 @@ if __name__ == '__main__':
 
     with Pool(processes=args.num_browsers, initializer=setup_process, initargs=(log_path,)) as p:
         r = list(tqdm(p.imap_unordered(worker_function, all_args), total=len(all_args), desc="Header Parsing Progress (URL Chunks)", leave=True, position=0))
-        print(r)
+        # print(r)
 
     # Headfull (linux):
     # Xvfb :99 -screen 0 1920x1080x24 &
