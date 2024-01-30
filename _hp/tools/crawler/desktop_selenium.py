@@ -1,5 +1,8 @@
+import glob
 from multiprocessing import Pool
 import multiprocessing
+import os
+import shutil
 import sys
 import time
 
@@ -96,6 +99,28 @@ def get_browser(browser: str, version: str, binary_location=None, arguments=None
     return driver(options=options, service=service)
 
 
+def path_age(path):
+    """Returns when a path was last modified in seconds"""
+    return time.time() - os.path.getmtime(path)
+
+
+def clean_dirs(timeout):
+    """Remove old directories."""
+    selenium_dirs = glob.glob("/tmp/rust_*")
+    selenium_dirs.extend(glob.glob("/tmp/Temp-*"))
+    selenium_dirs.extend(glob.glob("/tmp/.org.chromium.*"))
+    selenium_dirs.extend(glob.glob("/tmp/.com.microsoft.*"))
+
+    for dir in selenium_dirs:
+        try:
+            age = path_age(dir)
+            if age > timeout:
+                shutil.rmtree(dir, ignore_errors=True)
+                Path(dir).unlink(missing_ok=True)
+        except Exception:
+            pass
+
+
 def run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger: logging.Logger):  
     try:
         url = None
@@ -157,9 +182,12 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
                 if browser_name not in ["safari", "firefox"]:
                     driver.close()
                 driver.quit()
+            except UnboundLocalError:
+                # driver = get_browser(...) failed, we do not have to log it again
+                pass
             except CustomTimeout:
                 logger.error("CustomTimeout while closing the browser", exc_info=True, extra=extra)
-            except Exception as e:
+            except Exception:
                 logger.error("Exception while closing the browser", exc_info=True, extra=extra)
             finally:
                 logger.info(f"Finish {browser_name} ({browser_version}). Took: {datetime.datetime.now() - start}", extra=extra)
@@ -177,18 +205,18 @@ def worker_function(args):
     logger.propagate = False
     logger.setLevel(logging.INFO)
     logger.addHandler(file_handler)
-
+    processes = []
     with CustomErrorTimeout(timeout):
-        processes = []
         try:
             processes = run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger)
         except (CustomTimeout, Exception):
             logger.error("Fatal outer exception!", exc_info=True)
-        finally:
-            # Sometimes driver.quit and similar do not work, thus we kill the processes explicitely once again
-            # Another approach would be to have a separate watchdog process to kill stale drivers + browsers
-            kill_processes(processes)
     
+    # Sometimes driver.quit and similar do not work, thus we kill the processes explicitely once again
+    # Another approach would be to have a separate watchdog process to kill stale drivers + browsers
+    kill_processes(processes)
+    # They also fail to remove all temp directories thus we remove them manually
+    clean_dirs(timeout)
     # We only want to have one log handler per process
     logger.removeHandler(file_handler)
 
@@ -200,16 +228,16 @@ def setup_process(log_path):
     time.sleep(num)  
 
 
-file_handler = logging.FileHandler(f"logs/desktop-selenium/{datetime.datetime.now().date().strftime('%Y-%m-%d')}_unraisable.log")
+file_handler = logging.FileHandler(f"logs/desktop-selenium/{datetime.datetime.now().date().strftime('%Y-%m-%d')}_unraisable.json")
 file_handler.setFormatter(ecs_logging.StdlibFormatter())
 
 # Set up logging to a file with the specified level and handler
 logging.basicConfig(level=logging.ERROR, handlers=[file_handler])
 
 def unraisable_hook(unraisable):
-    # Log unraisable exceptions to a file
+    """Log unraisable exceptions to a file"""
     for item in unraisable:
-        logging.error("Unraisable exception", exc_info=item.exc_info)
+        logging.error(f"Unraisable exception: {item}")
 
 # Set the unraisable hook globally
 sys.unraisablehook = unraisable_hook
