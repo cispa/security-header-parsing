@@ -46,5 +46,5 @@ def main(request, response):
             return res
         except Exception as e:
             print(e)
-            return {'Error': e}
+            return {'Error': str(e)}
 
