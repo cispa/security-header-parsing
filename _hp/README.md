@@ -1,4 +1,39 @@
 # HTTP Header Security
+- Run statistic:
+- Run 1:
+  - All have 1706 finish messages (the printed exception error in del does not matter? only ugly?)
+  - Firefox H: 853 X: 853
+    - 0 crashes?
+    - however 180x Timeout while closing (driver.quit()) the browser, 90x headless, 90x headfull; there has to be a systematic issue?
+    - Maybe there exist some fixed responses with which it is possible to "kill" Firefox? Make it unresponsive
+  - Edge H: 853 X: 853
+    - 91/853  crashes (all headfull, (session not created: DevToolsActivePort file doesn't exist))
+  - Chrome H: 853 X: 853
+    - 153/853 crashes (all headfull, (session not created: DevToolsActivePort file doesn't exist))
+  - Brave H: 853 X: 853
+    - 239/853 crashes (all headfull, (session not created: DevToolsActivePort file doesn't exist))
+  - Run 2:
+    - Firefox:
+      - Headfull: 450/853 start crashes: `Process unexpectedly closed with status 1`; Timeout while closing 45
+      - Headless: Timeouts while closing 89
+    - Edge:
+      - Headfull: 162/853 start crashes `(session not created: DevToolsActivePort file doesn't exist)`, one crash in between: `Message: disconnected: received Inspector.detached event\n  (Session info: MicrosoftEdge=119.0.2151.97)`
+      - Headless: one crash in between: `HTTPConnectionPool(host='localhost', port=60117): Max retries exceeded with url: /session/f9bbefafb2210657aa26247075c49d24/window`
+    - Chrome:
+      - Headfull: 368/853 `(session not created: DevToolsActivePort file doesn't exist)` start crashes 
+      - Headless: /
+    - Brave:
+      - Headfull: 339/853 `(session not created: DevToolsActivePort file doesn't exist)` start crashes
+      - Headless: /
+- Run 3:
+  - Firefox: 0/853 crashes?! 90/853 + 90/853 Timeout while closing!
+  - Edge: 130/853 crashes (headfull, all DevTools)
+  - Chrome: 177/853 crashes (headfull, all DevTools)
+  - Brave: 283/853 (headfull, 282 DevTools, 1 "'NoneType' object has no attribute 'get'")
+
+- Elastic PW="uxCLpajVSN4tnseNIZ1U"
+- Kibana token="eyJ2ZXIiOiI4LjEyLjAiLCJhZHIiOlsiMTAuMjUzLjE2Ny4xNTk6OTIwMCJdLCJmZ3IiOiI5MjQ0ZDlmYzk4MDlhMDIyZWJjNjhkOWU2NDZmMWJkMmQzOTBhOGIwYzA5YWFiOWU3YWYxNzJhMTZiYTBmOTUwIiwia2V5IjoiaGNTelZZMEJMY1NGaXFRMkk1WE86Sm5sbm5takRRcXl6aW4zQ1lxSWVEQSJ9"
+
 
 - Setup:
     - Create a fresh Ubuntu22 container/VM: `lxc launch ubuntu:22.04 <name>` and connect to it `lxc exec <name> bash`

@@ -170,7 +170,7 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
                 # Switch back to the old tab or window
                 driver.switch_to.window(original_window)
     except Exception:
-        logger.error(f"Major Exeception occured! Visited {cur_url}/{all_urls}. Last URL: {url}", exc_info=True, extra=extra)
+        logger.error(f"Major Exception occured! Visited {cur_url}/{all_urls}. Last URL: {url}", exc_info=True, extra=extra)
     except CustomTimeout:
         logger.error(f"CustomTimeout occured! Visited {cur_url}/{all_urls}. Last URL: {url}", exc_info=True, extra=extra)
 
