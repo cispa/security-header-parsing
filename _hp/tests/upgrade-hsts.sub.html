@@ -19,6 +19,7 @@
     async function upgrade_test(test_info, url, origin, response_id) {
         test_name = `upgradeHSTS_${test_info}|${origin}|${response_id}`;
         let u = new URL(origin);
+        // TODO: timeout the promise early such that later tests can still run? Promise.race?
         promise_test(async t => {
             t.set_test_info(url, test_info);
             // Reset HSTS after every request/test
@@ -30,6 +31,8 @@
             });
             // Visit URL that (might) set HSTS
             // No-CORS request such that we do not have to care about ACAO
+            // TODO: catch promise_test: Unhandled rejection with value: object "TypeError: Failed to fetch"
+            // e.g., if \x00 is in header, we want to record it as a normal result!
             let r = await fetch(url + response_id, { "method": "GET", "mode": "no-cors" });
             assert_equals(r.bodyUsed, false, "Initial request succeeded");
             // Visit http://(sub.)host to check for HSTS/redirect

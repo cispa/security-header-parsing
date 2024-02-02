@@ -2,6 +2,9 @@ import os
 import psycopg2
 import pandas as pd
 from dataclasses import dataclass
+from functools import lru_cache, partial
+import re
+
 
 @dataclass
 class Config:
@@ -81,3 +84,42 @@ def to_cat(column, non_cat=[]):
         return column
     else:
         return column.astype('category')
+
+
+def clean_url(url):
+    # Set browser_id=1 (unknown) to not accidentally include them in our real data collection
+    return re.sub(r"browser_id=(\d+)", "browser_id=1", url)
+
+def make_clickable(url):
+    # Clickable links for debugging
+    url = clean_url(url)
+    return f'<a href="{url}" target="_blank">{url}</a>'
+
+
+
+def add_columns(df):
+    # Create extra columns
+    df["outcome_str"] = df["outcome_value"].fillna("None").astype(str)
+    df["clean_url"] = df["full_url"].apply(clean_url)
+    @lru_cache(maxsize=None)
+    def id_to_browser(id):
+        """Full browser name (os+version) from the ID"""
+        return " ".join(df.loc[df["browser_id"] == id].iloc[0][["name", "os", "version", "automation_mode", "headless_mode"]].to_list())
+    df["browser"] = df["browser_id"].apply(id_to_browser)
+    df["org_origin"] = df["org_scheme"] + "://" + df["org_host"]
+    df["resp_origin"] = df["resp_scheme"] + "://" + df["resp_host"]
+    
+    # Unify outcomes that are semantically the same (only the exact error string is different in different browsers)
+    # Firefox: {'error': 'object "TypeError: NetworkError when attempting to fetch resource."', 'headers': ''}
+    # Chromium: {'error': 'object "TypeError: Failed to fetch"', 'headers': ''}
+    # Safari: {'error': 'object "TypeError: Load failed"', 'headers': ''}
+    # ...
+    df["outcome_str"] = df["outcome_str"].replace("{'error': 'object \"TypeError: NetworkError when attempting to fetch resource.\"', 'headers': ''}", "{'error': 'object \"TypeError: Failed to fetch\"', 'headers': ''}")
+    df["outcome_str"] = df["outcome_str"].replace("{'error': 'object \"TypeError: Load failed\"', 'headers': ''}", "{'error': 'object \"TypeError: Failed to fetch\"', 'headers': ''}")
+    
+    # For document referrer we do not want to know the exact resp_id and count
+    # We only want to know whether it is a origin or the full URl?
+    #df['outcome_str'] = df['outcome_str'].replace(r'resp_id=\d+', 'resp_id=<resp_id>', regex=True)
+    #df['outcome_str'] = df['outcome_str'].replace(r'count=\d+', 'count=<count>', regex=True)
+    df['outcome_str'] = df['outcome_str'].apply(lambda x: 'document.referrer: full_url' if 'responses.py?feature_group' in x else x)
+    return df
