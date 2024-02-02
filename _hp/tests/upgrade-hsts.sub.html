@@ -15,11 +15,18 @@
 
 </body>
 <script>
+    const fetchDataWithTimeout = async (url, timeout) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+        const response = await fetch(url, { signal: controller.signal, "method": "GET", "mode": "no-cors" });
+        clearTimeout(timeoutId); // Clear the timeout since the request was successful
+        return response;
+    };
+
     let resp_type = urlParams.get("resp_type") || "debug";
     async function upgrade_test(test_info, url, origin, response_id) {
         test_name = `upgradeHSTS_${test_info}|${origin}|${response_id}`;
         let u = new URL(origin);
-        // TODO: timeout the promise early such that later tests can still run? Promise.race?
         promise_test(async t => {
             t.set_test_info(url, test_info);
             // Reset HSTS after every request/test
@@ -31,22 +38,31 @@
             });
             // Visit URL that (might) set HSTS
             // No-CORS request such that we do not have to care about ACAO
-            // TODO: catch promise_test: Unhandled rejection with value: object "TypeError: Failed to fetch"
-            // e.g., if \x00 is in header, we want to record it as a normal result!
-            let r = await fetch(url + response_id, { "method": "GET", "mode": "no-cors" });
-            assert_equals(r.bodyUsed, false, "Initial request succeeded");
-            // Visit http://(sub.)host to check for HSTS/redirect
-            let test_url;
-            if (test_info == "subdomain") {
-                test_url = "http://sub." + u.host + "/_hp/common/empty.html";
-            } else {
-                test_url = "http://" + u.host + "/_hp/common/empty.html";
+            try {
+                // The initial fetch should be fast
+                let r = await fetchDataWithTimeout(url + response_id, test_timeout/5);
+                assert_equals(r.bodyUsed, false, "Initial request succeeded");
+                // Visit http://(sub.)host to check for HSTS/redirect
+                let test_url;
+                if (test_info == "subdomain") {
+                    test_url = "http://sub." + u.host + "/_hp/common/empty.html";
+                } else {
+                    test_url = "http://" + u.host + "/_hp/common/empty.html";
+                }
+                // CORS request such that we can access r.redirected
+                r = await fetch(test_url, { "method": "GET" });
+                //console.log(r);
+                t.report_outcome({ "response.redirected": r.redirected });
+                assert_equals(r.bodyUsed, false, "Second request finished");
+            } catch (e) {
+                if (e.name === 'AbortError') {
+                    t.report_outcome("Fetch timed out");
+                } else {
+                    // Catch errors and report them (e.g., \x00 in header will usually result in a failed fetch!)
+                    t.report_outcome(e.toString());
+                }
             }
-            // CORS request such that we can access r.redirected
-            r = await fetch(test_url, { "method": "GET" });
-            //console.log(r);
-            t.report_outcome({ "response.redirected": r.redirected });
-            assert_equals(r.bodyUsed, false, "Second request finished");
+
         }, test_name);
     }
 

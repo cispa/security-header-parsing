@@ -16,6 +16,14 @@
 
 
 <script>
+    const fetchDataWithTimeout = async (url, timeout, args) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+        const response = await fetch(url, { signal: controller.signal, ...args });
+        clearTimeout(timeoutId); // Clear the timeout since the request was successful
+        return response;
+    };
     let resp_type = urlParams.get("resp_type") || "debug";
     var count = 0;
     function access_fetch_test(method, credentials, headers, test_info, url, origin, response_id) {
@@ -33,8 +41,8 @@
         async_test(t => {
             t.set_test_info(url, test_info);
             let final_url = url + response_id + `&resp=1`;
-            // TODO: add a timeout?!
-            fetch(final_url, { "mode": "cors", "method": method, "credentials": credentials, "headers": headers }).then((r) => test_fetch(t, r, null)).catch((e) => test_fetch(t, null, e))
+            fetchDataWithTimeout(final_url, 0.9*test_timeout, { "mode": "cors", "method": method, "credentials": credentials, "headers": headers })
+            .then((r) => test_fetch(t, r, null)).catch((e) => test_fetch(t, null, e))
             // Cleanup function (not called for tests that time out?)
             t.add_cleanup(() => { });
         }, test_name);

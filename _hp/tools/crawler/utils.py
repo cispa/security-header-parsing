@@ -16,6 +16,7 @@ except:
 
 # Time until all tests on a page have to be finished (called done())
 # TODO: make configurable for different tests and/or browsers! (or e.g., higher timeouts for repeats)
+# TODO: the upgrade-hsts.sub.html tests should use a higher timeout?! (as each request is done one after another and each individula request has a timeout of TIMEOUT/5)
 GLOBAL_TEST_TIMEOUT = 5 # Also known as test_timeout in testharness.sub.js
 
 # Time after a single test marks itself as "no message received"
@@ -39,7 +40,7 @@ base_dir = "_hp/tests"
 HSTS_DEACTIVATE = f"https://{base_host}/_hp/common/empty.html?pipe=header(strict-transport-security,max-age=0)|status(200)"
 
 # [(test_file_name, label_name, number_of_response_ids, num_popup_parsing, num_popup_basic)]
-# TODO: maybe increate number_of_response_ids for some tests to increase the speed?
+# TODO: maybe increase number_of_response_ids for some tests to increase the speed?
 # Comment: Num tests per resp_id: <basic/debug>, parsing (for one base URL; x2 as most tests are loaded from both HTTP and HTTPS)
 test_info = [
     # Only for basic tests!

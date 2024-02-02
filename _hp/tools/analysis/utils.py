@@ -88,7 +88,9 @@ def to_cat(column, non_cat=[]):
 
 def clean_url(url):
     # Set browser_id=1 (unknown) to not accidentally include them in our real data collection
-    return re.sub(r"browser_id=(\d+)", "browser_id=1", url)
+    url = re.sub(r"browser_id=(\d+)", "browser_id=1", url)
+    url = re.sub(r"timeout=(\d+)&", "", url)
+    return url
 
 def make_clickable(url):
     # Clickable links for debugging
