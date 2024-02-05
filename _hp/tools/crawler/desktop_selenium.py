@@ -79,6 +79,10 @@ def get_browser(browser: str, version: str, binary_location=None, arguments=None
         driver = webdriver.Firefox
     elif browser == "safari":
         options = webdriver.SafariOptions()
+        # Problem: "Could not create a session: The Safari instance is already paired with another WebDriver session"
+        # Idea: use different ports for each driver, however that does not work with the current version anymore (https://developer.apple.com/documentation/webkit/about_webdriver_for_safari#2957226)
+        # port = 5555
+        # service = webdriver.SafariService(port=port)
         driver = webdriver.Safari
     elif browser == "edge":
         options = webdriver.EdgeOptions()
@@ -140,9 +144,11 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
         original_window = driver.current_window_handle
         for url in test_urls:
             try:
+                driver.set_window_position(-5000, 0)  # Posititon the window off-screen (necessary on macOS such that the device stays more or less usable)
                 logger.debug(f"Attempting: {url}", extra=extra)
                 # Create a new window for each test/URL; another option would be to restart the driver for each test but that is even slower
                 driver.switch_to.new_window('window')
+                driver.set_window_position(-5000, 0)  # Posititon the new window off-screen as well
                 new_window = driver.current_window_handle
                 if "upgrade" in url:
                     driver.get(HSTS_DEACTIVATE)
@@ -227,7 +233,8 @@ def setup_process(log_path):
     num = int(name.rsplit("-", maxsplit=1)[1]) - 1
     time.sleep(num)  
 
-
+log_path = f"logs/desktop-selenium/"
+Path(log_path).mkdir(parents=True, exist_ok=True)
 file_handler = logging.FileHandler(f"logs/desktop-selenium/{datetime.datetime.now().date().strftime('%Y-%m-%d')}_unraisable.json")
 file_handler.setFormatter(ecs_logging.StdlibFormatter())
 
@@ -314,14 +321,12 @@ if __name__ == '__main__':
 
     now = f"{datetime.datetime.now()}"
     log_path = f"logs/desktop-selenium/{now}"
-    Path(log_path).mkdir(parents=True, exist_ok=True)
 
     all_args = []
     for scheme in ["http", "https"]:
         for browser_name, browser_version, binary_location, arguments, browser_id in config:
             if args.run_mode == "run_all":
-                test_urls = get_tests(
-                    resp_type=args.resp_type, browser_id=browser_id, scheme=scheme)
+                test_urls = get_tests(resp_type=args.resp_type, browser_id=browser_id, scheme=scheme)
             elif args.run_mode == "repeat":
                 with open("../repeat.json", "r") as f:
                     test_urls = json.load(f).get(str(browser_id), [])
