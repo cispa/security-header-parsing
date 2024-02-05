@@ -269,7 +269,7 @@ if __name__ == '__main__':
         # Only run Safari (headfull as no headless mode exists)
         # Initial experiments showed almost no differences between Linux and macOS versions of brave, chrome, firefox
         config = [
-            # Released 2024-01-22
+            # Released 2024-01-22 (17.3 (19617.2.4.11.8))
             ("safari", "17.3", None, None, get_or_create_browser("safari", "17.3", "macOS 14.3", "real", "selenium", "")),
             
             # Brave without updates on MacOS
