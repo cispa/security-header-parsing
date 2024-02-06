@@ -157,7 +157,7 @@ async function save_result(tests, status) {
   d = document.createElement("div");
   d.id = "finished";
   document.body.appendChild(d);
-  // Notify parent page that the test is finished!
-  window.parent.postMessage("Finished", "*");
+  // Notify opener page that the test is finished!
+  window.opener.postMessage("finished", "*");
 };
 add_completion_callback(save_result);
