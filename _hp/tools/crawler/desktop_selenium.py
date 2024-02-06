@@ -333,33 +333,35 @@ if __name__ == '__main__':
     url_list = []
     rand_token = generate_short_uuid()
     chunk_id = 0
-    for scheme in ["http", "https"]:
-        for browser_name, browser_version, binary_location, arguments, browser_id in config:
-            if args.run_mode == "run_all":
-                test_urls = get_tests(resp_type=args.resp_type, browser_id=browser_id, scheme=scheme)
-            elif args.run_mode == "repeat":
-                with open("../repeat.json", "r") as f:
-                    test_urls = json.load(f).get(str(browser_id), [])
-                    test_urls = list(filter(lambda s: s.startswith(f"{scheme}://"), test_urls))
-                if not len(test_urls):
-                    continue
-            else:
-                raise Exception(f"Unknown run mode: {args.run_mode}")
-        
-            url_chunks = [test_urls[i:i + args.max_urls_until_restart] for i in range(0, len(test_urls), args.max_urls_until_restart)]
-            for url_chunk in url_chunks:
-                all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, url_chunk, args.timeout_task, TIMEOUT))
-                if args.gen_mac_page_runner:
-                    url_list.append(create_test_page_runner(browser_id, f"{rand_token}-{chunk_id}", url_chunks))
-                    chunk_id += 1
-
     if args.page_runner_json != "":
         with open(args.page_runner_json, "r") as f:
             urls = json.load(f)
         all_args = []
+        assert(len(config) == 1)
+        browser_name, browser_version, binary_location, arguments, browser_id = config[0]
         for url in urls:
-            assert(re.match("runner-(\d+)")[1] == browser_version)
+            assert(int(re.findall("runner-(\d+)", url)[0]) == browser_id)
             all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, [url], args.timeout_task, args.timeout_task-60))
+    else:
+        for scheme in ["http", "https"]:
+            for browser_name, browser_version, binary_location, arguments, browser_id in config:
+                if args.run_mode == "run_all":
+                    test_urls = get_tests(resp_type=args.resp_type, browser_id=browser_id, scheme=scheme)
+                elif args.run_mode == "repeat":
+                    with open("../repeat.json", "r") as f:
+                        test_urls = json.load(f).get(str(browser_id), [])
+                        test_urls = list(filter(lambda s: s.startswith(f"{scheme}://"), test_urls))
+                    if not len(test_urls):
+                        continue
+                else:
+                    raise Exception(f"Unknown run mode: {args.run_mode}")
+            
+                url_chunks = [test_urls[i:i + args.max_urls_until_restart] for i in range(0, len(test_urls), args.max_urls_until_restart)]
+                for url_chunk in url_chunks:
+                    all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, url_chunk, args.timeout_task, TIMEOUT))
+                    if args.gen_mac_page_runner:
+                        url_list.append(create_test_page_runner(browser_id, f"{rand_token}-{chunk_id}", url_chunk))
+                        chunk_id += 1
 
     if args.gen_mac_page_runner:
         print(f"URLs to visit: {url_list}")

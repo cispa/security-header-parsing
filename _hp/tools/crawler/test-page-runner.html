@@ -25,7 +25,7 @@
 
 			if (counter < urls.length) {
 				// interpreted as: top=min,left=min,width=min,height=min
-				openWindow = window.open(urls[counter], "_blank", "top=-100,left=-100,width=0,height=0");
+				openWindow = window.open(urls[counter], "_blank", "top=0,left=0,width=100,height=100");
 				counter++;
 				// Open the next test after the TIMEOUT
 				timeoutId = setTimeout(function () {
@@ -49,6 +49,9 @@
 			}
 		}
 		window.addEventListener('message', handleMessage);
+
+		// Open the first window
+		openNextWindow();
 
 
 	</script>

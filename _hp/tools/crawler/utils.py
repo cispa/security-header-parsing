@@ -150,7 +150,7 @@ def get_or_create_browser(name, version, os, headless_mode, automation_mode, add
 def create_test_page_runner(browser_id, identifier, test_urls):
     """Create a test-page runner page for a given browser_id and a list of test_urls."""
     test_runner_page = f"test-page-runner-{browser_id}_{identifier}.html"
-    test_runner_url = f"https://{base_host}/{test_runner_page}"
+    test_runner_url = f"https://{base_host}/_hp/tests/{test_runner_page}"
     with open("test-page-runner.html") as file:
         html_template = file.read()
         html_template = html_template.replace(
