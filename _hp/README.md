@@ -30,6 +30,18 @@
   - Edge: 130/853 crashes (headfull, all DevTools)
   - Chrome: 177/853 crashes (headfull, all DevTools)
   - Brave: 283/853 (headfull, 282 DevTools, 1 "'NoneType' object has no attribute 'get'")
+- Run 4 and following:
+  - Firefox still many timeouts (180/Run)
+  - No crashed for Brave, Firefox, Chrome
+  - Rare crashes (even for headless) for Edge (e.g., 4/803 in the second run, 10/803 in the first run): 
+    - "[Errno 26] Text file busy: '/home/ubuntu/.cache/selenium/msedgedriver/linux64/121.0.2277.98/msedgedriver'"
+    - "Message: unknown error: cannot find msedge binary"
+    - "(session not created: DevToolsActivePort file doesn't exist)"
+    - "'NoneType' object has no attribute 'get'"
+    - "Message: timeout: Timed out receiving message from renderer: 14.000"
+    - "Message: invalid session id"
+    - "Message: unknown error: no msedge binary at /home/ubuntu/.cache/selenium/MicrosoftEdge/linux64/121.0.2277.98/"
+    - Should not matter too much as we will repeat all tests that do not have a result until we have results for all tests
 
 - Elastic PW="uxCLpajVSN4tnseNIZ1U"
 - Kibana token="eyJ2ZXIiOiI4LjEyLjAiLCJhZHIiOlsiMTAuMjUzLjE2Ny4xNTk6OTIwMCJdLCJmZ3IiOiI5MjQ0ZDlmYzk4MDlhMDIyZWJjNjhkOWU2NDZmMWJkMmQzOTBhOGIwYzA5YWFiOWU3YWYxNzJhMTZiYTBmOTUwIiwia2V5IjoiaGNTelZZMEJMY1NGaXFRMkk1WE86Sm5sbm5takRRcXl6aW4zQ1lxSWVEQSJ9"

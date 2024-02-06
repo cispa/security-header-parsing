@@ -1,4 +1,6 @@
 import httpx
+import json
+import uuid
 
 from sqlalchemy import ClauseElement
 from sqlalchemy.exc import IntegrityError
@@ -17,22 +19,20 @@ except:
 # Time until all tests on a page have to be finished (called done())
 # TODO: make configurable for different tests and/or browsers! (or e.g., higher timeouts for repeats)
 # TODO: the upgrade-hsts.sub.html tests should use a higher timeout?! (as each request is done one after another and each individula request has a timeout of TIMEOUT/5)
-GLOBAL_TEST_TIMEOUT = 5 # Also known as test_timeout in testharness.sub.js
+GLOBAL_TEST_TIMEOUT = 5  # Also known as test_timeout in testharness.sub.js
 
 # Time after a single test marks itself as "no message received"
 # SINGLE_TEST_TIMEOUT = 0.9 * GLOBAL_TEST_TIMEOUT # 0.9 is hardcoded in the tests (0.9 * test_timeout)
 
 # Time it takes to open the browser and perform the inital request to the test page
 # TODO: this is different for different browsers, some mobile browsers are really slow; use a dict?
-BROWSER_START_TIMEOUT = 1 
+BROWSER_START_TIMEOUT = 1
 # Time to wait for the final request to finish
 FINAL_REQ_TIMEOUT = 1
 
 # Note: in desktop_selenium we currently have a max_page_load of 2xTIMEOUT and wait for a maximum of TIMEOUT after the page is loaded; we can't replicate this behavior in mobile?
 # Also we finish early when we see the #finished div in the page with Selenium which we cannot do on mobile
 TIMEOUT = BROWSER_START_TIMEOUT + GLOBAL_TEST_TIMEOUT + FINAL_REQ_TIMEOUT
-
-
 
 
 base_host = "sub.headers.websec.saarland"
@@ -85,7 +85,8 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000):
         for first_id, last_id in get_resp_ids(label, resp_type, num_resp_ids):
             # If there are more popups than max_popups add URLs for each popup count, only add run_no_popups to the first one
             if num_popups > max_popups:
-                buckets = [list(range(start, min(start + max_popups, num_popups + 1))) for start in range(1, num_popups + 1, max_popups)]
+                buckets = [list(range(start, min(start + max_popups, num_popups + 1)))
+                           for start in range(1, num_popups + 1, max_popups)]
                 run_no_popup = "yes"
                 for bucket in buckets:
                     first_popup = bucket[0]
@@ -114,12 +115,14 @@ def get_or_create(session, model, defaults=None, **kwargs):
     if instance:
         return instance, False
     else:
-        params = dict((k, v) for k, v in kwargs.items() if not isinstance(v, ClauseElement))
+        params = dict((k, v) for k, v in kwargs.items()
+                      if not isinstance(v, ClauseElement))
         params.update(defaults or {})
         instance = model(**params)
         session.add(instance)
         session.commit()
         return instance, True
+
 
 def get_or_create_browser(name, version, os, headless_mode, automation_mode, add_info):
     with Session() as session:
@@ -142,3 +145,28 @@ def get_or_create_browser(name, version, os, headless_mode, automation_mode, add
         except IntegrityError as e:
             session.rollback()
             print("IntegrityError", e)
+
+
+def create_test_page_runner(browser_id, identifier, test_urls):
+    """Create a test-page runner page for a given browser_id and a list of test_urls."""
+    test_runner_page = f"test-page-runner-{browser_id}_{identifier}.html"
+    test_runner_url = f"https://{base_host}/{test_runner_page}"
+    with open("test-page-runner.html") as file:
+        html_template = file.read()
+        html_template = html_template.replace(
+            '$$$URLS$$$', json.dumps(test_urls))
+        html_template = html_template.replace(
+            '$$$TIMEOUT$$$', str(TIMEOUT*1000))
+        with open(f'../../tests/{test_runner_page}', 'w') as file:
+            file.write(html_template)
+    return test_runner_url
+
+def generate_short_uuid(length=6):
+    if length <= 0:
+        raise ValueError("Length must be a positive integer")
+    
+    # Generate a UUID
+    full_uuid = uuid.uuid4()
+    # Convert it to a string and extract the specified number of characters
+    short_uuid = str(full_uuid)[:length]
+    return short_uuid

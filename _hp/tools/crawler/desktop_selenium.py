@@ -7,7 +7,7 @@ import sys
 import time
 
 from tqdm import tqdm
-from utils import TIMEOUT, get_tests, HSTS_DEACTIVATE
+from utils import TIMEOUT, generate_short_uuid, get_tests, HSTS_DEACTIVATE, create_test_page_runner
 from create_browsers import get_or_create_browser
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -262,10 +262,11 @@ if __name__ == '__main__':
     parser.add_argument("--num_browsers", default=60, type=int, help="How many browsers to start in parallel (max).")
     parser.add_argument("--max_urls_until_restart", default=100, type=int, help="Maximum number of URLs until the browser is restated.")
     parser.add_argument("--timeout_task", default=1000, type=int, help="Timeout for a single task (max_urls_until_restart URLs in one browser) in seconds.")
+    parser.add_argument("--gen_mac_page_runner", action="store_true", help="Toggle the generate test-page runner for Mac Mode.")
     args = parser.parse_args()
 
     # (browser_name, version, binary_location (e.g., for brave), arguments (e.g, for headless), browser_id
-    if sys.platform == "darwin":
+    if sys.platform == "darwin" or args.gen_mac_page_runner:
         # Only run Safari (headfull as no headless mode exists)
         # Initial experiments showed almost no differences between Linux and macOS versions of brave, chrome, firefox
         config = [
@@ -326,6 +327,9 @@ if __name__ == '__main__':
     log_path = f"logs/desktop-selenium/{now}"
 
     all_args = []
+    url_list = []
+    rand_token = generate_short_uuid()
+    chunk_id = 0
     for scheme in ["http", "https"]:
         for browser_name, browser_version, binary_location, arguments, browser_id in config:
             if args.run_mode == "run_all":
@@ -342,11 +346,16 @@ if __name__ == '__main__':
             url_chunks = [test_urls[i:i + args.max_urls_until_restart] for i in range(0, len(test_urls), args.max_urls_until_restart)]
             for url_chunk in url_chunks:
                 all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, url_chunk, args.timeout_task))
+                if args.gen_mac_page_runner:
+                    url_list.append(create_test_page_runner(browser_id, f"{rand_token}-{chunk_id}", url_chunks))
+                    chunk_id += 1
 
-
-    with Pool(processes=args.num_browsers, initializer=setup_process, initargs=(log_path,)) as p:
-        r = list(tqdm(p.imap_unordered(worker_function, all_args), total=len(all_args), desc="Header Parsing Progress (URL Chunks)", leave=True, position=0))
-        # print(r)
+    if args.gen_mac_page_runner:
+        print(f"URLs to visit: {url_list}")
+    else:
+        with Pool(processes=args.num_browsers, initializer=setup_process, initargs=(log_path,)) as p:
+            r = list(tqdm(p.imap_unordered(worker_function, all_args), total=len(all_args), desc="Header Parsing Progress (URL Chunks)", leave=True, position=0))
+            # print(r)
 
     # Headfull (linux):
     # Xvfb :99 -screen 0 1920x1080x24 &
