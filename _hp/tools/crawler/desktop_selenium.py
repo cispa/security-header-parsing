@@ -2,6 +2,7 @@ import glob
 from multiprocessing import Pool
 import multiprocessing
 import os
+import re
 import shutil
 import sys
 import time
@@ -125,7 +126,7 @@ def clean_dirs(timeout):
             pass
 
 
-def run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger: logging.Logger):  
+def run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger: logging.Logger, page_timeout):  
     try:
         url = None
         processes = []
@@ -162,7 +163,7 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
                 except Exception:
                     logger.error("Switching browser window failed", exc_info=True, extra=extra)
                 # Wait until the results are saved on the server (after finishing fetch request, a div with id "finished" is added to the DOM)
-                WebDriverWait(driver, TIMEOUT).until(
+                WebDriverWait(driver, page_timeout).until(
                     EC.presence_of_element_located((By.ID, "finished")))
                 cur_url += 1
             except Exception:
@@ -200,8 +201,9 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
                 return processes
 
 
+
 def worker_function(args):
-    log_path, browser_name, browser_version, binary_location, arguments, debug_input, test_urls, timeout = args
+    log_path, browser_name, browser_version, binary_location, arguments, debug_input, test_urls, timeout, page_timeout = args
     
     log_filename = f"{log_path}-{browser_name}-{browser_version}.json"
     file_handler = logging.FileHandler(log_filename)
@@ -214,7 +216,7 @@ def worker_function(args):
     processes = []
     with CustomErrorTimeout(timeout):
         try:
-            processes = run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger)
+            processes = run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger, page_timeout)
         except (CustomTimeout, Exception):
             logger.error("Fatal outer exception!", exc_info=True)
     
@@ -263,6 +265,7 @@ if __name__ == '__main__':
     parser.add_argument("--max_urls_until_restart", default=100, type=int, help="Maximum number of URLs until the browser is restated.")
     parser.add_argument("--timeout_task", default=1000, type=int, help="Timeout for a single task (max_urls_until_restart URLs in one browser) in seconds.")
     parser.add_argument("--gen_mac_page_runner", action="store_true", help="Toggle the generate test-page runner for Mac Mode.")
+    parser.add_argument("--page_runner_json", default="", type=str, help="Path to a json list of page_runner URLs to visit")
     args = parser.parse_args()
 
     # (browser_name, version, binary_location (e.g., for brave), arguments (e.g, for headless), browser_id
@@ -345,13 +348,23 @@ if __name__ == '__main__':
         
             url_chunks = [test_urls[i:i + args.max_urls_until_restart] for i in range(0, len(test_urls), args.max_urls_until_restart)]
             for url_chunk in url_chunks:
-                all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, url_chunk, args.timeout_task))
+                all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, url_chunk, args.timeout_task, TIMEOUT))
                 if args.gen_mac_page_runner:
                     url_list.append(create_test_page_runner(browser_id, f"{rand_token}-{chunk_id}", url_chunks))
                     chunk_id += 1
 
+    if args.page_runner_json != "":
+        with open(args.page_runner_json, "r") as f:
+            urls = json.load(f)
+        all_args = []
+        for url in urls:
+            assert(re.match("runner-(\d+)")[1] == browser_version)
+            all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, [url], args.timeout_task, args.timeout_task-60))
+
     if args.gen_mac_page_runner:
         print(f"URLs to visit: {url_list}")
+        with open(f"mac-{rand_token}.json", "w") as f:
+            json.dump(url_list, f)
     else:
         with Pool(processes=args.num_browsers, initializer=setup_process, initargs=(log_path,)) as p:
             r = list(tqdm(p.imap_unordered(worker_function, all_args), total=len(all_args), desc="Header Parsing Progress (URL Chunks)", leave=True, position=0))
