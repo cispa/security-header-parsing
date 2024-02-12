@@ -40,10 +40,23 @@
             let final_url = url + response_id + `&count=${i.id}&nest=${nest}&origin=${origin}&element=${test_info}&resp=${resp}`;
             i.src = final_url;
 
-            i.onload = () => test_perfAPI(t, final_url);
-            i.onerror = () => test_perfAPI(t, final_url);
+            // Safari does not call either onload nor onerror if \n in response?!
+            // Wait for 90% of test_timeout; then report that no load/error event received (perfEntries are only added if load/error is called!)
+            let timer = t.step_timeout(() => {
+                t.report_outcome("No load/error event fired!");
+                t.done();
+            }, 0.9 * test_timeout);
 
-            // Cleanup function (not called for tests that time out?)
+            i.onload = () => {
+                clearTimeout(timer);
+                test_perfAPI(t, final_url);
+            }
+            i.onerror = () => {
+                clearTimeout(timer);
+                test_perfAPI(t, final_url);
+            }
+
+            // Cleanup function
             t.add_cleanup(() => {
                 i.remove();
             });
@@ -52,7 +65,7 @@
         }, test_name);
     }
 
-    function test_perfAPI(t, url) {
+    function test_perfAPI(t, url, extra) {
         const resources = performance.getEntriesByName(url);
         assert_true(resources.length <= 1, "Only one performance entry for one URL");
         if (resources.length) {
