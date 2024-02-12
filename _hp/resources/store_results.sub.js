@@ -158,6 +158,11 @@ async function save_result(tests, status) {
   d.id = "finished";
   document.body.appendChild(d);
   // Notify opener page that the test is finished!
-  window.opener.postMessage("finished", "*");
+  try {
+    window.opener.postMessage("finished", "*");
+  } catch (e) {
+    // Openere page does not exist; test opened directly
+    console.log(e);
+  }
 };
 add_completion_callback(save_result);
