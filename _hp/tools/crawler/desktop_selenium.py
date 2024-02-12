@@ -139,7 +139,7 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
                             binary_location, arguments)
         processes = get_child_processes(driver.service.process.pid)
         # Max page load timeout
-        driver.set_page_load_timeout(TIMEOUT*2)
+        driver.set_page_load_timeout(2 * page_timeout)
         # print(driver.capabilities)
         # Store the ID of the original window
         original_window = driver.current_window_handle
@@ -352,7 +352,7 @@ if __name__ == '__main__':
                     with open("../repeat.json", "r") as f:
                         test_urls = json.load(f).get(str(browser_id), [])
                         test_urls = list(filter(lambda s: s.startswith(f"{scheme}://"), test_urls))
-                        page_timeout = 2 * TIMEOUT
+                        page_timeout = 3 * TIMEOUT
                     if not len(test_urls):
                         continue
                 else:
