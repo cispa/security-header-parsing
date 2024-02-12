@@ -347,10 +347,12 @@ if __name__ == '__main__':
             for browser_name, browser_version, binary_location, arguments, browser_id in config:
                 if args.run_mode == "run_all":
                     test_urls = get_tests(resp_type=args.resp_type, browser_id=browser_id, scheme=scheme)
+                    page_timeout = TIMEOUT
                 elif args.run_mode == "repeat":
                     with open("../repeat.json", "r") as f:
                         test_urls = json.load(f).get(str(browser_id), [])
                         test_urls = list(filter(lambda s: s.startswith(f"{scheme}://"), test_urls))
+                        page_timeout = 2 * TIMEOUT
                     if not len(test_urls):
                         continue
                 else:
@@ -358,7 +360,7 @@ if __name__ == '__main__':
             
                 url_chunks = [test_urls[i:i + args.max_urls_until_restart] for i in range(0, len(test_urls), args.max_urls_until_restart)]
                 for url_chunk in url_chunks:
-                    all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, url_chunk, args.timeout_task, TIMEOUT))
+                    all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, url_chunk, args.timeout_task, page_timeout))
                     if args.gen_mac_page_runner:
                         url_list.append(create_test_page_runner(browser_id, f"{rand_token}-{chunk_id}", url_chunk))
                         chunk_id += 1

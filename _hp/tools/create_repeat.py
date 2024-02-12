@@ -1,6 +1,7 @@
 import json
 import re
 from analysis.utils import get_data, Config
+from crawler.utils import GLOBAL_TEST_TIMEOUT
 
 # Create a json with all tests to redo (either timed out or completely missing)
 # Idea: group by test and count number of unique browser_ids
@@ -51,8 +52,9 @@ def calc_repeat():
             except KeyError:
                 d = set()
             # TODO: for mobile browsers the first_popup, last_popup, run_no_popup has to be added again?
-            # TODO: add timeout again (maybe a higher one?)
-            d.add(re.sub("browser_id=(\d+)", f"browser_id={browser_id}", clean_url))
+            repeat_url = re.sub("browser_id=(\d+)", f"browser_id={browser_id}", clean_url)
+            repeat_url = re.sub("\?", f"?timeout={2*GLOBAL_TEST_TIMEOUT}&", repeat_url, count=1)
+            d.add(repeat_url)
             to_repeat[browser_id] = d
     with open("repeat.json", "w") as f:
         json.dump(to_repeat, f, default=list)
