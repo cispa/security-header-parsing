@@ -42,6 +42,7 @@
 
             // Safari does not call either onload nor onerror if \n in response?!
             // Wait for 90% of test_timeout; then report that no load/error event received (perfEntries are only added if load/error is called!)
+            // The harness will run into "Harness status: TIMEOUT" as the page will not fire a load event; however this does not really matter (explicit_done does not seem to work)
             let timer = t.step_timeout(() => {
                 t.report_outcome("No load/error event fired!");
                 t.done();
@@ -89,6 +90,7 @@
     const path = '/_hp/server/responses.py?feature_group=tao&resp_id=';
     const label = 'TAO';
     run_tests(test_declarations, path, label);
+      
 
 </script>
 
