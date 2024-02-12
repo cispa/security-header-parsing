@@ -40,6 +40,7 @@ base_dir = "_hp/tests"
 HSTS_DEACTIVATE = f"https://{base_host}/_hp/common/empty.html?pipe=header(strict-transport-security,max-age=0)|status(200)"
 
 # [(test_file_name, label_name, number_of_response_ids, num_popup_parsing, num_popup_basic)]
+# number_of_response_ids is the maxium number of response_ids allowed for parsing tests
 # TODO: maybe increase number_of_response_ids for some tests to increase the speed?
 # Comment: Num tests per resp_id: <basic/debug>, parsing (for one base URL; x2 as most tests are loaded from both HTTP and HTTPS)
 test_info = [
