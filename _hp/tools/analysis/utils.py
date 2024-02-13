@@ -112,18 +112,18 @@ def add_columns(df):
     df["resp_origin"] = df["resp_scheme"] + "://" + df["resp_host"]
     
     # Unify outcomes that are semantically the same (only the exact error string is different in different browsers)
-    # Fetch fails!
+    # Fetch fails:
     # Firefox: {'error': 'object "TypeError: NetworkError when attempting to fetch resource."', 'headers': ''}
     # Chromium: {'error': 'object "TypeError: Failed to fetch"', 'headers': ''}
     # Safari: {'error': 'object "TypeError: Load failed"', 'headers': ''}
-    # Fetch is aborted
-    # Firefox: AbortError: The operation was aborted
+    # Fetch is aborted:
+    # Firefox: AbortError: The operation was aborted.<space>
     # Safari: AbortError: Fetch is aborted
     # The outcome does not exist in Chromium
 
-    df["outcome_str"] = df["outcome_str"].replace("TypeError: Load failed", "TypeError: Failed to fetch")
-    df["outcome_str"] = df["outcome_str"].replace("TypeError: NetworkError when attempting to fetch resource.", "TypeError: Failed to fetch")
-    df["outcome_str"] = df["outcome_str"].replace("AbortError: The operation was aborted.", "AbortError: Fetch is aborted")
+    df["outcome_str"] = df["outcome_str"].replace("TypeError: Load failed", "TypeError: Failed to fetch", regex=True)
+    df["outcome_str"] = df["outcome_str"].replace("TypeError: NetworkError when attempting to fetch resource.", "TypeError: Failed to fetch", regex=True)
+    df["outcome_str"] = df["outcome_str"].replace(r"AbortError: The operation was aborted\. ?", "AbortError: Fetch is aborted", regex=True)
     
     # For document referrer we do not want to know the exact resp_id and count
     # We only want to know whether it is a origin or the full URl?
