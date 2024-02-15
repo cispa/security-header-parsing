@@ -18,7 +18,7 @@ except:
 
 # Time until all tests on a page have to be finished (called done())
 # TODO: make configurable for different tests and/or browsers! (or e.g., higher timeouts for repeats)
-# TODO: the upgrade-hsts.sub.html tests should use a higher timeout?! (as each request is done one after another and each individula request has a timeout of TIMEOUT/5)
+# TODO: the upgrade-hsts.sub.html tests should use a higher timeout?! (as each request is done one after another and each individual request has a timeout of TIMEOUT/5)
 GLOBAL_TEST_TIMEOUT = 5  # Also known as test_timeout in testharness.sub.js
 
 # Time after a single test marks itself as "no message received"
@@ -39,38 +39,43 @@ base_host = "sub.headers.websec.saarland"
 base_dir = "_hp/tests"
 HSTS_DEACTIVATE = f"https://{base_host}/_hp/common/empty.html?pipe=header(strict-transport-security,max-age=0)|status(200)"
 
-# [(test_file_name, label_name, number_of_response_ids, num_popup_parsing, num_popup_basic)]
-# number_of_response_ids is the maxium number of response_ids allowed for parsing tests
-# TODO: maybe increase number_of_response_ids for some tests to increase the speed?
-# Comment: Num tests per resp_id: <basic/debug>, parsing (for one base URL; x2 as most tests are loaded from both HTTP and HTTPS)
+
 test_info = [
     # Only for basic tests!
-    ("fetch-cors.sub.html", "CORS", 1, 0, 0),  # Tests: 32 (8*4), 4
+    
+    # [(test_file_name, label_name, number_of_response_ids, num_popup_parsing, num_popup_basic)]
+    # number_of_response_ids is the maxium number of response_ids allowed for parsing tests
+    ("fetch-cors.sub.html", "CORS", 1, 0, 0),  # Tests: 32 (8*4), 4 
+    # Comment: Num tests per resp_id: <basic/debug> (Origin relations x NumTests), parsing (for one base URL; x2 as most tests are loaded from both HTTP and HTTPS)
+
     # Only for parsing tests!
-    ("fetch-cors.sub.html", "CORS-ACAO", 1, 0, 0),  # Tests: 32 (8*4), 4
-    ("fetch-cors.sub.html", "CORS-ACAC", 1, 0, 0),  # Tests: 32 (8*4), 4
-    ("fetch-cors.sub.html", "CORS-ACAM", 1, 0, 0),  # Tests: 32 (8*4), 4
-    ("fetch-cors.sub.html", "CORS-ACAH", 1, 0, 0),  # Tests: 32 (8*4), 4
-    ("fetch-cors.sub.html", "CORS-ACEH", 1, 0, 0),  # Tests: 32 (8*4), 4
+    # For parsing tests, run more than one response at a time (maximum of ten included frames/images or 40 fetches or 1 popup or 4 promise tests)
+    ("fetch-cors.sub.html", "CORS-ACAO", 10, 0, 0),  # Tests: 32 (8*4), 4
+    ("fetch-cors.sub.html", "CORS-ACAC", 10, 0, 0),  # Tests: 32 (8*4), 4
+    ("fetch-cors.sub.html", "CORS-ACAM", 10, 0, 0),  # Tests: 32 (8*4), 4
+    ("fetch-cors.sub.html", "CORS-ACAH", 10, 0, 0),  # Tests: 32 (8*4), 4
+    ("fetch-cors.sub.html", "CORS-ACEH", 10, 0, 0),  # Tests: 32 (8*4), 4
+    
     # All tests!
-    ("framing.sub.html", "XFO", 1, 0, 0),  # Tests:  72 (8*9), 2
-    ("framing.sub.html", "CSP-FA", 1, 0, 0),  # Tests:  72 (8*9), 2
-    ("framing.sub.html", "CSPvsXFO", 1, 0, 0),  # Tests:  72 (8*9), 2
-    ("fullscreen-api-pp.sub.html", "PP", 1, 0, 0),  # Tests: 32 (8*4), 2
+    ("framing.sub.html", "XFO", 5, 0, 0),  # Tests:  72 (8*9), 2
+    ("framing.sub.html", "CSP-FA", 5, 0, 0),  # Tests:  72 (8*9), 2
+    ("framing.sub.html", "CSPvsXFO", 5, 0, 0),  # Tests:  72 (8*9), 2
+    ("fullscreen-api-pp.sub.html", "PP", 5, 0, 0),  # Tests: 32 (8*4), 2
     ("originAgentCluster-oac.sub.html", "OAC", 1, 1, 8),  # Tests: 24 (8*3), 1
-    ("perfAPI-tao.sub.html", "TAO", 1, 0, 0),  # Tests: 8 (8*1), 1
-    ("referrer-access-rp.sub.html", "RP", 1, 0, 8),  # Tests: 16 (8*2), 1
-    ("script-execution-csp.sub.html", "CSP-SCRIPT", 1, 0, 0),  # Tests: 16 (8*2), 1
-    ("subresource-loading-coep.sub.html", "COEP", 1, 0, 0),  # Tests: 16 (8*2), 1
-    ("subresource-loading-corp.sub.html", "CORP", 1, 0, 0),  # Tests: 32 (8*4), 1
-    ("subresource-loading-csp.sub.html", "CSP-IMG", 1, 0, 0),  # Tests: 8 (8*1), 1
+    ("perfAPI-tao.sub.html", "TAO", 10, 0, 0),  # Tests: 8 (8*1), 1
+    ("referrer-access-rp.sub.html", "RP", 10, 0, 8),  # Tests: 16 (8*2), 1
+    ("script-execution-csp.sub.html", "CSP-SCRIPT", 10, 0, 0),  # Tests: 16 (8*2), 1
+    ("subresource-loading-coep.sub.html", "COEP", 10, 0, 0),  # Tests: 16 (8*2), 1
+    ("subresource-loading-corp.sub.html", "CORP", 10, 0, 0),  # Tests: 32 (8*4), 1
+    ("subresource-loading-csp.sub.html", "CSP-IMG", 10, 0, 0),  # Tests: 8 (8*1), 1
     ("window-references-coop.sub.html", "COOP", 1, 1, 8),  # Tests: 8 (8*1), 1
+   
     # HTTP only
-    ("upgrade-hsts.sub.html", "HSTS", 1, 0, 0),    # Tests: 4 (2*2), 4 (2*2)
+    ("upgrade-hsts.sub.html", "HSTS", 1, 0, 0),    # Tests: 4 (2*2), 4 (2*2) # Promise tests thus only one resp_id
 ]
 
 
-def get_tests(resp_type, browser_id, scheme, max_popups=1000):
+def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resp_ids=1000):
     test_urls = []
     for url, label, num_resp_ids, popup_parsing, popup_basic in test_info:
         num_popups = popup_parsing if resp_type == "parsing" else popup_basic
@@ -83,11 +88,21 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000):
                 continue
             if label == "CORS" and resp_type == "parsing":
                 continue
-        for first_id, last_id in get_resp_ids(label, resp_type, num_resp_ids):
-            # If there are more popups than max_popups add URLs for each popup count, only add run_no_popups to the first one
-            if num_popups > max_popups:
-                buckets = [list(range(start, min(start + max_popups, num_popups + 1)))
-                           for start in range(1, num_popups + 1, max_popups)]
+        
+        # Allow more than one response_id per test for parsing tests
+        if resp_type == "parsing":
+            max_resp_ids = min(num_resp_ids, max_resp_ids)
+        else:
+            max_resp_ids = 1
+
+        for first_id, last_id in get_resp_ids(label, resp_type, max_resp_ids):
+            # All popups are the number of popups (per response_id) * the number of response_ids
+            all_popups = num_popups * (last_id - first_id + 1)
+            # If there are more popups than max_popups add URLs for each popup count
+            if all_popups > max_popups:
+                buckets = [list(range(start, min(start + max_popups, all_popups + 1)))
+                           for start in range(1, all_popups + 1, max_popups)]
+                # Only add run_no_popups to the first one
                 run_no_popup = "yes"
                 for bucket in buckets:
                     first_popup = bucket[0]
@@ -104,11 +119,33 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000):
 
 
 def get_resp_ids(label, resp_type, num_resp_ids):
+    assert num_resp_ids >= 1
+
     resp_ids = httpx.get(
         f"https://{base_host}/_hp/server/get_resp_ids.py?label={label}&resp_type={resp_type}", verify=False).json()
-    # TODO: use num_resp_ids to return continuous chunks of resp_ids with a maximum length of num_resp_ids
-    # For now: each chunk is always size 1, regardless of parameter
-    return [(resp_id, resp_id) for resp_id in resp_ids]
+    if num_resp_ids == 1:
+        return [(resp_id, resp_id) for resp_id in resp_ids]
+    # Use num_resp_ids to return continuous chunks of resp_ids with a maximum length of num_resp_ids
+    else:
+        splits = []
+        start = cur = count = None
+        for next in resp_ids:
+            if start is None:
+                start = cur = next
+                count = 1
+            elif next - cur != 1:
+                splits.append((start, cur))
+                start = cur = next
+                count = 1
+            else:
+                count += 1
+                cur = next
+                if count == num_resp_ids:
+                    splits.append((start, cur))
+                    start = cur = count = None
+        if start != None:
+            splits.append((start, cur))
+        return splits
 
 
 def get_or_create(session, model, defaults=None, **kwargs):
