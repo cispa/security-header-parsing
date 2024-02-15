@@ -299,6 +299,15 @@ if __name__ == '__main__':
             # Released 2024-01-25
             ("edge", "121", None, ["--headless=new"], get_or_create_browser("edge", "121", "Ubuntu 22.04", "headless-new", "selenium", "")),
             
+            # To compare between versions use additional chrome and firefox versions
+            # Released 2024-02-14
+            ("chrome", "122", None, ["--headless=new"], get_or_create_browser("chrome", "122", "Ubuntu 22.04", "headless-new", "selenium", "")),
+            # Released 2023-11-29
+            ("chrome", "120", None, ["--headless=new"], get_or_create_browser("chrome", "120", "Ubuntu 22.04", "headless-new", "selenium", "")),
+            # Released 2023-12-19
+            ("firefox", "121", None, ["-headless"], get_or_create_browser("firefox", "121", "Ubuntu 22.04", "headless", "selenium", "")),
+
+
             # Brave (setup for a concrete version managed manually)
             # mkdir ~/brave-versions
             # mkdir ~/brave-versions/brave-version
