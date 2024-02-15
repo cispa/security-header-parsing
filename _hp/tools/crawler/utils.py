@@ -75,7 +75,7 @@ test_info = [
 ]
 
 
-def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resp_ids=1000):
+def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000):
     test_urls = []
     for url, label, num_resp_ids, popup_parsing, popup_basic in test_info:
         num_popups = popup_parsing if resp_type == "parsing" else popup_basic
@@ -91,7 +91,7 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resp_ids=1000)
         
         # Allow more than one response_id per test for parsing tests
         if resp_type == "parsing":
-            max_resp_ids = min(num_resp_ids, max_resp_ids)
+            max_resp_ids = min(num_resp_ids, max_resps)
         else:
             max_resp_ids = 1
 

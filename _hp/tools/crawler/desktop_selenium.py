@@ -355,7 +355,7 @@ if __name__ == '__main__':
         for scheme in ["http", "https"]:
             for browser_name, browser_version, binary_location, arguments, browser_id in config:
                 if args.run_mode == "run_all":
-                    test_urls = get_tests(resp_type=args.resp_type, browser_id=browser_id, scheme=scheme)
+                    test_urls = get_tests(resp_type=args.resp_type, browser_id=browser_id, scheme=scheme, max_resps=10)
                     page_timeout = TIMEOUT
                 elif args.run_mode == "repeat":
                     with open("../repeat.json", "r") as f:
