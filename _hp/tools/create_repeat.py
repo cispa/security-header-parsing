@@ -52,6 +52,7 @@ def calc_repeat():
             except KeyError:
                 d = set()
             # TODO: for mobile browsers the first_popup, last_popup, run_no_popup has to be added again?
+            # TODO: there might be issues with the new more than one resp_id per URL parsing mode?
             repeat_url = re.sub("browser_id=(\d+)", f"browser_id={browser_id}", clean_url)
             repeat_url = re.sub("\?", f"?timeout={3*GLOBAL_TEST_TIMEOUT}&", repeat_url, count=1)
             d.add(repeat_url)
