@@ -51,7 +51,7 @@
     - Create a fresh Ubuntu22 container/VM: `lxc launch ubuntu:22.04 <name>` and connect to it `lxc exec <name> bash`
     - Switch to the ubuntu user: `su - ubuntu`
     - Clone this repository: `git clone git@projects.cispa.saarland:swag/wpt.git`
-    - Run the setup file: `cd wpt/_hp`, `./setup.sh` (reopen all terminals or run `source ~/.bashrc` afterwards)
+    - Run the setup file: `cd wpt/_hp`, `./setup.bash` (reopen all terminals or run `source ~/.bashrc` afterwards)
     - Configure DB settings in [config.json](config.json)
     - Setup the database: `cd _hp/tools && poetry run python models.py`
     - Setup certs: either remove `.demo` from the files in `_hp/tools/certs/` to use self-signed certs or add the real certs there

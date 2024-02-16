@@ -1,3 +1,4 @@
+from functools import lru_cache
 import json
 import re
 from analysis.utils import get_data, Config
@@ -13,8 +14,16 @@ from crawler.utils import GLOBAL_TEST_TIMEOUT
 # Question: how to increase the TIMEOUT in these reruns to make the chances of additional time outs as low as possible?
 
 # In total 189*2=378 URLs to visit exist for the basic mode!
+df = None
+
+@lru_cache(maxsize=None)
+def get_base_url(org_scheme, org_host, test_name, resp_type):
+    global df
+    return df.loc[(df["org_scheme"] == org_scheme) & (df["org_host"] == org_host) & (df["test_name"] == test_name) & (df["resp_type"] == resp_type)].iloc[0]["clean_url"]
+
 
 def calc_repeat():
+    global df
     # Load all data
     initial_data = """
     SELECT "Result".*, 
@@ -39,11 +48,11 @@ def calc_repeat():
     def get_missing(browser_list):
         return all_browsers - set(browser_list)
     
-    browser_count = df.loc[df["test_status"] == 0].groupby(["test_name", "relation_info", "org_scheme", "org_host", "resp_scheme", "resp_host", "response_id", "clean_url"])["browser_id"].unique()
+    browser_count = df.loc[df["test_status"] == 0].groupby(["test_name", "relation_info", "org_scheme", "org_host", "resp_scheme", "resp_host", "response_id", "resp_type"])["browser_id"].unique()
     max_c = browser_count.apply(len).max()
     missing = browser_count.loc[browser_count.apply(len) != max_c].apply(get_missing)
     to_repeat = {}
-    for (test_name, relation_info, org_scheme, org_host, resp_scheme, resp_host, response_id, clean_url), row in missing.to_frame().iterrows():
+    for (test_name, relation_info, org_scheme, org_host, resp_scheme, resp_host, response_id, resp_type), row in missing.to_frame().iterrows():
         browser_ids = row.iloc[0]
         for browser_id in browser_ids:
             browser_id = str(browser_id)
@@ -52,8 +61,11 @@ def calc_repeat():
             except KeyError:
                 d = set()
             # TODO: for mobile browsers the first_popup, last_popup, run_no_popup has to be added again?
-            # TODO: there might be issues with the new more than one resp_id per URL parsing mode?
-            repeat_url = re.sub("browser_id=(\d+)", f"browser_id={browser_id}", clean_url)
+            base_url = get_base_url(org_scheme, org_host, test_name, resp_type)
+            repeat_url = re.sub("browser_id=(\d+)", f"browser_id={browser_id}", base_url)
+            # For repetition runs, always only have one response_id per URL!
+            repeat_url = re.sub("first_id=(\d+)", f"first_id={response_id}", repeat_url)
+            repeat_url = re.sub("last_id=(\d+)", f"last_id={response_id}", repeat_url)
             repeat_url = re.sub("\?", f"?timeout={3*GLOBAL_TEST_TIMEOUT}&", repeat_url, count=1)
             d.add(repeat_url)
             to_repeat[browser_id] = d
