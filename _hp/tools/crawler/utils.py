@@ -50,11 +50,12 @@ test_info = [
 
     # Only for parsing tests!
     # For parsing tests, run more than one response at a time (maximum of ten included frames/images or 40 fetches or 1 popup or 4 promise tests)
-    ("fetch-cors.sub.html", "CORS-ACAO", 10, 0, 0),  # Tests: 32 (8*4), 4
-    ("fetch-cors.sub.html", "CORS-ACAC", 10, 0, 0),  # Tests: 32 (8*4), 4
-    ("fetch-cors.sub.html", "CORS-ACAM", 10, 0, 0),  # Tests: 32 (8*4), 4
-    ("fetch-cors.sub.html", "CORS-ACAH", 10, 0, 0),  # Tests: 32 (8*4), 4
-    ("fetch-cors.sub.html", "CORS-ACEH", 10, 0, 0),  # Tests: 32 (8*4), 4
+    # Empirically reduced fetch, COEP, and CSP-IMG (as there were a couple of tests with different/timeout results)
+    ("fetch-cors.sub.html", "CORS-ACAO", 5, 0, 0),  # Tests: 32 (8*4), 4
+    ("fetch-cors.sub.html", "CORS-ACAC", 5, 0, 0),  # Tests: 32 (8*4), 4
+    ("fetch-cors.sub.html", "CORS-ACAM", 5, 0, 0),  # Tests: 32 (8*4), 4
+    ("fetch-cors.sub.html", "CORS-ACAH", 5, 0, 0),  # Tests: 32 (8*4), 4
+    ("fetch-cors.sub.html", "CORS-ACEH", 5, 0, 0),  # Tests: 32 (8*4), 4
     
     # All tests!
     ("framing.sub.html", "XFO", 5, 0, 0),  # Tests:  72 (8*9), 2
@@ -65,9 +66,9 @@ test_info = [
     ("perfAPI-tao.sub.html", "TAO", 10, 0, 0),  # Tests: 8 (8*1), 1
     ("referrer-access-rp.sub.html", "RP", 10, 0, 8),  # Tests: 16 (8*2), 1
     ("script-execution-csp.sub.html", "CSP-SCRIPT", 10, 0, 0),  # Tests: 16 (8*2), 1
-    ("subresource-loading-coep.sub.html", "COEP", 10, 0, 0),  # Tests: 16 (8*2), 1
+    ("subresource-loading-coep.sub.html", "COEP", 5, 0, 0),  # Tests: 16 (8*2), 1
     ("subresource-loading-corp.sub.html", "CORP", 10, 0, 0),  # Tests: 32 (8*4), 1
-    ("subresource-loading-csp.sub.html", "CSP-IMG", 10, 0, 0),  # Tests: 8 (8*1), 1
+    ("subresource-loading-csp.sub.html", "CSP-IMG", 5, 0, 0),  # Tests: 8 (8*1), 1
     ("window-references-coop.sub.html", "COOP", 1, 1, 8),  # Tests: 8 (8*1), 1
    
     # HTTP only
