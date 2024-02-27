@@ -354,7 +354,8 @@ if __name__ == '__main__':
         assert(len(config) == 1)
         browser_name, browser_version, binary_location, arguments, browser_id = config[0]
         for url in urls:
-            assert(int(re.findall("runner-(\d+)", url)[0]) == browser_id)
+            assert(int(re.findall("runner-(\d+)", url)[0]) == 1)
+            url = url + f"?browser_id={browser_id}"
             all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, [url], args.timeout_task, args.timeout_task-60))
     else:
         for scheme in ["http", "https"]:
