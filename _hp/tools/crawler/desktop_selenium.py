@@ -14,6 +14,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common import WebDriverException
+
 import datetime
 import argparse
 import json
@@ -134,8 +136,14 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
         cur_url = 0
         extra = {"browser": browser_name, "browser_version": browser_version, "binary_location": binary_location, "arguments": arguments}
         logger.info(f"Start {browser_name} ({browser_version})", extra=extra)
-        start = datetime.datetime.now()  
-        driver = get_browser(browser_name, browser_version,
+        start = datetime.datetime.now() 
+        # Try getting a driver twice (sometimes Safari fails the first attempt)
+        try:
+            driver = get_browser(browser_name, browser_version,
+                            binary_location, arguments)
+        except WebDriverException:
+            logger.error(f"First get_browser failed.", exc_info=True, extra=extra)
+            driver = get_browser(browser_name, browser_version,
                             binary_location, arguments)
         processes = get_child_processes(driver.service.process.pid)
         # Max page load timeout
@@ -262,7 +270,7 @@ if __name__ == '__main__':
     parser.add_argument("--run_mode", choices=["run_all", "repeat"], default="run_all",
                         help="Specify the mode (default: run_all)")
     parser.add_argument("--num_browsers", default=60, type=int, help="How many browsers to start in parallel (max).")
-    parser.add_argument("--max_urls_until_restart", default=100, type=int, help="Maximum number of URLs until the browser is restated.")
+    parser.add_argument("--max_urls_until_restart", default=100, type=int, help="Maximum number of URLs until the browser is restarted.")
     parser.add_argument("--timeout_task", default=1000, type=int, help="Timeout for a single task (max_urls_until_restart URLs in one browser) in seconds.")
     parser.add_argument("--gen_page_runner", action="store_true", help="Toggle the generate test-page runner mode.")
     parser.add_argument("--page_runner_json", default="", type=str, help="Path to a json list of page_runner URLs to visit")
