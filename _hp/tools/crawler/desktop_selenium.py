@@ -264,12 +264,14 @@ if __name__ == '__main__':
     parser.add_argument("--num_browsers", default=60, type=int, help="How many browsers to start in parallel (max).")
     parser.add_argument("--max_urls_until_restart", default=100, type=int, help="Maximum number of URLs until the browser is restated.")
     parser.add_argument("--timeout_task", default=1000, type=int, help="Timeout for a single task (max_urls_until_restart URLs in one browser) in seconds.")
-    parser.add_argument("--gen_mac_page_runner", action="store_true", help="Toggle the generate test-page runner for Mac Mode.")
+    parser.add_argument("--gen_page_runner", action="store_true", help="Toggle the generate test-page runner mode.")
     parser.add_argument("--page_runner_json", default="", type=str, help="Path to a json list of page_runner URLs to visit")
+    parser.add_argument("--max_resps", default=10, type=int, help="Maximum number of responses per parsing test URL")
+    parser.add_argument("--max_popups", default=100, type=int, help="Maximum number of popus per test URL")
     args = parser.parse_args()
 
     # (browser_name, version, binary_location (e.g., for brave), arguments (e.g, for headless), browser_id
-    if sys.platform == "darwin" or args.gen_mac_page_runner:
+    if sys.platform == "darwin":
         # Only run Safari (headfull as no headless mode exists)
         # Initial experiments showed almost no differences between Linux and macOS versions of brave, chrome, firefox
         config = [
@@ -335,6 +337,9 @@ if __name__ == '__main__':
             ("firefox", "119", None, None, get_or_create_browser("firefox", "119", "Ubuntu 22.04", "xvfb", "selenium", "")),
         ]
 
+    if args.gen_page_runner:
+        config = [("Unknown", "Unknown", None, None, get_or_create_browser("Unknown", "Unknown", "Unknown", "real", "manual", None))]
+
     now = f"{datetime.datetime.now()}"
     log_path = f"logs/desktop-selenium/{now}"
 
@@ -355,7 +360,7 @@ if __name__ == '__main__':
         for scheme in ["http", "https"]:
             for browser_name, browser_version, binary_location, arguments, browser_id in config:
                 if args.run_mode == "run_all":
-                    test_urls = get_tests(resp_type=args.resp_type, browser_id=browser_id, scheme=scheme, max_resps=10)
+                    test_urls = get_tests(resp_type=args.resp_type, browser_id=browser_id, scheme=scheme, max_resps=args.max_resps, max_popups=args.max_popups)
                     page_timeout = TIMEOUT
                 elif args.run_mode == "repeat":
                     with open("../repeat.json", "r") as f:
@@ -370,13 +375,13 @@ if __name__ == '__main__':
                 url_chunks = [test_urls[i:i + args.max_urls_until_restart] for i in range(0, len(test_urls), args.max_urls_until_restart)]
                 for url_chunk in url_chunks:
                     all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, url_chunk, args.timeout_task, page_timeout))
-                    if args.gen_mac_page_runner:
+                    if args.gen_page_runner:
                         url_list.append(create_test_page_runner(browser_id, f"{rand_token}-{chunk_id}", url_chunk))
                         chunk_id += 1
 
-    if args.gen_mac_page_runner:
+    if args.gen_page_runner:
         print(f"URLs to visit: {url_list}")
-        with open(f"mac-{rand_token}.json", "w") as f:
+        with open(f"{args.resp_type}-MaxURLs{args.max_urls_until_restart}-MaxResps{args.max_resps}-MaxPopups{args.max_popups}-{rand_token}.json", "w") as f:
             json.dump(url_list, f)
     else:
         with Pool(processes=args.num_browsers, initializer=setup_process, initargs=(log_path,)) as p:

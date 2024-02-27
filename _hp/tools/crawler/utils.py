@@ -111,7 +111,7 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000):
                     test_urls.append(
                         f"{scheme}://{base_host}/{base_dir}/{url}?timeout={GLOBAL_TEST_TIMEOUT}&resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}&first_popup={first_popup}&last_popup={last_popup}&run_no_popup={run_no_popup}")
                     run_no_popup = "no"
-                print(buckets)
+                # print(buckets)
             # Otherwise run all tests
             else:
                 test_urls.append(

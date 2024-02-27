@@ -60,7 +60,6 @@
     - Automatic: Start the testrunners, e.g., `poetry run desktop_selenium.py`
     - Manual: Visit http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html (HTTPS: 443)
 - TODOs:
-    - create useful responses for each feature group
     - analyse results!
       - discover differences in browsers/versions
       - "explain" reasons (keep in mind that other features such as blocked mixed content and CORB might be responsible for differences and not different parsing of the security header)

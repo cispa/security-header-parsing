@@ -13,6 +13,8 @@
 		let counter = 0;
 		let openWindow;
 		let timeoutId;
+		let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+		let browser_id = urlParams.get('browser_id') || 1;
 
 		function closeCurrentWindow() {
 			if (openWindow) {
@@ -25,7 +27,9 @@
 
 			if (counter < urls.length) {
 				// interpreted as: top=min,left=min,width=min,height=min
-				openWindow = window.open(urls[counter], "_blank", "top=0,left=0,width=100,height=100");
+				let url = urls[counter];
+				url = url.replace(/browser_id=1/, `browser_id=${browser_id}`);
+				openWindow = window.open(url, "_blank", "top=0,left=0,width=100,height=100");
 				counter++;
 				// Open the next test after the TIMEOUT
 				timeoutId = setTimeout(function () {
