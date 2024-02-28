@@ -18,25 +18,5 @@
 		"package_name":"org.mozilla.firefox",
 	   	"intent":"org.mozilla.fenix.IntentReceiverActivity",	   
 	   	"version":"119.1.1"
-	},
-	"firefox_beta": {
-		"package_name":"org.mozilla.firefox_beta",
-	   	"intent":"org.mozilla.fenix.IntentReceiverActivity",	   
-	   	"version":"122.0b1"
-	},
-	"ucmobile": {
-		"package_name":"com.UCMobile.intl",
-	   	"intent":"com.UCMobile.main.UCMobile",	   
-	   	"version":"13.3.8.1305"
-	},
-	"phoenix": {
-		"package_name":"com.transsion.phoenix",
-	   	"intent":"com.proj.sun.activity.LaunchActivity",	   
-	   	"version":"14.3.1.4745"
-	},
-	"baidu": {
-		"package_name":"com.baidu.searchbox",
-	   	"intent":"com.baidu.searchbox.MainActivity",	   
-	   	"version":"13.47.5.10"
-	}	
+	}		
  }
