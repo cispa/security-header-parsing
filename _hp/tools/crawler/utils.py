@@ -75,6 +75,11 @@ test_info = [
     ("upgrade-hsts.sub.html", "HSTS", 1, 0, 0),    # Tests: 4 (2*2), 4 (2*2) # Promise tests thus only one resp_id
 ]
 
+timeout_modifiers = {
+    "OAC": 2,
+    "RP": 2
+}
+
 
 def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000):
     test_urls = []
@@ -96,6 +101,7 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000):
         else:
             max_resp_ids = 1
 
+        test_timeout = timeout_modifiers.get(label, 1) * GLOBAL_TEST_TIMEOUT
         for first_id, last_id in get_resp_ids(label, resp_type, max_resp_ids):
             # All popups are the number of popups (per response_id) * the number of response_ids
             all_popups = num_popups * (last_id - first_id + 1)
@@ -109,13 +115,13 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000):
                     first_popup = bucket[0]
                     last_popup = bucket[-1]
                     test_urls.append(
-                        f"{scheme}://{base_host}/{base_dir}/{url}?timeout={GLOBAL_TEST_TIMEOUT}&resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}&first_popup={first_popup}&last_popup={last_popup}&run_no_popup={run_no_popup}")
+                        f"{scheme}://{base_host}/{base_dir}/{url}?timeout={test_timeout}&resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}&first_popup={first_popup}&last_popup={last_popup}&run_no_popup={run_no_popup}")
                     run_no_popup = "no"
                 # print(buckets)
             # Otherwise run all tests
             else:
                 test_urls.append(
-                    f"{scheme}://{base_host}/{base_dir}/{url}?timeout={GLOBAL_TEST_TIMEOUT}&resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}")
+                    f"{scheme}://{base_host}/{base_dir}/{url}?timeout={test_timeout}&resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}")
     return test_urls
 
 
