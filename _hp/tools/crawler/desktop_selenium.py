@@ -171,7 +171,9 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
                 except Exception:
                     logger.error("Switching browser window failed", exc_info=True, extra=extra)
                 # Wait until the results are saved on the server (after finishing fetch request, a div with id "finished" is added to the DOM)
-                WebDriverWait(driver, page_timeout).until(
+                url_timeout = int(re.search("timeout=(\d+)", url)[1])
+                timeout = max(page_timeout, url_timeout+2)
+                WebDriverWait(driver, timeout).until(
                     EC.presence_of_element_located((By.ID, "finished")))
                 cur_url += 1
             except Exception:
