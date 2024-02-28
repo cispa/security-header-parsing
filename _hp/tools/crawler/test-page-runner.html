@@ -15,6 +15,7 @@
 		let timeoutId;
 		let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
 		let browser_id = urlParams.get('browser_id') || 1;
+		let run_id = urlParams.get('run_id') || "unknown";
 
 		function closeCurrentWindow() {
 			if (openWindow) {
@@ -42,6 +43,10 @@
 				d = document.createElement("div");
 				d.id = "finished";
 				document.body.appendChild(d);
+				
+				// Try to stop the page runner
+				fetch(`${location.origin}/_hp/server/notify_runner_clients.py?run_id=${run_id}`);
+
 			}
 		}
 
