@@ -14,9 +14,9 @@
 	   "intent":"org.chromium.chrome.browser.ChromeTabbedActivity",	   
 	   "version":"1.60.116"
 	},
-	"firefox": {
-		"package_name":"org.mozilla.firefox",
+	"firefox_beta": {
+		"package_name":"org.mozilla.firefox_beta",
 	   	"intent":"org.mozilla.fenix.IntentReceiverActivity",	   
-	   	"version":"119.1.1"
-	}		
+	   	"version":"122.0b1"
+	}	
  }

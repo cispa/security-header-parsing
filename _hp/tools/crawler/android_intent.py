@@ -8,6 +8,21 @@ MODE = 'basic'
 
 from utils import get_tests, get_or_create_browser, TIMEOUT
 from multiprocessing import Pool
+import psycopg
+import uuid    
+
+
+# Setup the config
+try:
+	proj_config = json.load(open("config.json"))
+except OSError:
+	try:
+		proj_config = json.load(open("_hp/tools/config.json"))
+	except OSError:
+		proj_config = json.load(open("../config.json"))
+
+DB_URL = proj_config['DB_URL'].replace("postgresql+psycopg2://", "postgresql://")
+
 
 class PARAMETER:
 	def __init__(self, app_list):
@@ -45,15 +60,25 @@ def run_test(parameter):
 	for app in parameter.app_list:			
 		print(f'Testing: {app.package_name}, on device ID: {app.device_id}, with URL: {app.test_url}')					
 
-		# # starting the browser to create init profile
-		# send_url_intent(app.device_id, app.package_name, app.activity_name, 'www.google.com')
-		# time.sleep(5)		
+		# starting the browser to create init profile
+		send_url_intent(app.device_id, app.package_name, app.activity_name, 'www.google.com')
+		time.sleep(3)		
+
+		run_id = uuid.uuid4().hex
+		app.test_url += f'&run_id={run_id}'
 
 		encoded_test_url = app.test_url.replace('&','\&')
+		with psycopg.connect(DB_URL, autocommit=True) as conn:
+			conn.execute("LISTEN page_runner")
+			gen = conn.notifies()			
+
+			send_url_intent(app.device_id, app.package_name, app.activity_name, encoded_test_url)
+
+			for notify in gen:
+				if notify.payload == run_id:
+					print(notify)
+					gen.close()				
 		
-		send_url_intent(app.device_id, app.package_name, app.activity_name, encoded_test_url)
-				
-		time.sleep(30)				
 		
 
 def main(browser_list, url_list, config_dict):
@@ -81,7 +106,7 @@ def main(browser_list, url_list, config_dict):
 	parameters = []
 	for working_list in chunked_app_lists:
 		parameters.append(PARAMETER(working_list))
-	
+		
 	pool = Pool()
 	pool.map(run_test, parameters)
 
