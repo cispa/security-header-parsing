@@ -25,6 +25,7 @@ def calc_repeat():
     def clean_url(url):
         url = re.sub(r"browser_id=(\d+)", "browser_id=1", url)
         url = re.sub(r"&first_popup=(\d+)&last_popup=(\d+)&run_no_popup=(yes|no)", "", url)
+        url = re.sub(r"&run_id=(\w+)", "", url)
         url = re.sub(r"timeout=(\d+)&", "", url)
         return url
     df["clean_url"] = df["full_url"].apply(clean_url)
