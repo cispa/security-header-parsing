@@ -157,6 +157,13 @@ async function save_result(tests, status) {
   d = document.createElement("div");
   d.id = "finished";
   document.body.appendChild(d);
+
+  // Try to stop the page runner
+  let run_id = urlParams.get('run_id') || undefined;
+  if (run_id) {
+    await fetch(`${location.origin}/_hp/server/notify_runner_clients.py?run_id=${run_id}`);
+  }
+
   // Notify opener page that the test is finished!
   try {
     window.opener.postMessage("finished", "*");
@@ -164,5 +171,7 @@ async function save_result(tests, status) {
     // Openere page does not exist; test opened directly
     console.log(e);
   }
+
+
 };
 add_completion_callback(save_result);
