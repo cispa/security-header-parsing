@@ -1,30 +1,15 @@
-from functools import lru_cache
 import json
 import re
 from analysis.utils import get_data, Config
 from crawler.utils import GLOBAL_TEST_TIMEOUT
 
-# Create a json with all tests to redo (either timed out or completely missing)
-# TODO: change it to redo all tests that have less than 5 results! (i.e., we first run all tests 5 times, then we check which tests have less than 5 results and run them again)
-# Idea: group by test and count number of unique browser_ids
-# Get the maximum count
-# For all tests that do not have the maximum count, compute which ones are missing
-# Save them (unique page loads) to a file
-# Caveat1: easy way will usually also result in the duplication of other tests (e.g., 5/10 tests on a page load timed out -> 10 tests will be repeated)
-# However this should not matter too much as test results should be stable (see stability analysis below)
-# Question: how to increase the TIMEOUT in these reruns to make the chances of additional time outs as low as possible?
-
-# In total 189*2=378 URLs to visit exist for the basic mode!
-df = None
-
-@lru_cache(maxsize=None)
-def get_base_url(org_scheme, org_host, test_name, resp_type):
-    global df
-    return df.loc[(df["org_scheme"] == org_scheme) & (df["org_host"] == org_host) & (df["test_name"] == test_name) & (df["resp_type"] == resp_type)].iloc[0]["clean_url"]
-
+# Create a json with all tests to redo (either timed out or completely missing in one or more of the 5 runs)
+# Idea: group by test and count how many outcomes for each browser were observed
+# For all tests that have less than 5 results, save them (unique page loads) to a file
+# Caveat: easy way will usually also result in the duplication of other tests (e.g., 5/10 tests on a page load timed out -> 10 tests will be repeated)
+# However this should not matter too much as test results should be stable and we perform majority voting on the results
 
 def calc_repeat():
-    global df
     # Load all data
     initial_data = """
     SELECT "Result".*, 
@@ -33,9 +18,8 @@ def calc_repeat():
     FROM "Result"
     JOIN "Response" ON "Result".response_id = "Response".id JOIN "Browser" ON "Result".browser_id = "Browser".id
     WHERE "Browser".name != 'Unknown' and "Response".resp_type != 'debug'
-    and "Browser".id not in (4, 28, 30);
+    and "Browser".os != 'Android 11'; -- For now ignore Android
     """
-    # 4 ucmobile (Android), 28 opera (iOS), 30 safari (iOS) currently not working
     df = get_data(Config(), initial_data)
     
     def clean_url(url):
@@ -44,32 +28,40 @@ def calc_repeat():
         url = re.sub(r"timeout=(\d+)&", "", url)
         return url
     df["clean_url"] = df["full_url"].apply(clean_url)
-
-    all_browsers = set(df["browser_id"].unique()) 
-    def get_missing(browser_list):
-        return all_browsers - set(browser_list)
+   
+    def create_test_id(row):
+        return f'{row["test_name"]}_{row["relation_info"]}_{row["org_scheme"]}_{row["org_host"]}_{row["resp_scheme"]}_{row["resp_host"]}_{row["response_id"]}_{row["resp_type"]}'
+    df["browser_id"] = df["browser_id"].astype("category")
+    # Takes a while (500s+) (might be faster to already do it with postgres but not too important)
+    df["test_id"] = df.apply(create_test_id, axis=1)
+    df["test_id"] = df["test_id"].astype("category")
     
-    browser_count = df.loc[df["test_status"] == 0].groupby(["test_name", "relation_info", "org_scheme", "org_host", "resp_scheme", "resp_host", "response_id", "resp_type"])["browser_id"].unique()
-    max_c = browser_count.apply(len).max()
-    missing = browser_count.loc[browser_count.apply(len) != max_c].apply(get_missing)
+    test_counts = df.groupby(["test_id"], observed=True)["browser_id"].value_counts()
+    tests_to_repeat = test_counts.loc[test_counts < 5].reset_index()
+    print(tests_to_repeat[["browser_id", "count"]].value_counts())
+
+    rep = tests_to_repeat.merge(df.drop_duplicates(subset=["test_id"]), on=["test_id"], how="left", suffixes=["", "_ignore"])
     to_repeat = {}
-    for (test_name, relation_info, org_scheme, org_host, resp_scheme, resp_host, response_id, resp_type), row in missing.to_frame().iterrows():
-        browser_ids = row.iloc[0]
-        for browser_id in browser_ids:
-            browser_id = str(browser_id)
-            try:
-                d = to_repeat[browser_id]
-            except KeyError:
-                d = set()
-            # TODO: for mobile browsers the first_popup, last_popup, run_no_popup has to be added again?
-            base_url = get_base_url(org_scheme, org_host, test_name, resp_type)
-            repeat_url = re.sub("browser_id=(\d+)", f"browser_id={browser_id}", base_url)
-            # For repetition runs, always only have one response_id per URL!
-            repeat_url = re.sub("first_id=(\d+)", f"first_id={response_id}", repeat_url)
-            repeat_url = re.sub("last_id=(\d+)", f"last_id={response_id}", repeat_url)
-            repeat_url = re.sub("\?", f"?timeout={3*GLOBAL_TEST_TIMEOUT}&", repeat_url, count=1)
-            d.add(repeat_url)
-            to_repeat[browser_id] = d
+    for _, row in rep.iterrows():
+        browser_id = str(row["browser_id"])
+        response_id = row["response_id"]
+        try:
+            d = to_repeat[browser_id]
+        except KeyError:
+            d = set()
+        base_url = row["clean_url"]
+        repeat_url = re.sub("browser_id=(\d+)", f"browser_id={browser_id}", base_url)
+       
+        # For repetition runs, always only have one response_id per URL!
+        repeat_url = re.sub("first_id=(\d+)", f"first_id={response_id}", repeat_url)
+        repeat_url = re.sub("last_id=(\d+)", f"last_id={response_id}", repeat_url)
+        # Increase the TIMEOUT to make additional issues due to timeouts less likely
+        repeat_url = re.sub("\?", f"?timeout={3*GLOBAL_TEST_TIMEOUT}&", repeat_url, count=1)
+        
+        # TODO: for mobile browsers the first_popup, last_popup, run_no_popup has to be added again?
+
+        d.add(repeat_url)
+        to_repeat[browser_id] = d
     with open("repeat.json", "w") as f:
         json.dump(to_repeat, f, default=list)
 
