@@ -5,6 +5,7 @@ from analysis.utils import get_data, Config
 from crawler.utils import GLOBAL_TEST_TIMEOUT
 
 # Create a json with all tests to redo (either timed out or completely missing)
+# TODO: change it to redo all tests that have less than 5 results! (i.e., we first run all tests 5 times, then we check which tests have less than 5 results and run them again)
 # Idea: group by test and count number of unique browser_ids
 # Get the maximum count
 # For all tests that do not have the maximum count, compute which ones are missing
