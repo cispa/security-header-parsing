@@ -89,6 +89,8 @@ def to_cat(column, non_cat=[]):
 def clean_url(url):
     # Set browser_id=1 (unknown) to not accidentally include them in our real data collection
     url = re.sub(r"browser_id=(\d+)", "browser_id=1", url)
+    url = re.sub(r"&first_popup=(\d+)&last_popup=(\d+)&run_no_popup=(yes|no)", "", url)
+    url = re.sub(r"&run_id=(\w+)", "", url)
     url = re.sub(r"timeout=(\d+)&", "", url)
     return url
 
