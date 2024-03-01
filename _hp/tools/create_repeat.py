@@ -17,7 +17,7 @@ def calc_repeat():
     "Browser".name, "Browser".version, "Browser".headless_mode, "Browser".os, "Browser".automation_mode, "Browser".add_info
     FROM "Result"
     JOIN "Response" ON "Result".response_id = "Response".id JOIN "Browser" ON "Result".browser_id = "Browser".id
-    WHERE "Browser".name != 'Unknown' and "Response".resp_type != 'debug'
+    WHERE "Browser".name != 'Unknown' and "Response".resp_type != 'debug' and test_status = 0
     and "Browser".os != 'Android 11'; -- For now ignore Android
     """
     df = get_data(Config(), initial_data)
