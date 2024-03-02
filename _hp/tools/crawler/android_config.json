@@ -18,5 +18,10 @@
 		"package_name":"org.mozilla.firefox_beta",
 	   	"intent":"org.mozilla.fenix.IntentReceiverActivity",	   
 	   	"version":"122.0b1"
-	}	
+	},
+	"firefox": {
+		"package_name":"org.mozilla.firefox",
+	   	"intent":"org.mozilla.fenix.IntentReceiverActivity",	   
+	   	"version":"119.1.1"
+	}
  }
