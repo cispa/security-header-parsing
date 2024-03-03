@@ -25,9 +25,10 @@ DB_URL = proj_config['DB_URL'].replace("postgresql+psycopg2://", "postgresql://"
 
 
 class PARAMETER:
-	def __init__(self, app_list, device_id):
+	def __init__(self, app_list, device_id, auto_restart):
 		self.app_list = app_list
 		self.device_id = device_id
+		self.auto_restart = auto_restart
 
 class APP:
 	def __init__(self, package_name, activity_name, test_url):
@@ -172,7 +173,7 @@ def run_test(parameter):
 			print(e)
 			print('Timeout exception!')
 		
-		if run_times >= 100:
+		if run_times >= 100 and parameter.auto_restart:
 			run_times = 0
 			device_avd_name = get_emulator_avd_name(device_id)
 			print(f'Restarting the emulator: {device_id}, AVD: {device_avd_name}')
@@ -181,7 +182,7 @@ def run_test(parameter):
 			print(f'Done restarting the emulator: {device_id}, AVD: {device_avd_name}')
 		
 
-def main(browser_list, url_list, repeat_times, num_devices, resp_type, config_dict):
+def main(browser_list, url_list, repeat_times, num_devices, resp_type, auto_restart, config_dict):
 	app_list = list()		
 
 	for browser_name in browser_list:
@@ -220,7 +221,7 @@ def main(browser_list, url_list, repeat_times, num_devices, resp_type, config_di
 
 	for index, working_list in enumerate(chunked_app_lists):
 		device_id = device_ids[index]
-		parameters.append(PARAMETER(working_list, device_id))
+		parameters.append(PARAMETER(working_list, device_id, auto_restart))
 		
 	pool = Pool()
 	pool.map(run_test, parameters)
@@ -238,7 +239,8 @@ if __name__ == '__main__':
 	ap.add_argument('-repeat', '--repeat', default=1, type=int, help='Repeat x times')
 	ap.add_argument('-num_devices', '--num_devices', dest='num_devices', type=int)
 	ap.add_argument('-type', '--resp_type', choices=['basic', 'debug', 'parsing'], default='basic', help='Specify the response type (default: basic)')
-
+	ap.add_argument('-auto_restart', action='store_true', help='Auto restart')
+	
 	args = ap.parse_args()
 
 	if 'all' in args.browsers:
@@ -250,5 +252,4 @@ if __name__ == '__main__':
 			url_list = json.load(file)		
 	
 	print(f'Starting test on {args.browsers} ...')	
-	
-	main(args.browsers, url_list, args.repeat, args.num_devices, args.resp_type, config_dict)
+	main(args.browsers, url_list, args.repeat, args.num_devices, args.resp_type, args.auto_restart, config_dict)
