@@ -76,8 +76,13 @@ test_info = [
 ]
 
 timeout_modifiers = {
-    "OAC": 2,
-    "RP": 2
+    "OAC": 3,
+    "RP": 3,
+    "XFO": 2,
+    "CSP-FA": 2,
+    "CSPvsXFO": 2,
+    "CORP": 1.5,
+    "HSTS": 1.5,
 }
 
 
