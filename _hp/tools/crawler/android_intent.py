@@ -138,6 +138,7 @@ def start_emulators(num_devices):
 # run on each emulator
 def run_test(parameter):		
 	device_id = parameter.device_id
+	device_avd_name = get_emulator_avd_name(device_id)
 	print(f'Testing: on device ID: {device_id}, with number of URLs: {len(parameter.app_list)}')	
 	
 	run_times = 0	
@@ -174,12 +175,13 @@ def run_test(parameter):
 			print('Timeout exception!')
 		
 		if run_times >= 100 and parameter.auto_restart:
-			run_times = 0
-			device_avd_name = get_emulator_avd_name(device_id)
+			run_times = 0			
 			print(f'Restarting the emulator: {device_id}, AVD: {device_avd_name}')
 			force_stop_emulators(device_avd_name)
 			start_emulator_by_avd_name(device_avd_name)
 			print(f'Done restarting the emulator: {device_id}, AVD: {device_avd_name}')
+	
+	force_stop_emulators(device_avd_name)
 		
 
 def main(browser_list, url_list, repeat_times, num_devices, resp_type, auto_restart, config_dict):
