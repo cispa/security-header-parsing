@@ -81,8 +81,8 @@ timeout_modifiers = {
     "XFO": 2,
     "CSP-FA": 2,
     "CSPvsXFO": 2,
-    "CORP": 1.5,
-    "HSTS": 1.5,
+    "CORP": 2,
+    "HSTS": 2,
 }
 
 
