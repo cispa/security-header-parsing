@@ -17,15 +17,12 @@ except:
 
 
 # Time until all tests on a page have to be finished (called done())
-# TODO: make configurable for different tests and/or browsers! (or e.g., higher timeouts for repeats)
-# TODO: the upgrade-hsts.sub.html tests should use a higher timeout?! (as each request is done one after another and each individual request has a timeout of TIMEOUT/5)
 GLOBAL_TEST_TIMEOUT = 5  # Also known as test_timeout in testharness.sub.js
 
 # Time after a single test marks itself as "no message received"
 # SINGLE_TEST_TIMEOUT = 0.9 * GLOBAL_TEST_TIMEOUT # 0.9 is hardcoded in the tests (0.9 * test_timeout)
 
 # Time it takes to open the browser and perform the inital request to the test page
-# TODO: this is different for different browsers, some mobile browsers are really slow; use a dict?
 BROWSER_START_TIMEOUT = 1
 # Time to wait for the final request to finish
 FINAL_REQ_TIMEOUT = 1
@@ -75,9 +72,10 @@ test_info = [
     ("upgrade-hsts.sub.html", "HSTS", 1, 0, 0),    # Tests: 4 (2*2), 4 (2*2) # Promise tests thus only one resp_id
 ]
 
+# Some tests often need longer
 timeout_modifiers = {
-    "OAC": 3,
-    "RP": 3,
+    "OAC": 2,
+    "RP": 2,
     "XFO": 2,
     "CSP-FA": 2,
     "CSPvsXFO": 2,
@@ -86,7 +84,7 @@ timeout_modifiers = {
 }
 
 
-def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000):
+def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000, browser_modifier=1):
     test_urls = []
     for url, label, num_resp_ids, popup_parsing, popup_basic in test_info:
         num_popups = popup_parsing if resp_type == "parsing" else popup_basic
@@ -106,7 +104,7 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000):
         else:
             max_resp_ids = 1
 
-        test_timeout = timeout_modifiers.get(label, 1) * GLOBAL_TEST_TIMEOUT
+        test_timeout = timeout_modifiers.get(label, 1) * GLOBAL_TEST_TIMEOUT * browser_modifier
         for first_id, last_id in get_resp_ids(label, resp_type, max_resp_ids):
             # All popups are the number of popups (per response_id) * the number of response_ids
             all_popups = num_popups * (last_id - first_id + 1)
