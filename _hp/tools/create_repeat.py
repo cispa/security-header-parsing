@@ -18,7 +18,8 @@ def calc_repeat():
     FROM "Result"
     JOIN "Response" ON "Result".response_id = "Response".id JOIN "Browser" ON "Result".browser_id = "Browser".id
     WHERE "Browser".name != 'Unknown' and "Response".resp_type != 'debug' and test_status = 0
-    and "Browser".os != 'Android 11'; -- For now ignore Android
+    and "Response".resp_type = 'basic' and "Browser".os = 'Ubuntu 22.04' and "Result".created_at::date = '2024-03-04'
+    and "Browser".os != 'Android 11'; -- For now ignore Android; adapt the above query dynamically to generate the correct repeats only fast
     """
     df = get_data(Config(), initial_data)
     
@@ -57,6 +58,7 @@ def calc_repeat():
         repeat_url = re.sub("first_id=(\d+)", f"first_id={response_id}", repeat_url)
         repeat_url = re.sub("last_id=(\d+)", f"last_id={response_id}", repeat_url)
         # Increase the TIMEOUT to make additional issues due to timeouts less likely
+        # TODO: for mobile 3xGLOBAL_TEST_TIMEOUT (15s) is not necessarily higher than some of the normal timeouts (20s, 5*2*2)
         repeat_url = re.sub("\?", f"?timeout={3*GLOBAL_TEST_TIMEOUT}&", repeat_url, count=1)
         
         # TODO: for mobile browsers the first_popup, last_popup, run_no_popup has to be added again?

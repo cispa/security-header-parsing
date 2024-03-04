@@ -141,7 +141,7 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
         try:
             driver = get_browser(browser_name, browser_version,
                             binary_location, arguments)
-        except WebDriverException:
+        except (WebDriverException, OSError):
             logger.error(f"First get_browser failed.", exc_info=True, extra=extra)
             driver = get_browser(browser_name, browser_version,
                             binary_location, arguments)
@@ -276,7 +276,7 @@ if __name__ == '__main__':
                         help="Specify the mode (default: run_all)")
     parser.add_argument("--num_browsers", default=60, type=int, help="How many browsers to start in parallel (max).")
     parser.add_argument("--max_urls_until_restart", default=100, type=int, help="Maximum number of URLs until the browser is restarted.")
-    parser.add_argument("--timeout_task", default=1000, type=int, help="Timeout for a single task (max_urls_until_restart URLs in one browser) in seconds.")
+    parser.add_argument("--timeout_task", default=1500, type=int, help="Timeout for a single task (max_urls_until_restart URLs in one browser) in seconds.")
     parser.add_argument("--gen_page_runner", action="store_true", help="Toggle the generate test-page runner mode.")
     parser.add_argument("--page_runner_json", default="", type=str, help="Path to a json list of page_runner URLs to visit")
     parser.add_argument("--max_resps", default=10, type=int, help="Maximum number of responses per parsing test URL")
