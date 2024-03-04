@@ -54,6 +54,7 @@ def get_available_device():
 	return device_id_list
 
 def force_stop_emulators(device_avd_name = None):
+	print(f'Stop the enumator name: {device_avd_name}')
 	if device_avd_name:
 		kill_current_devices_cmd = "kill -9 $(ps aux | grep '[e]mulator/qemu/linux-x86_64/qemu-system-i386-headless @device_"+device_avd_name+" ' | awk '{print $2}')"
 		subprocess.run(kill_current_devices_cmd, shell=True)
@@ -83,29 +84,28 @@ def get_port_by_emulator_avd_name(device_avd_name):
 	return port	
 
 def start_emulator_by_avd_name(device_avd_name):
+	print(f'Starting the emulator: {device_avd_name}')
 	port = get_port_by_emulator_avd_name(device_avd_name)
 	cmd_text = f'nohup emulator @device_{device_avd_name} -no-snapshot  -screen multi-touch -no-window -port {port}&'		
 	subprocess.run(cmd_text, shell=True)				
 
 	max_times = 0
-	while True:
-		if max_times >= 100:
-			break
-		device_id_list = get_available_device()
-		is_started = False
+	is_started = False
+	while not is_started and max_times <= 100:		
+		print(f'Waiting for the devices : {device_avd_name}, to start!')
+		device_id_list = get_available_device()		
 		for device_id in device_id_list:
 			if device_id == f'emulator-{port}':
-				is_started = True
-		if is_started:
-			break
-		print('Waiting for the devices to start!')
+				is_started = True		
 		time.sleep(2)
 		max_times += 1
+
+	time.sleep(5)
 
 	print('Switch to root and connect reverse proxy for adb command line.')
 	cmd_text = f'adb -s emulator-{port} root'		
 	subprocess.run(cmd_text, shell=True)
-	time.sleep(2)	
+	time.sleep(10)	
 
 def start_emulators(num_devices):
 	port = 5554
@@ -113,7 +113,7 @@ def start_emulators(num_devices):
 		cmd_text = f'nohup emulator @device_{device} -no-snapshot  -screen multi-touch -no-window -port {port}&'		
 		subprocess.run(cmd_text, shell=True)				
 		port += 2
-		time.sleep(30)
+		time.sleep(5)
 
 	max_times = 0
 	device_id_list = get_available_device()
