@@ -1,7 +1,7 @@
+import argparse
 import json
 import re
 from analysis.utils import get_data, Config
-from crawler.utils import GLOBAL_TEST_TIMEOUT
 
 # Create a json with all tests to redo (either timed out or completely missing in one or more of the 5 runs)
 # Idea: group by test and count how many outcomes for each browser were observed
@@ -9,17 +9,16 @@ from crawler.utils import GLOBAL_TEST_TIMEOUT
 # Caveat: easy way will usually also result in the duplication of other tests (e.g., 5/10 tests on a page load timed out -> 10 tests will be repeated)
 # However this should not matter too much as test results should be stable and we perform majority voting on the results
 
-def calc_repeat():
+def calc_repeat(selection_str):
     # Load all data
-    initial_data = """
+    initial_data = f"""
     SELECT "Result".*, 
     "Response".raw_header, "Response".status_code, "Response".label, "Response".resp_type,
     "Browser".name, "Browser".version, "Browser".headless_mode, "Browser".os, "Browser".automation_mode, "Browser".add_info
     FROM "Result"
     JOIN "Response" ON "Result".response_id = "Response".id JOIN "Browser" ON "Result".browser_id = "Browser".id
     WHERE "Browser".name != 'Unknown' and "Response".resp_type != 'debug' and test_status = 0
-    and "Response".resp_type = 'basic' and ("Browser".os = 'iPadOS 17.3.1' or "Browser".os = 'macOS 14.3')
-    and "Browser".os != 'Android 11'; -- For now ignore Android; adapt the above query dynamically to generate the correct repeats only fast
+    and {selection_str};
     """
     df = get_data(Config(), initial_data)
     
@@ -53,15 +52,24 @@ def calc_repeat():
             d = set()
         base_url = row["clean_url"]
         repeat_url = re.sub("browser_id=(\d+)", f"browser_id={browser_id}", base_url)
-       
+    
         # For repetition runs, always only have one response_id per URL!
+        f_id = re.search(r"first_id=(\d+)", repeat_url)
+        l_id = re.search(r"last_id=(\d+)", repeat_url)
         repeat_url = re.sub("first_id=(\d+)", f"first_id={response_id}", repeat_url)
         repeat_url = re.sub("last_id=(\d+)", f"last_id={response_id}", repeat_url)
         # Increase the TIMEOUT to make additional issues due to timeouts less likely
-        # TODO: for mobile 3xGLOBAL_TEST_TIMEOUT (15s) is not necessarily higher than some of the normal timeouts (20s, 5*2*2)
-        repeat_url = re.sub("\?", f"?timeout={3*GLOBAL_TEST_TIMEOUT}&", repeat_url, count=1)
-        
-        # TODO: for mobile browsers the first_popup, last_popup, run_no_popup has to be added again?
+        full_url = row["full_url"]
+        old_timeout = int(re.findall(r"timeout=(\d+)", full_url)[0])
+        repeat_url = re.sub("\?", f"?timeout={2*old_timeout}&", repeat_url, count=1)
+        first_popup = re.search(r"first_popup=(\d+)", full_url)
+        last_popup = re.search(r"last_popup=(\d+)", full_url)
+        run_no_popup = re.search(r"run_no_popup=(\w+)", full_url)
+        # This assumes that all rows in the initial df had the same max_popups settings
+        if first_popup:
+            if int(l_id[1]) - int(f_id[1]) != 0:
+                raise Exception(f"Not possible to set correct first/last popup: {full_url} ")
+            repeat_url += f"&{first_popup[0]}&{last_popup[0]}&{run_no_popup[0]}"
 
         d.add(repeat_url)
         to_repeat[browser_id] = d
@@ -69,4 +77,9 @@ def calc_repeat():
         json.dump(to_repeat, f, default=list)
 
 if __name__ == '__main__':
-    calc_repeat()
+    parser = argparse.ArgumentParser(description="Create repeat runs.")
+    parser.add_argument("--selection_str", type=str, default='"Browser".os = \'Android 11\' and "Browser".os = \'Android 11\'',
+                        help="Postgres selection string")
+    args = parser.parse_args()
+
+    calc_repeat(args.selection_str)
