@@ -18,7 +18,7 @@ def calc_repeat():
     FROM "Result"
     JOIN "Response" ON "Result".response_id = "Response".id JOIN "Browser" ON "Result".browser_id = "Browser".id
     WHERE "Browser".name != 'Unknown' and "Response".resp_type != 'debug' and test_status = 0
-    and "Response".resp_type = 'parsing' and "Browser".os = 'Ubuntu 22.04' and "Result".created_at::date >= '2024-03-04'
+    and "Response".resp_type = 'basic' and ("Browser".os = 'iPadOS 17.3.1' or "Browser".os = 'macOS 14.3')
     and "Browser".os != 'Android 11'; -- For now ignore Android; adapt the above query dynamically to generate the correct repeats only fast
     """
     df = get_data(Config(), initial_data)
