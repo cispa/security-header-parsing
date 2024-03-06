@@ -43,6 +43,7 @@
 				// Append a "finished" div which we can await for in Selenium/Playwright based tests
 				d = document.createElement("div");
 				d.id = "finished";
+				document.body.style.backgroundColor = "green";
 				document.body.appendChild(d);
 				
 				// Try to stop the page runner

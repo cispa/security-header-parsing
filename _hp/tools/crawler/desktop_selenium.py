@@ -278,6 +278,7 @@ if __name__ == '__main__':
     parser.add_argument("--max_urls_until_restart", default=100, type=int, help="Maximum number of URLs until the browser is restarted.")
     parser.add_argument("--timeout_task", default=1500, type=int, help="Timeout for a single task (max_urls_until_restart URLs in one browser) in seconds.")
     parser.add_argument("--gen_page_runner", action="store_true", help="Toggle the generate test-page runner mode.")
+    parser.add_argument("--gen_multiplier", default=1, type=int, help="How often to include each URL in the test runner page.")
     parser.add_argument("--page_runner_json", default="", type=str, help="Path to a json list of page_runner URLs to visit")
     parser.add_argument("--max_resps", default=10, type=int, help="Maximum number of responses per parsing test URL")
     parser.add_argument("--max_popups", default=100, type=int, help="Maximum number of popus per test URL")
@@ -390,6 +391,7 @@ if __name__ == '__main__':
                 for url_chunk in url_chunks:
                     all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, url_chunk, args.timeout_task, page_timeout))
                     if args.gen_page_runner:
+                        url_chunk = url_chunk * args.gen_multiplier
                         url_list.append(create_test_page_runner(browser_id, f"{rand_token}-{chunk_id}", url_chunk))
                         chunk_id += 1
 
