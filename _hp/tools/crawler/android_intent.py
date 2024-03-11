@@ -184,8 +184,9 @@ def run_test(parameter):
 	force_stop_emulators(device_avd_name)
 		
 
-def main(browser_list, url_list, repeat_times, num_devices, resp_type, auto_restart, config_dict):
+def main(browser_list, url_dict, repeat_times, num_devices, resp_type, auto_restart, config_dict):
 	app_list = list()		
+	url_list = list()
 
 	for browser_name in browser_list:
 		browser_config = config_dict[browser_name]
@@ -193,11 +194,15 @@ def main(browser_list, url_list, repeat_times, num_devices, resp_type, auto_rest
 		browser_id = get_or_create_browser(browser_name, browser_config['version'], 'Android 11', 'real', 'intent', '')	
 
 		added_browser_id = False
-		if not url_list:
+		if not url_dict:
 			for scheme in ["http", "https"]:			
 				urls = get_tests(resp_type = resp_type, browser_id = browser_id, scheme = scheme, max_popups = 1)			
 				url_list.extend(urls)
 			added_browser_id = True
+		else:			
+			browser_id_key = str(browser_id)
+			if browser_id_key in url_dict:
+				url_list = url_dict[browser_id_key]
 		
 		for i in range(0, repeat_times):
 			for url in url_list:
@@ -206,6 +211,7 @@ def main(browser_list, url_list, repeat_times, num_devices, resp_type, auto_rest
 				app_list.append(APP(browser_config['package_name'], browser_config['intent'], url))
 
 	print(f'Total number of URLs: {len(app_list)}')
+	
 	device_ids = get_available_device()	
 	while len(device_ids) > 0:
 		print('Force stop current emulatos ...')
@@ -237,7 +243,7 @@ if __name__ == '__main__':
 
 	ap = argparse.ArgumentParser(description='Tester for Android devices')
 	ap.add_argument('-browsers', '--browsers', dest='browsers', type=str, required=True, nargs='+', choices=browser_list)
-	ap.add_argument('-url_json', '--url_json', default='', type=str, help='Path to a json list of page_runner URLs to visit')
+	ap.add_argument('-url_json', '--url_json', default='', type=str, help='Path to a json list of create_repeat tests')
 	ap.add_argument('-repeat', '--repeat', default=1, type=int, help='Repeat x times')
 	ap.add_argument('-num_devices', '--num_devices', dest='num_devices', type=int)
 	ap.add_argument('-type', '--resp_type', choices=['basic', 'debug', 'parsing'], default='basic', help='Specify the response type (default: basic)')
@@ -248,10 +254,10 @@ if __name__ == '__main__':
 	if 'all' in args.browsers:
 		args.browsers = list(config_dict.keys())
 
-	url_list = list()
+	url_dict = dict()
 	if args.url_json:
 		with open(args.url_json) as file:
-			url_list = json.load(file)		
-	
+			url_dict = json.load(file)		
+		
 	print(f'Starting test on {args.browsers} ...')	
-	main(args.browsers, url_list, args.repeat, args.num_devices, args.resp_type, args.auto_restart, config_dict)
+	main(args.browsers, url_dict, args.repeat, args.num_devices, args.resp_type, args.auto_restart, config_dict)
