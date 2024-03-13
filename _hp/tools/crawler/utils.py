@@ -60,8 +60,10 @@ test_info = [
     ("framing.sub.html", "CSPvsXFO", 5, 0, 0),  # Tests:  72 (8*9), 2
     ("fullscreen-api-pp.sub.html", "PP", 5, 0, 0),  # Tests: 32 (8*4), 2
     ("originAgentCluster-oac.sub.html", "OAC", 1, 1, 8),  # Tests: 24 (8*3), 1
+    ("originAgentCluster-oac-nopop.sub.html", "OAC", 1, 0, -1),  # Tests: 24 (8*3), 1
     ("perfAPI-tao.sub.html", "TAO", 10, 0, 0),  # Tests: 8 (8*1), 1
     ("referrer-access-rp.sub.html", "RP", 10, 0, 8),  # Tests: 16 (8*2), 1
+    ("referrer-access-rp-nopop.sub.html", "RP", 10, 0, -1),  # Tests: 8 (8*1), 1
     ("script-execution-csp.sub.html", "CSP-SCRIPT", 10, 0, 0),  # Tests: 16 (8*2), 1
     ("subresource-loading-coep.sub.html", "COEP", 5, 0, 0),  # Tests: 16 (8*2), 1
     ("subresource-loading-corp.sub.html", "CORP", 10, 0, 0),  # Tests: 32 (8*4), 1
@@ -86,8 +88,21 @@ timeout_modifiers = {
 
 def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000, browser_modifier=1):
     test_urls = []
+    if num_popups == 0:
+        test_info 
     for url, label, num_resp_ids, popup_parsing, popup_basic in test_info:
         num_popups = popup_parsing if resp_type == "parsing" else popup_basic
+
+        # Do not run popup tests if max_popups is 0
+        if max_popups == 0 and (popup_parsing + popup_basic) > 0:
+            continue
+        # Only run the special test files without popups for the without popup mode
+        if popup_basic == -1:
+            if max_popups != 0:
+                continue
+            if label == "OAC" and resp_type == "parsing":
+                continue
+        
         # HSTS test are not executed for HTTPS
         if "upgrade" in url and scheme == "https":
             continue
