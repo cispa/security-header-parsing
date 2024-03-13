@@ -13,6 +13,6 @@ if __name__ == '__main__':
     browser_id = str(args.browser_id)
 
     rand_token = generate_short_uuid()
-    print(d[browser_id])
+    print(len(d[browser_id]))
     r = create_test_page_runner(browser_id, f"{rand_token}-0", d[browser_id])
     print(r)

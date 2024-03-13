@@ -9,7 +9,7 @@ from analysis.utils import get_data, Config
 # Caveat: easy way will usually also result in the duplication of other tests (e.g., 5/10 tests on a page load timed out -> 10 tests will be repeated)
 # However this should not matter too much as test results should be stable and we perform majority voting on the results
 
-def calc_repeat(selection_str):
+def calc_repeat(selection_str, mult_resp_ids):
     # Load all data
     initial_data = f"""
     SELECT "Result".*, 
@@ -53,11 +53,12 @@ def calc_repeat(selection_str):
         base_url = row["clean_url"]
         repeat_url = re.sub("browser_id=(\d+)", f"browser_id={browser_id}", base_url)
     
-        # For repetition runs, always only have one response_id per URL!
-        f_id = re.search(r"first_id=(\d+)", repeat_url)
-        l_id = re.search(r"last_id=(\d+)", repeat_url)
-        repeat_url = re.sub("first_id=(\d+)", f"first_id={response_id}", repeat_url)
-        repeat_url = re.sub("last_id=(\d+)", f"last_id={response_id}", repeat_url)
+        # For repetition runs, only have one response_id per URL unless specified differently
+        if not mult_resp_ids:
+            f_id = re.search(r"first_id=(\d+)", repeat_url)
+            l_id = re.search(r"last_id=(\d+)", repeat_url)
+            repeat_url = re.sub("first_id=(\d+)", f"first_id={response_id}", repeat_url)
+            repeat_url = re.sub("last_id=(\d+)", f"last_id={response_id}", repeat_url)
         # Increase the TIMEOUT to make additional issues due to timeouts less likely
         full_url = row["full_url"]
         old_timeout = int(re.findall(r"timeout=(\d+)", full_url)[0])
@@ -80,6 +81,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Create repeat runs.")
     parser.add_argument("--selection_str", type=str, default='"Browser".os = \'Android 11\' and "Browser".os = \'Android 11\'',
                         help="Postgres selection string")
+    parser.add_argument("--mult_resp_ids", action="store_true", help="Activate multiple resp_ids per URL.")
     args = parser.parse_args()
 
-    calc_repeat(args.selection_str)
+    calc_repeat(args.selection_str, args.mult_resp_ids)
