@@ -322,6 +322,9 @@ if __name__ == '__main__':
             ("chrome", "120", None, ["--headless=new"], get_or_create_browser("chrome", "120", "Ubuntu 22.04", "headless-new", "selenium", "")),
             # Released 2023-12-19
             ("firefox", "121", None, ["-headless"], get_or_create_browser("firefox", "121", "Ubuntu 22.04", "headless", "selenium", "")),
+            # Released 2023-02-20
+            ("firefox", "123", None, ["-headless"], get_or_create_browser("firefox", "123", "Ubuntu 22.04", "headless", "selenium", "")),
+
 
 
             # Brave (setup for a concrete version managed manually)
