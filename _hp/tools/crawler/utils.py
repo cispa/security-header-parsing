@@ -88,8 +88,6 @@ timeout_modifiers = {
 
 def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000, browser_modifier=1):
     test_urls = []
-    if num_popups == 0:
-        test_info 
     for url, label, num_resp_ids, popup_parsing, popup_basic in test_info:
         num_popups = popup_parsing if resp_type == "parsing" else popup_basic
 
