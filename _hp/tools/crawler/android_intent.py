@@ -193,21 +193,22 @@ def main(browser_list, url_dict, repeat_times, num_devices, resp_type, auto_rest
 
 		browser_id = get_or_create_browser(browser_name, browser_config['version'], 'Android 11', 'real', 'intent', '')	
 
-		added_browser_id = False
+		# added_browser_id = False
 		if not url_dict:
 			for scheme in ["http", "https"]:			
 				urls = get_tests(resp_type = resp_type, browser_id = browser_id, scheme = scheme, max_popups = 1)			
 				url_list.extend(urls)
-			added_browser_id = True
+			# added_browser_id = True
 		else:			
 			browser_id_key = str(browser_id)
 			if browser_id_key in url_dict:
 				url_list = url_dict[browser_id_key]
+			# added_browser_id = True
 		
 		for i in range(0, repeat_times):
 			for url in url_list:
-				if not added_browser_id:
-					url += f'?browser_id={browser_id}'
+				# if not added_browser_id:
+				# 	url += f'?browser_id={browser_id}'
 				app_list.append(APP(browser_config['package_name'], browser_config['intent'], url))
 
 	print(f'Total number of URLs: {len(app_list)}')
