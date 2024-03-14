@@ -144,10 +144,7 @@ def run_test(parameter):
 	run_times = 0	
 	for app in parameter.app_list:			
 		print(f'Testing: {app.package_name}, on device ID: {device_id}, with URL: {app.test_url}, test run number: {run_times}')					
-		run_times += 1
-		# starting the browser to create init profile
-		# send_url_intent(app.device_id, app.package_name, app.activity_name, 'www.google.com')
-		# time.sleep(3)		
+		run_times += 1		
 
 		run_id = uuid.uuid4().hex
 		app.test_url += f'&run_id={run_id}'
@@ -161,7 +158,6 @@ def run_test(parameter):
 						gen = conn.notifies()			
 
 						send_url_intent(device_id, app.package_name, app.activity_name, encoded_test_url)
-						# time.sleep(1)
 
 						for notify in gen:
 							if notify.payload == run_id:
@@ -193,22 +189,17 @@ def main(browser_list, url_dict, repeat_times, num_devices, resp_type, auto_rest
 
 		browser_id = get_or_create_browser(browser_name, browser_config['version'], 'Android 11', 'real', 'intent', '')	
 
-		# added_browser_id = False
 		if not url_dict:
 			for scheme in ["http", "https"]:			
-				urls = get_tests(resp_type = resp_type, browser_id = browser_id, scheme = scheme, max_popups = 1)			
-				url_list.extend(urls)
-			# added_browser_id = True
+				urls = get_tests(resp_type = resp_type, browser_id = browser_id, scheme = scheme, max_popups = 1, browser_modifier = 2)			
+				url_list.extend(urls)			
 		else:			
 			browser_id_key = str(browser_id)
 			if browser_id_key in url_dict:
-				url_list = url_dict[browser_id_key]
-			# added_browser_id = True
+				url_list.extend(url_dict[browser_id_key])
 		
 		for i in range(0, repeat_times):
-			for url in url_list:
-				# if not added_browser_id:
-				# 	url += f'?browser_id={browser_id}'
+			for url in url_list:				
 				app_list.append(APP(browser_config['package_name'], browser_config['intent'], url))
 
 	print(f'Total number of URLs: {len(app_list)}')
@@ -231,9 +222,13 @@ def main(browser_list, url_dict, repeat_times, num_devices, resp_type, auto_rest
 	for index, working_list in enumerate(chunked_app_lists):
 		device_id = device_ids[index]
 		parameters.append(PARAMETER(working_list, device_id, auto_restart))
-		
+
+	start_time = time.time()	
 	pool = Pool()
 	pool.map(run_test, parameters)
+	pool.close()
+	pool.join()
+	print(f'{(time.time() - start_time)}')
 
 if __name__ == '__main__':
 	with open('android_config.json') as file:
