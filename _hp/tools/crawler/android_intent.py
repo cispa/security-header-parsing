@@ -222,8 +222,9 @@ def main(browser_list, url_dict, repeat_times, num_devices, resp_type, auto_rest
 	for index, working_list in enumerate(chunked_app_lists):
 		device_id = device_ids[index]
 		parameters.append(PARAMETER(working_list, device_id, auto_restart))
-
+	
 	start_time = time.time()	
+	print(start_time)
 	pool = Pool()
 	pool.map(run_test, parameters)
 	pool.close()
