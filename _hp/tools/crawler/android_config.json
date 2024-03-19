@@ -18,5 +18,15 @@
 		"package_name":"org.mozilla.firefox_beta",
 	   	"intent":"org.mozilla.fenix.IntentReceiverActivity",	   
 	   	"version":"123.0b9"
+	},
+	"duckduckgo": {		
+		"package_name":"com.duckduckgo.mobile.android",
+	   	"intent":"com.duckduckgo.app.browser.BrowserActivity",	   
+	   	"version":"5.194.0"
+	},
+	"torbrowser_alpha": {		
+		"package_name":"org.torproject.torbrowser_alpha",
+	   	"intent":"org.mozilla.fenix.IntentReceiverActivity",	   
+	   	"version":"115.2.1-beta"
 	}
  }
