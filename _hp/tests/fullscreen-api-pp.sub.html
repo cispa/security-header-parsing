@@ -67,12 +67,16 @@
   // The FP/PP configured response header is only set on B (allow * on initial A, not on other As)
   // A -> B (allow): access API
   const simple_access = access_fullscreen_test.bind(null, 'iframe', false, "direct");
+  simple_access.element_relation = "iframe_direct";
   // A -> B (allow) -> A (nothing): access API
   const child_access = access_fullscreen_test.bind(null, 'iframe', false, "child");
+  child_access.element_relation = "iframe_child";
   // A -> B (allow) -> A (allow): access API
   const child_allow_access = access_fullscreen_test.bind(null, 'iframe', false, "child_allow");
+  child_allow_access.element_relation = "iframe_child_allow";
   // A -> B (allow) -> A (sandbox): access API
   const child_sandbox_access = access_fullscreen_test.bind(null, 'iframe', false, "child_sandbox");
+  child_sandbox_access.element_relation = "iframe_child_sandbox";
 
   // Notes:
   // Fullscreen: not supported on iPhone (https://caniuse.com/mdn-api_document_fullscreenenabled)? 

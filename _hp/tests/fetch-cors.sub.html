@@ -61,9 +61,13 @@
 
     // A -> B (sets AC-XX), original A: access B (headers and co.)
     const simple_fetch = access_fetch_test.bind(null, 'GET', "omit", new Headers(), "simple");
+    simple_fetch.element_relation = 'GET_simple';
     const custom_method = access_fetch_test.bind(null, "TEST", "omit", new Headers(), "custom_method");
+    custom_method.element_relation = 'TEST_custom_method';
     const custom_headers = access_fetch_test.bind(null, "GET", "omit", new Headers({ "Test": "Test" }), "custom_headers")
+    custom_headers.element_relation = 'GET_custom_headers';
     const credentials_fetch = access_fetch_test.bind(null, "GET", "include", new Headers(), "credentials")
+    credentials_fetch.element_relation = 'GET_credentials';
     // Other tests? caching, ..
     let test_declarations;
     if (resp_type === "parsing") {

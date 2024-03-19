@@ -72,10 +72,13 @@
 
     // A -> B: access API
     const simple_access = access_oac_test.bind(null, 'iframe', false, "direct");
+    simple_access.element_relation = "iframe_direct";
     // A -> B (sandbox): access API
     const sandbox_access = access_oac_test.bind(null, 'iframe', true, "sandbox");
+    sandbox_access.element_relation = "iframe_sandbox";
     // Depends on the OAC (and scheme) of the embedding document as well? -> thus better to test with window.open
     const window_access = access_oac_test.bind(null, 'window.open', false, "window.open")
+    window_access.element_relation = "window.open_window.open";
     window_access.popup = true;
 
 

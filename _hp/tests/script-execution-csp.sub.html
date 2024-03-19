@@ -64,8 +64,10 @@
 
     // A -> B (CSP), A (script): send message
     const simple_access = script_execution_test.bind(null, 'iframe', false, "direct");
+    simple_access.element_relation = "iframe_direct";
     // A -> B (CSP, sandbox), A (script): send message
     const sandbox_access = script_execution_test.bind(null, 'iframe', true, "sandbox");
+    sandbox_access.element_relation = "iframe_sandbox";
     let test_declarations;
     if (resp_type === "parsing") {
         test_declarations = [simple_access];

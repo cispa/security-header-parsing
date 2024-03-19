@@ -71,8 +71,10 @@
 
   // A -> B (sets RP) -> A: access document.referrer (should be equal to what was send to the server)
   const simple_access = access_referrer_test.bind(null, 'iframe', false, "iframe");
+  simple_access.element_relation = "iframe_iframe";
   // Other tests: downgrade and similar can only be tested with window.open as active content is blocked by mixed content policy
   const simple_window_access = access_referrer_test.bind(null, 'iframe', false, "window.open");
+  simple_window_access.element_relation = "iframe_window.open";
   simple_window_access.popup = true;
   // Loads of tests exist in WPT: https://wpt.fyi/results/referrer-policy?label=master&label=experimental&aligned&q=referrer-policy
 

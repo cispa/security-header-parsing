@@ -61,18 +61,27 @@
 
   // A -> B
   const simple_iframe = framing_test.bind(null, 'iframe', false, "direct");
+  simple_iframe.element_relation = "iframe_direct";
   const simple_object = framing_test.bind(null, 'object', false, "direct");
+  simple_object.element_relation = "object_direct";
   const simple_embed = framing_test.bind(null, 'embed', false, "direct");
+  simple_embed.element_relation = "embed_direct";
 
   // A -> B (sandboxed) -> A
   const sandboxed_iframe = framing_test.bind(null, 'iframe', true, "sandbox");
+  sandboxed_iframe.element_relation = "iframe_sandbox";
   const sandboxed_object = framing_test.bind(null, 'object', true, "sandbox");  // Should not exist?
+  sandboxed_object.element_relation = "object_sandbox";
   const sandboxed_embed = framing_test.bind(null, 'embed', true, "sandbox");  // Should not exist?
+  sandboxed_embed.element_relation = "embed_sandbox";
 
   // A -> B -> A -> A to test for the full inclusion chain  (testing A->B->B and A->B->A is left out for performance)
   const nested_iframe = framing_test.bind(null, 'iframe', false, "nested");
+  nested_iframe.element_relation = "iframe_nested";
   const nested_object = framing_test.bind(null, 'object', false, "nested");
+  nested_object.element_relation = "object_nested";
   const nested_embed = framing_test.bind(null, 'embed', false, "nested");
+  nested_embed.element_relation = "embed_nested";
 
   // 8 (options for B) * 9 (tests) * 2 (responses) = 144 tests?! * 2 as we have two options for A (http/https :// sub.headers.websec.saarland)
 

@@ -45,6 +45,12 @@ function run_tests(test_declarations, path, label, origins) {
   const first_popup = parseInt(urlParams.get("first_popup"), 10) || 0;
   const last_popup = parseInt(urlParams.get("last_popup"), 10) || Infinity;
   const run_no_popup = urlParams.get("run_no_popup") || 'yes';
+
+  // Manual confirmation mode
+  const t_resp_id = parseInt(urlParams.get("t_resp_id"), 10) || null;
+  const t_resp_origin = urlParams.get("t_resp_origin") || null;
+  const element_relation = urlParams.get("t_element_relation") || null;
+
   // Fetch origin relations if not specified
   if (!origins) {
     origins = get_test_origins(resp_type);
@@ -56,6 +62,19 @@ function run_tests(test_declarations, path, label, origins) {
     for (var response_id = first_id; response_id < last_id + 1; response_id++) {
       for (var origin of origins) {
         for (let test of test_declarations) {
+          // Only run exactly one test in the manual confirmation mode (the manual confirmation mode has to use clean_urls without popup_settings!)
+          if (t_resp_id) {
+            if (t_resp_id != response_id) {
+              continue
+            }
+            if (t_resp_origin != origin) {
+              continue
+            }
+            if (element_relation != test.element_relation) {
+              continue
+            }
+          }
+
           if (test.popup) {
             popup_count = popup_count + 1;
             if (popup_count >= first_popup && popup_count <= last_popup) {

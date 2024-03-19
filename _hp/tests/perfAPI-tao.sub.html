@@ -79,6 +79,7 @@
 
     // A -> B (sets TAO), original A: access perfAPI timing of B
     const simple_access = access_perf_test.bind(null, 'img', false, "direct");
+    simple_access.element_relation = "img_direct";
     // Other tests? A -> B (sandbox, ....) -> A (sets TAO), B: access perfAPI timing of final A?
     // https://wpt.fyi/results/resource-timing?label=master&label=experimental&aligned&q=TAO
     let test_declarations;

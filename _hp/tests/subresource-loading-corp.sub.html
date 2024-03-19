@@ -61,13 +61,17 @@
 
   // A -> B
   const simple_subresource_loading = subresource_loading_test.bind(null, "img", false, "direct");
+  simple_subresource_loading.element_relation = "img_direct";
   // CORP should not apply to object, however it does in Firefox (https://bugzilla.mozilla.org/show_bug.cgi?id=1732106)
   const object_subresource_loading = subresource_loading_test.bind(null, "object", false, "direct");
+  object_subresource_loading.element_relation = "object_direct";
   // CORP should only take the parent into account?
   // A -> B (sandbox) -> A
   const sandboxed_subresource_loading = subresource_loading_test.bind(null, "img", true, "sandbox");
+  sandboxed_subresource_loading.element_relation = "img_sandbox";
   // A -> B -> A -> A
   const nested_subresource_loading = subresource_loading_test.bind(null, "img", false, "nested");
+  nested_subresource_loading.element_relation = "img_nested";
 
   // TODO: add other more advanced tests?
   // Other elements (script, fetch (no-cors and others?, CORP should only be active for no-cors), ...)

@@ -61,8 +61,10 @@
 
     // A -> B -> A
     const subresource_loading = subresource_loading_test.bind(null, "img", false, "direct");
+    subresource_loading.element_relation = "img_direct";
     // A -> B (sandbox) -> A
     const sandboxed_subresource_loading = subresource_loading_test.bind(null, "img", true, "sandbox");
+    sandboxed_subresource_loading.element_relation = "img_sandbox";
 
     let test_declarations;
     if (resp_type === "parsing") {

@@ -46,6 +46,7 @@
 
     const simple_access_window_test = access_window.bind(null, "direct");
     simple_access_window_test.popup = true;
+    simple_access_window_test.element_relation = 'direct_direct';
 
     // Other tests? e.g., same-origin-allow-popups need additional popups opened in the popup?
     // Even same-origin needs a parent that also sets same-origin (to not block for same-origin loads): https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-group-switches-due-to-cross-origin-opener-policy

@@ -67,7 +67,9 @@
     }
 
     const simple_upgrade_test = upgrade_test.bind(null, "direct");
+    simple_upgrade_test.element_relation = "direct_direct";
     const subdomain_upgrade_test = upgrade_test.bind(null, "subdomain");
+    subdomain_upgrade_test.element_relation = "subdomain_subdomain";
 
 
     // Simple upgrade test: Visit URL that sets HSTS, visit http://(sub.)<host of URL> and check for redirect

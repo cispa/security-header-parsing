@@ -62,6 +62,7 @@
 
     // A -> B (CSP), A (img): send message
     const simple_access = img_loading_test.bind(null, 'iframe', false, "direct");
+    simple_access.element_relation = "iframe_direct";
     let test_declarations;
     if (resp_type === "parsing") {
         test_declarations = [simple_access];
