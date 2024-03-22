@@ -97,7 +97,13 @@ def clean_url(url):
 def make_clickable(url):
     # Clickable links for debugging
     url = clean_url(url)
-    return f'<a href="{url}" target="_blank">{url}</a>'
+    return clickable(url, url)
+
+def clickable(title=None, url=None):
+    if not title:
+        title = url
+    return f'<a href="{url}" target="_blank">{title}</a>'
+
 
 
 
