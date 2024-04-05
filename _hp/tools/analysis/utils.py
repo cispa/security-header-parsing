@@ -149,4 +149,7 @@ def add_columns(df):
     #df['outcome_str'] = df['outcome_str'].replace(r'resp_id=\d+', 'resp_id=<resp_id>', regex=True)
     #df['outcome_str'] = df['outcome_str'].replace(r'count=\d+', 'count=<count>', regex=True)
     df['outcome_str'] = df['outcome_str'].apply(lambda x: 'document.referrer: full_url' if 'responses.py?feature_group' in x else x)
+    # The differences always only are between http-origin, https-origin, full-url, none, timeout; there is never a difference between the various origins, thus we can merge them to make our live easier
+    df["outcome_str"] = df["outcome_str"].apply(lambda x: "document.referrer: https://origin" if "https://" in x else x)
+    df["outcome_str"] = df["outcome_str"].apply(lambda x: "document.referrer: http://origin" if "http://" in x else x)
     return df
