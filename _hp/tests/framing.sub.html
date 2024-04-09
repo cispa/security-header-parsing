@@ -39,6 +39,7 @@
         let final_url = url + response_id + `&count=${i.id}&nest=0&origin=${origin}&element=${element}&resp=1`
         i.data = final_url; // Object
         i.src = final_url; // Embed + IFrame
+        // i.type = "text/html"; // Type for Object + Embed
         // Wait for 90% of test_timeout; then report that no message was received!
         let timer = t.step_timeout(() => {
           t.report_outcome("message timeout");
