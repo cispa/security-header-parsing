@@ -1,6 +1,7 @@
 from playwright.sync_api import sync_playwright
 import requests
 from tqdm import tqdm
+import pandas as pd
 
 
 def check_for_alert(browser_type, url):
@@ -29,7 +30,8 @@ def check_for_alert(browser_type, url):
             return False
         
 def fetch_file_extensions():
-    url = "https://gist.githubusercontent.com/securifera/e7eed730cbe1ce43d0c29d7cd2d582f4/raw/908a7934ca448f389275432514eaa157def9c385/Filename%2520extension%2520list"
+    # url = "https://gist.githubusercontent.com/securifera/e7eed730cbe1ce43d0c29d7cd2d582f4/raw/908a7934ca448f389275432514eaa157def9c385/Filename%2520extension%2520list"
+    url = "https://raw.githubusercontent.com/InfoSecWarrior/Offensive-Payloads/main/File-Extensions-Wordlist.txt"
     response = requests.get(url)
     if response.status_code == 200:
         return response.text.splitlines()
@@ -41,17 +43,29 @@ def main():
     url = "https://observer.sectec.rocks/opg/embed/?url=https://echo.sectec.rocks/echo/abc.js?content-type=text/html&ecocnt_js=%3Cscript%3Ealert(1)%3C/script%3E"
     browsers = ['chromium', 'webkit', 'firefox']
     file_endings = fetch_file_extensions() 
+    # file_endings = ["", ".py", ".php", ".html", ".swf", ".png", ".jpg", ".mp4"]
     results = {}
     
     for browser_type in tqdm(browsers, desc='Browsers'):
         for element in tqdm(['embed', 'object'], desc='Elements', leave=False):
             for file_ending in tqdm(file_endings, desc='File Endings', leave=False):
                 updated_url = url.replace('.js', file_ending)
-                updated_url += f'&element={element}'
+                updated_url = updated_url.replace('embed', element)
                 key = f'{browser_type}_{element}_{file_ending}'
-                results[key] = check_for_alert(browser_type, updated_url)
+                try:
+                    results[key] = check_for_alert(browser_type, updated_url)
+                except Exception as e:
+                    results[key] = f"{e}"
     
     print("Results:", results)
+
+    l = []
+    for key, value in results.items():
+        browser, element, file_ending = key.split("_")
+        l.append((browser, element, file_ending, value))
+
+    df = pd.DataFrame(l, columns=["browser", "element", "file_ending", "executes"])
+    df.to_csv("object_embed_res.csv")
 
 if __name__ == "__main__":
     main()
