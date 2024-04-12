@@ -38,7 +38,7 @@
             let resp = 1;
             let nest = 0;
             if (sandbox) {
-                i.sandbox = "allow-scripts";
+                i.sandbox = "allow-scripts"; // "allow-same-origin"
             }
             let final_url = url + response_id + `&count=${i.id}&nest=${nest}&origin=${origin}&element=${element}&resp=${resp}`
             i.src = final_url;
