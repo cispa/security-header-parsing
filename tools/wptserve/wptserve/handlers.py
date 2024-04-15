@@ -210,7 +210,8 @@ class FileHandler:
         path = filesystem_path(self.base_path, request, self.url_base)
 
         if os.path.isdir(path):
-            return self.directory_handler(request, response)
+            raise HTTPException(403)
+            # return self.directory_handler(request, response)
         try:
             #This is probably racy with some other process trying to change the file
             file_size = os.stat(path).st_size

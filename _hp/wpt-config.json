@@ -4,6 +4,7 @@
         "https": [443, 8443],
         "h2": [9000]
     },
+    "check_subdomains": false,
     "browser_host": "headers.websec.saarland",
     "alternate_hosts": {
         "alt": "headers.webappsec.eu"
