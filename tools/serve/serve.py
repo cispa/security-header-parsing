@@ -577,7 +577,9 @@ class RoutesBuilder:
             ("*", "/.well-known/private-aggregation/*", handlers.PythonScriptHandler),
             ("*", "/.well-known/web-identity", handlers.PythonScriptHandler),
             ("*", "_hp/*.py", handlers.PythonScriptHandler),
-            ("GET", "_hp/*", handlers.FileHandler)
+            ("GET", "_hp/*", handlers.FileHandler),
+            ("OPTIONS", "*.asis", handlers.AsIsHandler)
+
         ]
 
         for (method, suffix, handler_cls) in routes:
