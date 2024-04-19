@@ -80,6 +80,7 @@
 
   // Notes:
   // Fullscreen: not supported on iPhone (https://caniuse.com/mdn-api_document_fullscreenenabled)? 
+  // We use iPad only where it is supported
   // Alternative: query geolocation navigator.permissions.query({"name": "geolocation"}).then(r => r.state)
   // Results can be granted, prompt, or denied; if header disallows it should be denied otherwise prompt -> problem: FF + WebKit seem to always show prompt!
   // Support for everything permission related seems to be quite low currently: https://wpt.fyi/results/?label=master&label=experimental&aligned&q=permissions
