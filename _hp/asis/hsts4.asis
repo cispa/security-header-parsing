@@ -1,0 +1,3 @@
+HTTP/1.1 200 OK
+Strict-Transport-Security: max-age=20; includeSubDomains abc=abc
+

@@ -2,6 +2,8 @@
 var org_scheme = location.port == 9000 ? "http2" : location.protocol == "http:" ? "http" : "https";
 var org_host = location.hostname;
 
+let search = urlParams.get('search') || undefined;
+
 // We always visit the testpages at http://sub.headers.websec.saarland or https://sub.headers.websec.saarland
 // We then create tests for http, https, ~~and http2~~ for the following cases:
 // same-org, 2x same-site (parent-domain + sub-domain), cross-site
@@ -18,7 +20,9 @@ function get_test_origins(resp_type) {
 
   origins = [];
   for (let host of [same_host, parent, sub, alt_host]) {
-    origins.push(`http://${host}`);
+    if (!(search && org_scheme == 'https')) {
+      origins.push(`http://${host}`);
+    }
     origins.push(`https://${host}`);
     // H2 has a process leak? after a while 7k+ processes are open and everything crashes
     // Occurs for both with/without settings to allow for invalid responses
@@ -181,6 +185,24 @@ async function save_result(tests, status) {
   let run_id = urlParams.get('run_id') || undefined;
   if (run_id) {
     await fetch(`${location.origin}/_hp/server/notify_runner_clients.py?run_id=${run_id}`);
+  }
+
+  if (search) {
+    // Get the content of the webpage
+    const webpageContent = document.body.innerText;
+
+    // Define the string to search for
+    const searchString = '"swag-same-origin.jpg":"error"';
+    const searchString2 = '"swag-same-site.jpg":"error"';
+
+
+    // Count occurrences of the search string
+    const c = (webpageContent.match(new RegExp(searchString, 'g')) || []).length;
+    const c2 = (webpageContent.match(new RegExp(searchString2, 'g')) || []).length;
+
+
+    // Output the count
+    alert(`The string "${searchString}" occurs ${c} times on the page. The string "${searchString2}" occurs ${c2} times on the page.`);
   }
 
   // Notify opener page that the test is finished!
