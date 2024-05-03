@@ -351,7 +351,7 @@ if __name__ == '__main__':
     
     if args.debug_browsers:
         config = [
-            ("firefox", "119", None, None, get_or_create_browser("firefox", "119", "Ubuntu 22.04", "xvfb", "selenium", "")),
+            ("chrome", "126", None, ["--headless=new"], get_or_create_browser("crhome", "126", "Ubuntu 22.04", "headless-new", "selenium", "")),
         ]
 
     if args.gen_page_runner:
