@@ -50,6 +50,8 @@ def get_body(feature_group, resp):
         file = open("_hp/common/frame-img-csp.html", "rb")
     elif feature_group in ["coep"]:
         file = open("_hp/common/frame-coep.html", "rb")
+    elif feature_group in ["xcto"]:
+        file = open("_hp/common/script-xcto.js", "rb")
     else:
         print(f"Invalid feature_group: {feature_group}")
         return ""
@@ -69,4 +71,6 @@ def main(request, response):
         response.raw_header = []
     # Get the correct response body based on the current test/feature group
     file = get_body(params['feature_group'], resp=resp)
+    if params['feature_group'] == "xcto":
+        file = file.replace(b"<replace-id>", bytes(params['count'], encoding="utf-8"))
     return response.status_code, response.raw_header, file

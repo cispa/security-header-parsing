@@ -1,0 +1,1 @@
+window.parent.postMessage({ "id": "<replace-id>", "message": "message send" }, "*");

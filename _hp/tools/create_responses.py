@@ -414,3 +414,25 @@ create_responses(header_list, label, status_code=302, resp_type="basic")
 
 
 #endregion
+
+#region MIMESniffing XCTO
+label = "XCTO"
+header_name = "X-Content-Type-Options" # https://fetch.spec.whatwg.org/#x-content-type-options-header
+header_deny = [(header_name, "nosniff")]
+header_allow = [(header_name, "*")]
+# Debug tests
+create_responses([header_deny, header_allow], label)
+# Basic tests
+header_list = [[(header_name, "nosniff")], [], 
+               [(header_name, "null")], [(header_name, origin_s)],
+               [(header_name, origin)], [(header_name, parent)],
+               [(header_name, home)], [(header_name, origin_sp)],
+               [(header_name, site)],
+               [(header_name, "*"), (header_name, "nosniff")], [(header_name, origin_s), (header_name, "null")]
+            ]
+
+create_responses(header_list, label, resp_type="basic")
+# Some basic headers with redirect
+header_list = [[(header_name, "*"), redirect_empty], [(header_name, "no-sniff"), redirect_empty]]
+create_responses(header_list, label, status_code=302, resp_type="basic")
+#endregion
