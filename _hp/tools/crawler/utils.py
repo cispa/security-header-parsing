@@ -69,13 +69,14 @@ test_info = [
     ("subresource-loading-corp.sub.html", "CORP", 10, 0, 0),  # Tests: 32 (8*4), 1
     ("subresource-loading-csp.sub.html", "CSP-IMG", 5, 0, 0),  # Tests: 8 (8*1), 1
     ("window-references-coop.sub.html", "COOP", 1, 1, 8),  # Tests: 8 (8*1), 1
+    ("script-execution-xcto.sub.html", "XCTO", 5, 0, 0), # Tests: 8 (8*1), 1
    
     # HTTP only
     ("upgrade-hsts.sub.html", "HSTS", 1, 0, 0),    # Tests: 4 (2*2), 4 (2*2) # Promise tests thus only one resp_id
 ]
 
 test_info = [
-    ("upgrade-hsts.sub.html", "HSTS", 1, 0, 0),    # Tests: 4 (2*2), 4 (2*2) # Promise tests thus only one resp_id
+    ("script-execution-xcto.sub.html", "XCTO", 5, 0, 0), # Tests: 8 (8*1), 1
 ]
 
 # Some tests often need longer

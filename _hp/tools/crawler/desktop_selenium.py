@@ -313,7 +313,7 @@ if __name__ == '__main__':
             # Released 2024-01-23
             ("firefox", "122", None, ["-headless"], get_or_create_browser("firefox", "122", "Ubuntu 22.04", "headless", "selenium", "")),
             # Released 2024-01-25
-            ("edge", "121", None, ["--headless=new"], get_or_create_browser("edge", "121", "Ubuntu 22.04", "headless-new", "selenium", "")),
+            # ("edge", "121", None, ["--headless=new"], get_or_create_browser("edge", "121", "Ubuntu 22.04", "headless-new", "selenium", "")),
             
             # To compare between versions use additional chrome and firefox versions
             # Released 2024-02-14
