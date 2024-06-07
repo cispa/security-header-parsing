@@ -60,10 +60,8 @@ test_info = [
     ("framing.sub.html", "CSPvsXFO", 5, 0, 0),  # Tests:  72 (8*9), 2
     ("fullscreen-api-pp.sub.html", "PP", 5, 0, 0),  # Tests: 32 (8*4), 2
     ("originAgentCluster-oac.sub.html", "OAC", 1, 1, 8),  # Tests: 24 (8*3), 1
-    ("originAgentCluster-oac-nopop.sub.html", "OAC", 1, 0, -1),  # Tests: 24 (8*3), 1
     ("perfAPI-tao.sub.html", "TAO", 10, 0, 0),  # Tests: 8 (8*1), 1
     ("referrer-access-rp.sub.html", "RP", 10, 0, 8),  # Tests: 16 (8*2), 1
-    ("referrer-access-rp-nopop.sub.html", "RP", 10, 0, -1),  # Tests: 8 (8*1), 1
     ("script-execution-csp.sub.html", "CSP-SCRIPT", 10, 0, 0),  # Tests: 16 (8*2), 1
     ("subresource-loading-coep.sub.html", "COEP", 5, 0, 0),  # Tests: 16 (8*2), 1
     ("subresource-loading-corp.sub.html", "CORP", 10, 0, 0),  # Tests: 32 (8*4), 1
