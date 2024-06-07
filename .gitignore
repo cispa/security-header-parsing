@@ -65,3 +65,6 @@ outputs/
 repeat.json
 logs/
 test-page-runner*.html
+example-tabs.ipynb
+filebeat-etc.yml
+filebeat.yaml
