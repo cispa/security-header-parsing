@@ -342,11 +342,10 @@ if __name__ == '__main__':
         use_headfull = False
         if use_headfull:
                 config = config + [
-                    ("chrome", "119", None, None, get_or_create_browser("chrome", "119", "Ubuntu 22.04", "xvfb", "selenium", "")),
-                    ("firefox", "119", None, None, get_or_create_browser("firefox", "119", "Ubuntu 22.04", "xvfb", "selenium", "")),
-                    ("edge", "119", None, None, get_or_create_browser("edge", "119", "Ubuntu 22.04", "xvfb", "selenium", "")),
-                    ("brave", "119", "/home/ubuntu/brave-versions/v1.60.114/brave-browser", None,
-                    get_or_create_browser("brave", "1.60.114 (119.0.6045.124)", "Ubuntu 22.04", "xvfb", "selenium", ""))
+                    ("chrome", "121", None, None, get_or_create_browser("chrome", "121", "Ubuntu 22.04", "xvfb", "selenium", "")),
+                    ("firefox", "122", None, None, get_or_create_browser("firefox", "122", "Ubuntu 22.04", "xvfb", "selenium", "")),
+                    ("brave", "121", "/home/ubuntu/brave-versions/v1.62.156/brave-browser", None,
+                    get_or_create_browser("brave", "v1.62.156 (121.0.6167.139)", "Ubuntu 22.04", "xvfb", "selenium", ""))
                 ]
     
     if args.debug_browsers:

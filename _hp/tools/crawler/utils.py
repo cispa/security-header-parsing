@@ -75,9 +75,6 @@ test_info = [
     ("upgrade-hsts.sub.html", "HSTS", 1, 0, 0),    # Tests: 4 (2*2), 4 (2*2) # Promise tests thus only one resp_id
 ]
 
-test_info = [
-    ("script-execution-xcto.sub.html", "XCTO", 5, 0, 0), # Tests: 8 (8*1), 1
-]
 
 # Some tests often need longer
 timeout_modifiers = {
