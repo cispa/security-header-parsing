@@ -411,7 +411,3 @@ if __name__ == '__main__':
     # x11vnc -display :99 -bg -shared -forever -passwd abc -xkb -rfbport 5900
     # export DISPLAY=:99 && fluxbox -log fluxbox.log &
     # export DISPLAY=:99 && python desktop_selenium.py
-
-    # Alternative idea with grid
-    # java -jar selenium-server-4.15.0.jar standalone --selenium-manager True
-    # remote_url = "http://localhost:4444/wd/hub"

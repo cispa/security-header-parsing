@@ -10,7 +10,11 @@ Our modified version of the wptserve HTTP server implementation can be found in 
 
 ## Run Instructions
 
-## Additional Information
+## Inventory
+- `_hp`: All test and analysis code for the paper:
+  - 
+- `tools`: Contains modified `wptserve`
+- Other directories are used by `wptserve` internally but are not modified
 
 
 

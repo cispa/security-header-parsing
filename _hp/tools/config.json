@@ -1,32 +1,3 @@
 {
-    "DB_URL": "postgresql+psycopg2://http_header:bde50f42d5851a9eb6bf4166e737cb1c@134.96.225.205:5432/http_header",
-    "BROWSERS": {
-        "brave_desktop": "../abc.exe",
-        "brave_android": "com.brave.android",
-        "opera_desktop": "../abc.exe",
-        "opera_android": "com.opera.android",
-        "edge_desktop": "com.opera.android",
-        "edge_android": "com.opera.android",
-        "aloha": "",
-        "chrome": "com.android.chrome",
-        "apus": "com.apusapps.browser",
-        "xbrowser": "com.xbrowser.play",
-        "edge": "com.xbrowser.play",
-        "via": "mark.via.gp",
-        "duckduckgo": "com.duckduckgo.mobile.android",
-        "firefox_android": "org.mozilla.firefox",
-        "firefox_desktop": "org.mozilla.firefox",
-        "firefox_beta_android": "org.mozilla.firefox_beta",
-        "opera": "com.opera.browser",
-        "opera_mini_android": "com.opera.mini.native",
-        "puffin": "com.cloudmosa.puffinFree",
-        "mx": "com.mx.browser",
-        "brave": "com.brave.browser",
-        "brave_beta": "com.brave.browser_beta",
-        "tor": "org.torproject.torbrowser",
-        "tor_alpha": "org.torproject.torbrowser_alpha",
-        "ucmobile_android": "com.UCMobile.intl",
-        "safari": "com.UCMobile.intl",
-        "talpa_android": "com.talpa.hibrowser"
-    }
+    "DB_URL": "postgresql+psycopg2://http_header:bde50f42d5851a9eb6bf4166e737cb1c@134.96.225.205:5432/http_header"
 }
