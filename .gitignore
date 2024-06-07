@@ -70,3 +70,4 @@ filebeat-etc.yml
 filebeat.yaml
 _hp/asis/
 trees/
+pre_*.ipynb
