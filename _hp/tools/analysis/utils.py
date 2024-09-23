@@ -8,10 +8,10 @@ import re
 
 @dataclass
 class Config:
-    DB_HOST: str="134.96.225.205"
-    DB_NAME: str="http_header"
-    DB_USER: str="http_header"
-    DB_PASSWORD: str="bde50f42d5851a9eb6bf4166e737cb1c"
+    DB_HOST: str="localhost"
+    DB_NAME: str="http_header_demo"
+    DB_USER: str=""
+    DB_PASSWORD: str=""
     DB_PORT: str="5432"
 
 def get_data(config: Config, select_query: str, quiet=False) -> pd.DataFrame:

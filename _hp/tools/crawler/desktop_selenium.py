@@ -274,6 +274,8 @@ if __name__ == '__main__':
                         help="Toggle on debugging for browser selection")
     parser.add_argument("--debug_input", action="store_true",
                         help="Toggle on debugging for input(Next) during the run.")
+    parser.add_argument("--ignore_certs", action="store_true",
+                        help="Ignore certificate errors (necessary for local/debug run)")
     parser.add_argument("--run_mode", choices=["run_all", "repeat"], default="run_all",
                         help="Specify the mode (default: run_all)")
     parser.add_argument("--num_browsers", default=60, type=int, help="How many browsers to start in parallel (max).")
@@ -371,6 +373,8 @@ if __name__ == '__main__':
         all_args = []
         assert(len(config) == 1)
         browser_name, browser_version, binary_location, arguments, browser_id = config[0]
+        if args.ignore_certs:
+            arguments = arguments + ["--ignore-certificate-errors"]
         for url in urls:
             assert(int(re.findall("runner-(\d+)", url)[0]) == 1)
             url = url + f"?browser_id={browser_id}"
@@ -378,6 +382,9 @@ if __name__ == '__main__':
     else:
         for scheme in ["http", "https"]:
             for browser_name, browser_version, binary_location, arguments, browser_id in config:
+                if args.ignore_certs:
+                    arguments = arguments + ["--ignore-certificate-errors"]
+
                 if args.run_mode == "run_all":
                     test_urls = get_tests(resp_type=args.resp_type, browser_id=browser_id, scheme=scheme, max_resps=args.max_resps, max_popups=args.max_popups)
                     page_timeout = TIMEOUT

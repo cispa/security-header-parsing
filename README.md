@@ -9,22 +9,24 @@ Our modified version of the wptserve HTTP server implementation can be found in 
 ## Setup
 - Create a fresh Ubuntu22 container/VM: `lxc launch ubuntu:22.04 <name>` and connect to it `lxc exec <name> bash`
   - Switch to the ubuntu user: `su - ubuntu`
-  - Clone this repository: `git@github.com:header-testing/header-testing.git`
+  - Clone this repository: `git clone git@github.com:header-testing/header-testing.git`
   - Run the setup file: `cd header-testing/_hp`, `./setup.bash` (reopen all terminals or run `source ~/.bashrc` afterwards)
-  - Configure DB settings in [config.json](_hp/config.json)
+  - Configure DB settings in [config.json](_hp/tools/config.json); Make sure to create a database with the correct name
   - Setup the database: `cd _hp/tools && poetry run python models.py`
   - Setup certs: either remove `.demo` from the files in `_hp/tools/certs/` to use self-signed certs or add your own certs here
 
 ## Run Instructions
 - Always start the WPT server first (from the top-most folder): `poetry run -C _hp python wpt serve --config _hp/wpt-config.json`
-- Create the basic and parsing responses: Run `cd _hp/tools && poetry run create_responses.py` (basic), run `cd analysis` and execute `response_header_generation.ipynb` to generate the parsing responses.
+- Create the basic and parsing responses: Run `cd _hp/tools && poetry run python create_responses.py` (basic), run `cd analysis` and execute `response_header_generation.ipynb` to generate the parsing responses.
 - Manually check if the server and the tests are working: Visit http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html
 - Automatic testrunners:
   - `cd _hp/tools/crawler`
-  - Android: `poetry run android_intent.py` (Additional config required)
-  - MacOS/Ubuntu: `poetry run desktop_selenium.py`
-  - iPadOS/iOS: `poetry run desktop_selenium.py ----gen_page_runner --page_runner_json urls.json --max_urls_until_restart 10000"`, then visit the URLs in that file manually
-- Analysis: Open `_hp/tools/analysis/main_analysis_desktop_basic+parsing.ipynb` (Also contains the mobile analysis)
+  - Android: `poetry run python android_intent.py` (Additional config required)
+  - MacOS/Ubuntu: `poetry run python desktop_selenium.py` (For a quick test run: `poetry run python desktop_selenium.py --debug_browsers --resp_type debug --ignore_certs`)
+  - iPadOS/iOS: `poetry run python desktop_selenium.py ----gen_page_runner --page_runner_json urls.json --max_urls_until_restart 10000"`, then visit the URLs in that file manually
+- Analysis:
+  - Run `cd _hp/tools/analysis && poetry run jupyter-lab`
+  - Open `_hp/tools/analysis/main_analysis_desktop_basic+parsing.ipynb` (Also contains the mobile analysis)
 
 ## Inventory
 - `_hp/`: All test and analysis code for the paper:
