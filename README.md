@@ -1,6 +1,6 @@
 # Head(er)s Up! Detecting Security Header Inconsistencies in Browsers
 
-This repository contains all code for our paper `Head(ers) Up! Detecting Security Header Inconsistencies in Browsers`.
+This repository contains all code for our paper `Head(er)s Up! Detecting Security Header Inconsistencies in Browsers`.
 
 This repository is a fork of [WPT](https://github.com/web-platform-tests/wpt), the original README can be found [here](./README_original.md).
 All test and analysis code for our paper can be found in the `_hp` directory.
