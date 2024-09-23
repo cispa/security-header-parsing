@@ -1,4 +1,4 @@
-# Head(ers) Up! Detecting Security Header Inconsistencies in Browsers
+# Head(er)s Up! Detecting Security Header Inconsistencies in Browsers
 
 This repository contains all code for our paper `Head(ers) Up! Detecting Security Header Inconsistencies in Browsers`.
 
