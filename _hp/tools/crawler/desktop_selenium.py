@@ -152,6 +152,8 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
         # Store the ID of the original window
         original_window = driver.current_window_handle
         for url in test_urls:
+            if "originAgentCluster" in url:
+                continue
             try:
                 driver.set_window_position(-5000, 0)  # Posititon the window off-screen (necessary on macOS such that the device stays more or less usable)
                 logger.debug(f"Attempting: {url}", extra=extra)
@@ -350,7 +352,7 @@ if __name__ == '__main__':
     
     if args.debug_browsers:
         config = [
-            ("chrome", "126", None, ["--headless=new"], get_or_create_browser("crhome", "126", "Ubuntu 22.04", "headless-new", "selenium", "")),
+            ("chrome", "128", None, ["--headless=new"], get_or_create_browser("chrome", "128", "Ubuntu 22.04", "headless-new", "selenium", "")),
         ]
 
     if args.gen_page_runner:
