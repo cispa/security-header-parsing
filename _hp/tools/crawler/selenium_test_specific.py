@@ -16,7 +16,7 @@ config = [
     ("firefox", "122", None, ["-headless"], get_or_create_browser("firefox", "122", "Ubuntu 22.04", "headless", "selenium", "")),
     # Released 2024-01-25
     ("edge", "121", None, ["--headless=new"], get_or_create_browser("edge", "121", "Ubuntu 22.04", "headless-new", "selenium", "")),
-    
+
     # To compare between versions use additional chrome and firefox versions
     # Released 2024-02-14
     ("chrome", "122", None, ["--headless=new"], get_or_create_browser("chrome", "122", "Ubuntu 22.04", "headless-new", "selenium", "")),
@@ -39,9 +39,9 @@ config = [
     # Latest as of 2024-02-05
     ("brave", "121", "/home/ubuntu/brave-versions/v1.62.156/brave-browser",
         ["--headless=new"], get_or_create_browser("brave", "v1.62.156 (121.0.6167.139)", "Ubuntu 22.04", "headless-new", "selenium", "")),
-]  
+]
 
-def test_specific(url, browser_name, browser_version, binary_location, arguments):
+def run_specific(url, browser_name, browser_version, binary_location, arguments):
     driver = get_browser(browser_name, browser_version,
                         binary_location, arguments)
     original_window = driver.current_window_handle
@@ -49,13 +49,14 @@ def test_specific(url, browser_name, browser_version, binary_location, arguments
     driver.switch_to.window(original_window)
     WebDriverWait(driver, 5).until(
                     EC.presence_of_element_located((By.ID, "finished")))
-    
+
     print(f"Visited, {browser_name}")
     driver.close()
-    
+
 
 if __name__ == "__main__":
     url = "http://sub.headers.websec.saarland/_hp/tests/referrer-access-rp.sub.html?resp_type=basic&browser_id=1&label=RP&first_id=199&last_id=199&scheme=http&t_resp_id=199&t_element_relation=iframe_window.open&t_resp_origin=http://sub.headers.websec.saarland"
 
     for (browser_name, browser_version, binary_location, arguments, _) in config:
-        test_specific(url, browser_name, browser_version, binary_location, arguments)
+        print(browser_name)
+        run_specific(url, browser_name, browser_version, binary_location, arguments)

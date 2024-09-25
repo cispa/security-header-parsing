@@ -24,7 +24,13 @@ ecs-logging = "^2.1.0"
 psycopg = {extras = ["binary"], version = "^3.1.18"}
 matplotlib = "^3.8.4"
 scipy = "^1.13.0"
+pytest = "^8.3.3"
 
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+flake8 = "^7.1.1"
+pre-commit = "^3.8.0"
 
 [build-system]
 requires = ["poetry-core"]
