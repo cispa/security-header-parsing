@@ -1,6 +1,6 @@
 import json
 from wptserve.handlers import handler
-from _hp.tools.models import Response, Session
+from hp.tools.models import Response, Session
 from functools import lru_cache
 import os
 import threading

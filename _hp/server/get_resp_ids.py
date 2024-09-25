@@ -1,5 +1,5 @@
 from wptserve.handlers import json_handler
-from _hp.tools.models import Response, Session
+from hp.tools.models import Response, Session
 from functools import lru_cache
 
 @lru_cache(maxsize=None)

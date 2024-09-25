@@ -1,6 +1,6 @@
 import json
 from wptserve.handlers import json_handler
-from _hp.tools.models import Result, Session
+from hp.tools.models import Result, Session
 
 
 @json_handler
