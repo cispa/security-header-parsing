@@ -1,5 +1,5 @@
 import json
-from utils import create_test_page_runner, generate_short_uuid
+from hp.tools.crawler.utils import create_test_page_runner, generate_short_uuid
 import argparse
 
 if __name__ == '__main__':

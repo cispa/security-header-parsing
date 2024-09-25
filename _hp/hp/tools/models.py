@@ -10,7 +10,13 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 
 # Setup the config
-proj_config = json.load(open("_hp/hp/tools/config.json"))
+try:
+	proj_config = json.load(open("config.json"))
+except OSError:
+	try:
+		proj_config = json.load(open("_hp/hp/tools/config.json"))
+	except OSError:
+		proj_config = json.load(open("../config.json"))
 
 DB_URL = proj_config['DB_URL']
 

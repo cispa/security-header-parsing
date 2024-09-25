@@ -1,7 +1,7 @@
 import argparse
 import json
 import re
-from analysis.utils import get_data, Config
+from hp.tools.analysis.utils import get_data, Config
 
 # Create a json with all tests to redo (either timed out or completely missing in one or more of the 5 runs)
 # Idea: group by test and count how many outcomes for each browser were observed

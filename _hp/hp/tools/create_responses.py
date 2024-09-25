@@ -1,6 +1,6 @@
-from models import Response, Session
+from hp.tools.models import Response, Session
 
-from crawler.utils import get_or_create
+from hp.tools.crawler.utils import get_or_create
 import json
 
 # Common area

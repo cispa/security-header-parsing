@@ -5,8 +5,8 @@ import subprocess
 import numpy as np
 
 
-from desktop_selenium import CustomErrorTimeout, CustomTimeout
-from utils import get_tests, get_or_create_browser, TIMEOUT
+from hp.tools.crawler.desktop_selenium import CustomErrorTimeout, CustomTimeout
+from hp.tools.crawler.utils import get_tests, get_or_create_browser, TIMEOUT
 from multiprocessing import Pool
 import psycopg
 import uuid    
@@ -17,7 +17,7 @@ try:
 	proj_config = json.load(open("config.json"))
 except OSError:
 	try:
-		proj_config = json.load(open("_hp/tools/config.json"))
+		proj_config = json.load(open("_hp/hp/tools/config.json"))
 	except OSError:
 		proj_config = json.load(open("../config.json"))
 
