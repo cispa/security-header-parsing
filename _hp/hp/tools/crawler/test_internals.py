@@ -2,8 +2,8 @@ import pytest
 
 #from wpt._hp.tools.crawler.utils import generate_short_uuid
 #from utils import generate_short_uuid
-from selenium_test_specific import config, run_specific
-from tools.crawler.utils import generate_short_uuid
+from hp.tools.crawler.selenium_run_specific import config, run_specific
+from hp.tools.crawler.utils import generate_short_uuid
 
 def test_generate_short_uuid():
     assert len(generate_short_uuid(3)) == 3

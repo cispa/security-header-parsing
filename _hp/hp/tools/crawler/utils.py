@@ -5,15 +5,8 @@ import uuid
 from sqlalchemy import ClauseElement
 from sqlalchemy.exc import IntegrityError
 
-try:
-    from models import Session, Browser
-except:
-    import sys
-    from pathlib import Path
-    file = Path(__file__).resolve()
-    parent, root = file.parent, file.parents[1]
-    sys.path.append(str(root))
-    from models import Session, Browser
+from hp.tools.models import Session, Browser
+
 
 
 # Time until all tests on a page have to be finished (called done())

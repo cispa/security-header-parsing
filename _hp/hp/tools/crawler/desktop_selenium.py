@@ -8,8 +8,8 @@ import sys
 import time
 
 from tqdm import tqdm
-from utils import TIMEOUT, generate_short_uuid, get_tests, HSTS_DEACTIVATE, create_test_page_runner
-from create_browsers import get_or_create_browser
+from hp.tools.crawler.utils import TIMEOUT, generate_short_uuid, get_tests, HSTS_DEACTIVATE, create_test_page_runner
+from hp.tools.create_browsers import get_or_create_browser
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -20,7 +20,7 @@ import datetime
 import argparse
 import json
 from pathlib import Path
-from Timeout import SignalTimeout
+from hp.tools.crawler.Timeout import SignalTimeout
 import logging
 import ecs_logging
 import psutil

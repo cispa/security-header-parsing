@@ -3,13 +3,8 @@ import psycopg
 import json
 
 # Setup the config
-try:
-    proj_config = json.load(open("config.json"))
-except OSError:
-    try:
-        proj_config = json.load(open("_hp/tools/config.json"))
-    except OSError:
-        proj_config = json.load(open("../config.json"))
+
+proj_config = json.load(open("_hp/hp/tools/config.json"))
 
 DB_URL = proj_config['DB_URL'].replace("postgresql+psycopg2://", "postgresql://")
 
