@@ -295,7 +295,7 @@ if __name__ == '__main__':
         config = [
             # Released 2024-01-22 (17.3 (19617.2.4.11.8))
             # ("safari", "17.3.1", None, None, get_or_create_browser("safari", "17.3.1", "macOS 14.3.1", "real", "selenium", "")),
-            ("safari", "17.5", None, None, get_or_create_browser("safari", "17.5", "macOS 14.5", "real", "selenium", "")),
+            ("safari", "17.5", None, [], get_or_create_browser("safari", "17.5", "macOS 14.5", "real", "selenium", "")),
 
             # Brave without updates on MacOS
             # Download .dmg from https://github.com/brave/brave-browser/releases and install
