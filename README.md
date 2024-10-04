@@ -3,7 +3,7 @@
 This repository contains all code for our paper `Head(er)s Up! Detecting Security Header Inconsistencies in Browsers`.
 
 This repository is a fork of [WPT](https://github.com/web-platform-tests/wpt), the original README can be found [here](./README_original.md).
-All test and analysis code for our paper can be found in the `_hp` directory.
+All test and analysis code for our paper can be found in the [_hp](./_hp/README.md) directory.
 Our modified version of the wptserve HTTP server implementation can be found in `tools/serve` and `tools/wptserve`. All other directories are untouched and required for `wptserve` to run, we removed the other WPT test directories for better clarity.
 
 ## Setup
@@ -40,5 +40,6 @@ Our modified version of the wptserve HTTP server implementation can be found in 
     - `analysis/`: Analysis code (.ipynb files) + utils
     - `certs/`: Put your certs here to enable testing of HTTPS
     - `crawler/`:  Intent (Android), Selenium (Mac + Ubuntu), and Browser Page Runner (iOS) test runners + utils
+  - `pyproject.toml`, `wpt-config.json`, and more: Various config files for the project
 - `tools/`: Contains modified `wptserve`
 - Other directories are used by `wptserve` internally but are not modified
