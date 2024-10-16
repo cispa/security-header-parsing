@@ -8,20 +8,20 @@ from sqlalchemy.exc import IntegrityError
 from hp.tools.models import Session, Browser
 
 
-
 # Time until all tests on a page have to be finished (called done())
 GLOBAL_TEST_TIMEOUT = 5  # Also known as test_timeout in testharness.sub.js
 
 # Time after a single test marks itself as "no message received"
-# SINGLE_TEST_TIMEOUT = 0.9 * GLOBAL_TEST_TIMEOUT # 0.9 is hardcoded in the tests (0.9 * test_timeout)
+SINGLE_TEST_TIMEOUT = 0.9 * GLOBAL_TEST_TIMEOUT # 0.9 is hardcoded in the tests (0.9 * test_timeout)
 
 # Time it takes to open the browser and perform the inital request to the test page
 BROWSER_START_TIMEOUT = 1
 # Time to wait for the final request to finish
 FINAL_REQ_TIMEOUT = 1
 
-# Note: in desktop_selenium we currently have a max_page_load of 2xTIMEOUT and wait for a maximum of TIMEOUT after the page is loaded; we can't replicate this behavior in mobile?
-# Also we finish early when we see the #finished div in the page with Selenium which we cannot do on mobile
+# Note: in desktop_selenium.py we use a max_page_load of 2xTIMEOUT and wait for a maximum of TIMEOUT after the page is loaded
+# Also we finish early when we see the #finished div in the page with Selenium
+# On Android we use the postgres notify/listen functionality to abort as soon as the results are recorded in the database
 TIMEOUT = BROWSER_START_TIMEOUT + GLOBAL_TEST_TIMEOUT + FINAL_REQ_TIMEOUT
 
 # Load the WPT Config
@@ -39,23 +39,22 @@ HSTS_DEACTIVATE = f"https://{base_host}/_hp/common/empty.html?pipe=header(strict
 
 
 test_info = [
-    # Only for basic tests!
-
     # [(test_file_name, label_name, number_of_response_ids, num_popup_parsing, num_popup_basic)]
     # number_of_response_ids is the maxium number of response_ids allowed for parsing tests
-    ("fetch-cors.sub.html", "CORS", 1, 0, 0),  # Tests: 32 (8*4), 4
     # Comment: Num tests per resp_id: <basic/debug> (Origin relations x NumTests), parsing (for one base URL; x2 as most tests are loaded from both HTTP and HTTPS)
 
-    # Only for parsing tests!
-    # For parsing tests, run more than one response at a time (maximum of ten included frames/images or 40 fetches or 1 popup or 4 promise tests)
-    # Empirically reduced fetch, COEP, and CSP-IMG (as there were a couple of tests with different/timeout results)
+    # Test config only for basic tests:
+    ("fetch-cors.sub.html", "CORS", 1, 0, 0),  # Tests: 32 (8*4), 4
+
+    # Test config only for parsing tests:
+    # For parsing tests, run more than one response at a time (maximum of ten included frames/images or 20 fetches or 1 popup or 4 promise tests)
     ("fetch-cors.sub.html", "CORS-ACAO", 5, 0, 0),  # Tests: 32 (8*4), 4
     ("fetch-cors.sub.html", "CORS-ACAC", 5, 0, 0),  # Tests: 32 (8*4), 4
     ("fetch-cors.sub.html", "CORS-ACAM", 5, 0, 0),  # Tests: 32 (8*4), 4
     ("fetch-cors.sub.html", "CORS-ACAH", 5, 0, 0),  # Tests: 32 (8*4), 4
     ("fetch-cors.sub.html", "CORS-ACEH", 5, 0, 0),  # Tests: 32 (8*4), 4
 
-    # All tests!
+    # Test config for both basic and parsing tests:
     ("framing.sub.html", "XFO", 5, 0, 0),  # Tests:  72 (8*9), 2
     ("framing.sub.html", "CSP-FA", 5, 0, 0),  # Tests:  72 (8*9), 2
     ("framing.sub.html", "CSPvsXFO", 5, 0, 0),  # Tests:  72 (8*9), 2
@@ -75,7 +74,7 @@ test_info = [
 ]
 
 
-# Some tests often need longer
+# Some tests often need longer, thus we increase their timeouts with the following modifiers
 timeout_modifiers = {
     "OAC": 2,
     "RP": 2,
@@ -88,23 +87,32 @@ timeout_modifiers = {
 
 
 def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000, browser_modifier=1):
+    """Return all test URLs for a given response type (and other settings)
+
+    Args:
+        resp_type (str): `debug`, `basic`, or `parsing`
+        browser_id (int): The ID of the requested browser (is filled in the URLs)
+        scheme (str): http or https
+        max_popups (int, optional): Maximum number of popups for one returned URL. Defaults to 1000.
+        max_resps (int, optional): Maximum number of resp_ids per URL. Defaults to 1000.
+        browser_modifier (int, optional): Timeout modifier. Defaults to 1.
+
+    Returns:
+        list[str]: List of test URLs to visit
+    """
     test_urls = []
+    # Add test for all 12 features as configured in test_info
     for url, label, num_resp_ids, popup_parsing, popup_basic in test_info:
         num_popups = popup_parsing if resp_type == "parsing" else popup_basic
 
         # Do not run popup tests if max_popups is 0
         if max_popups == 0 and (popup_parsing + popup_basic) > 0:
             continue
-        # Only run the special test files without popups for the without popup mode
-        if popup_basic == -1:
-            if max_popups != 0:
-                continue
-            if label == "OAC" and resp_type == "parsing":
-                continue
 
         # HSTS test are not executed for HTTPS
         if "upgrade" in url and scheme == "https":
             continue
+
         # CORS tests are different for parsing/basic mode
         if label.startswith("CORS"):
             if label != "CORS" and resp_type != "parsing":
@@ -118,15 +126,18 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000, br
         else:
             max_resp_ids = 1
 
+        # Modify the test_timeout according to the modifiers
         test_timeout = timeout_modifiers.get(label, 1) * GLOBAL_TEST_TIMEOUT * browser_modifier
+
+        # Get all response_ids and create the list of test_urls
         for first_id, last_id in get_resp_ids(label, resp_type, max_resp_ids):
             # All popups are the number of popups (per response_id) * the number of response_ids
             all_popups = num_popups * (last_id - first_id + 1)
-            # If there are more popups than max_popups add URLs for each popup count
+            # If there are more popups than max_popups add individual URLs according to the popup count
             if all_popups > max_popups:
                 buckets = [list(range(start, min(start + max_popups, all_popups + 1)))
                            for start in range(1, all_popups + 1, max_popups)]
-                # Only add run_no_popups to the first one
+                # Only add run_no_popups to the first URL
                 run_no_popup = "yes"
                 for bucket in buckets:
                     first_popup = bucket[0]
@@ -134,8 +145,7 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000, br
                     test_urls.append(
                         f"{scheme}://{base_host}/{base_dir}/{url}?timeout={test_timeout}&resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}&first_popup={first_popup}&last_popup={last_popup}&run_no_popup={run_no_popup}")
                     run_no_popup = "no"
-                # print(buckets)
-            # Otherwise run all tests
+            # Otherwise add all test URLs
             else:
                 test_urls.append(
                     f"{scheme}://{base_host}/{base_dir}/{url}?timeout={test_timeout}&resp_type={resp_type}&browser_id={browser_id}&label={label}&first_id={first_id}&last_id={last_id}&scheme={scheme}")
@@ -143,10 +153,21 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000, br
 
 
 def get_resp_ids(label, resp_type, num_resp_ids):
-    assert num_resp_ids >= 1
+    """Returs all resp_ids for a given label/resp_type and splits them according to num_resp_ids
 
+    Args:
+        label (str): Label such as XFO
+        resp_type (str): `debug`, `basic`, or `parsing`
+        num_resp_ids (int): Maximum number of response_ids in one split
+
+    Returns:
+        List[(int, int)]: Splits of resp_ids [(start, end), (start, end), ...]
+    """
+    assert num_resp_ids >= 1
+    # Receive all resp_ids from the server
     resp_ids = httpx.get(
         f"https://{base_host}/_hp/server/get_resp_ids.py?label={label}&resp_type={resp_type}", verify=False).json()
+    # Return one split for each resp_id
     if num_resp_ids == 1:
         return [(resp_id, resp_id) for resp_id in resp_ids]
     # Use num_resp_ids to return continuous chunks of resp_ids with a maximum length of num_resp_ids
@@ -157,6 +178,7 @@ def get_resp_ids(label, resp_type, num_resp_ids):
             if start is None:
                 start = cur = next
                 count = 1
+            # resp_ids do not have to be continous, if they are not force a split
             elif next - cur != 1:
                 splits.append((start, cur))
                 start = cur = next
@@ -173,9 +195,22 @@ def get_resp_ids(label, resp_type, num_resp_ids):
 
 
 def get_or_create(session, model, defaults=None, **kwargs):
+    """Create a new database entry if it does not already exist, otherwise return the existing one.
+
+    Args:
+        session (session): Postgres DB session
+        model (model): Model to create an entry in the DB
+        defaults (dict, optional): Default values. Defaults to None.
+        **kwargs: Actual data to create the object
+
+    Returns:
+        (int, bool): Id of the object, whether it got newly created or not
+    """
+    # Try to retrieve the object from the DB
     instance = session.query(model).filter_by(**kwargs).first()
     if instance:
         return instance, False
+    # Create the object in the DB if it does not exist
     else:
         params = dict((k, v) for k, v in kwargs.items()
                       if not isinstance(v, ClauseElement))
@@ -187,6 +222,19 @@ def get_or_create(session, model, defaults=None, **kwargs):
 
 
 def get_or_create_browser(name, version, os, headless_mode, automation_mode, add_info):
+    """Create a new browser configuration entry if it does not yet exist
+
+    Args:
+        name (str): Name of the browser
+        version (str): Version string
+        os (str): Operating System
+        headless_mode (str):  Enum('real', 'xvfb', 'headless', 'headless-new')
+        automation_mode (str): Enum('manual', 'intent', 'selenium', 'playwright', 'other')
+        add_info (str): Additional information about this browser configuration
+
+    Returns:
+        int: Id of the (newly) created browser configuration entry
+    """
     with Session() as session:
         try:
             browser, created = get_or_create(
@@ -210,7 +258,19 @@ def get_or_create_browser(name, version, os, headless_mode, automation_mode, add
 
 
 def create_test_page_runner(browser_id, identifier, test_urls):
-    """Create a test-page runner page for a given browser_id and a list of test_urls."""
+    """Create a test-page-runner page for a given browser_id and a list of test_urls.
+    Only used for browser where the test-page-runner is used; Currently used for iOS and MacOS browsers.
+    The test-page-runner page opens each test in a new window if visited.
+    As soon as the test is finished (or a timeout is reached) it will open the next test.
+
+    Args:
+        browser_id (int): The ID of the browser that should visit this page
+        identifier (str): Random UUID to have unique test-page-runners
+        test_urls (List[str]): List of test_urls to visit
+
+    Returns:
+        str: The URL of where the test-page-runner page is hosted.
+    """
     test_runner_page = f"test-page-runner-{browser_id}_{identifier}.html"
     test_runner_url = f"https://{base_host}/_hp/tests/{test_runner_page}"
     with open("test-page-runner.html") as file:
@@ -219,11 +279,20 @@ def create_test_page_runner(browser_id, identifier, test_urls):
             '$$$URLS$$$', json.dumps(test_urls))
         html_template = html_template.replace(
             '$$$TIMEOUT$$$', str(TIMEOUT*1000))
-        with open(f'../../tests/{test_runner_page}', 'w') as file:
+        with open(f'../../../tests/{test_runner_page}', 'w') as file:
             file.write(html_template)
     return test_runner_url
 
 def generate_short_uuid(length=6):
+    """Generate a UUID.
+    Currently used to have unique pages for the test-page-runners
+
+    Args:
+        length (int, optional): Length of the UUID. Defaults to 6.
+
+    Returns:
+        str: the UUID
+    """
     if length <= 0:
         raise ValueError("Length must be a positive integer")
 

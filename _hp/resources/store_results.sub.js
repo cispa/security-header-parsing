@@ -197,7 +197,7 @@ async function save_result(tests, status) {
   d.id = "finished";
   document.body.appendChild(d);
 
-  // Stop the run_id page runner by notifying the runner via postgres
+  // Stop the run_id page runner by notifying the runner via postgres (only used by Android runners)
   let run_id = urlParams.get('run_id') || undefined;
   if (run_id) {
     await fetch(`${location.origin}/_hp/server/notify_runner_clients.py?run_id=${run_id}`);

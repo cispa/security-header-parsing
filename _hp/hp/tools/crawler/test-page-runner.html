@@ -27,13 +27,13 @@
 			closeCurrentWindow();
 
 			if (counter < urls.length) {
-				// interpreted as: top=min,left=min,width=min,height=min
 				let url = urls[counter];
 				url = url.replace(/browser_id=\d+/, `browser_id=${browser_id}`);
 				url_timeout = Math.max(parseInt(url.match(/timeout=(\d+)/)[1], 10) * 1000 + 2000, timeout);
+				// interpreted as: top=min,left=min,width=min,height=min
 				openWindow = window.open(url, "_blank", "top=0,left=0,width=100,height=100");
 				counter++;
-				// Open the next test after the TIMEOUT
+				// Open the next test after the TIMEOUT or if a message is received
 				timeoutId = setTimeout(function () {
 					openNextWindow();
 				}, url_timeout);
@@ -45,8 +45,8 @@
 				d.id = "finished";
 				document.body.style.backgroundColor = "green";
 				document.body.appendChild(d);
-				
-				// Try to stop the page runner
+
+				// Try to stop the page runner (Only used by Android runners that do not use the test-page-runner)
 				fetch(`${location.origin}/_hp/server/notify_runner_clients.py?run_id=${run_id}`);
 
 			}

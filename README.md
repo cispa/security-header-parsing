@@ -21,16 +21,24 @@ Our modified version of the wptserve HTTP server implementation can be found in 
 - Manually check if the server and the tests are working: Visit http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html
 - Automatic testrunners:
   - `cd _hp/hp/tools/crawler`
-  - Android: `poetry run python android_intent.py` (Additional config required)
+  - Android: `poetry run python android_intent.py` (TODO: Additional config required; solve android_intent and more?!)
   - MacOS/Ubuntu: `poetry run python desktop_selenium.py` (For a quick test run: `poetry run python desktop_selenium.py --debug_browsers --resp_type debug --ignore_certs`)
   - iPadOS/iOS: `poetry run python desktop_selenium.py ----gen_page_runner --page_runner_json urls.json --max_urls_until_restart 10000"`, then visit the URLs in that file manually
   - TODO: Exact settings of the runs for our experiment:
     - TODO: some information about how to exactly reproduce our results?
     - TODO: repeat to ensure each test has 5x repetitions (`poetry run python create_repeat ...`)
     - ...
+- Optional configuration to run headfull browsers on linux server:
+```bash
+Xvfb :99 -screen 0 1920x1080x24 &
+x11vnc -display :99 -bg -shared -forever -passwd abc -xkb -rfbport 5900
+export DISPLAY=:99 && fluxbox -log fluxbox.log &
+```
 - Analysis:
   - Run `cd _hp/hp/tools/analysis && poetry run jupyter-lab`
-  - Open `_hp/hp/tools/analysis/main_analysis_desktop_basic+parsing.ipynb` (Also contains the mobile analysis)
+  - Open `_hp/hp/tools/analysis/main_analysis_desktop_basic+parsing.ipynb`
+  - TODO: rename: (Also contains the mobile analysis)
+  - TODO: check analysis code and improve
 
 ## Inventory
 - `_hp/`: All test and analysis code for the paper:

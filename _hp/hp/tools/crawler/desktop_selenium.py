@@ -1,41 +1,50 @@
 import glob
-from multiprocessing import Pool
 import multiprocessing
 import os
 import re
 import shutil
 import sys
 import time
-
+import logging
+import ecs_logging
+import psutil
+import datetime
+import argparse
+import json
+from multiprocessing import Pool
+from pathlib import Path
 from tqdm import tqdm
-from hp.tools.crawler.utils import TIMEOUT, generate_short_uuid, get_tests, HSTS_DEACTIVATE, create_test_page_runner, get_or_create_browser
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common import WebDriverException
 
-import datetime
-import argparse
-import json
-from pathlib import Path
+from hp.tools.crawler.utils import TIMEOUT, generate_short_uuid, get_tests, HSTS_DEACTIVATE, create_test_page_runner, get_or_create_browser
 from hp.tools.crawler.Timeout import SignalTimeout
-import logging
-import ecs_logging
-import psutil
 
 
 class CustomTimeout(BaseException):
+    """Custom Exception such that we can catch only this one."""
     pass
 
 
 class CustomErrorTimeout(SignalTimeout):
+    """Custom SignalTimeout that throws our CustomTimeout Exception"""
     def timeout_handler(self, signum, frame) -> None:
         """Handle timeout (SIGALRM) signal"""
         raise CustomTimeout
 
 
 def get_child_processes(parent_pid):
+    """Get all child processes for a given parent_pid
+
+    Args:
+        parent_pid (str): PID of a program
+
+    Returns:
+        List[str]: List of child PIDs
+    """
     try:
         # Get the process by PID
         parent_process = psutil.Process(parent_pid)
@@ -49,6 +58,12 @@ def get_child_processes(parent_pid):
 
 
 def kill_processes(pid_list):
+    """Kill all processes in pid_list.
+    First use terminate, then use kill if not successful.
+
+    Args:
+        pid_list (List[str]): List of PIDs
+    """
     for process in pid_list:
         try:
             process.terminate()
@@ -69,29 +84,32 @@ def kill_processes(pid_list):
 
 
 def get_browser(browser: str, version: str, binary_location=None, arguments=None):
+    """Start a browser and return the corresponding driver.
+
+    Args:
+        browser (str): Name of the browser
+        version (str): Versino of the browser
+        binary_location (str, optional): Binary location of the browser, if not given managed by Selenium. Defaults to None.
+        arguments (List[str], optional): Additional arguments to the browser such as headless. Defaults to None.
+
+    Returns:
+        driver: Selenium WebDriver instance
+    """
     service = None
     if browser in ["chrome", "brave"]:
         options = webdriver.ChromeOptions()
         driver = webdriver.Chrome
-        # Optional use different ChromeDriver version!, default is chosen from the given browser_version
-        # if browser == "brave":
-        #    service = Service("/Applications/chromedriver")
     elif browser == "firefox":
         options = webdriver.FirefoxOptions()
         driver = webdriver.Firefox
     elif browser == "safari":
         options = webdriver.SafariOptions()
-        # Problem: "Could not create a session: The Safari instance is already paired with another WebDriver session"
-        # Idea: use different ports for each driver, however that does not work with the current version anymore (https://developer.apple.com/documentation/webkit/about_webdriver_for_safari#2957226)
-        # port = 5555
-        # service = webdriver.SafariService(port=port)
         driver = webdriver.Safari
     elif browser == "edge":
         options = webdriver.EdgeOptions()
         driver = webdriver.Edge
     else:
-        print(f"Unsupported browser: {browser}")
-        return Exception()
+        return Exception(f"Unsupported browser: {browser}")
 
     options.browser_version = version
     if binary_location:
@@ -101,7 +119,7 @@ def get_browser(browser: str, version: str, binary_location=None, arguments=None
         for argument in arguments:
             # ("--headless=new") # Possible to add arguments such as headless
             options.add_argument(argument)
-    # print(options.to_capabilities())
+    # Start the browser and return the driver
     return driver(options=options, service=service)
 
 
@@ -111,7 +129,8 @@ def path_age(path):
 
 
 def clean_dirs(timeout):
-    """Remove old directories."""
+    """Remove old directories (last modified > timeout)."""
+    # Directories created by Selenium Drivers/Browsers that are sometimes not cleaned up correctly
     selenium_dirs = glob.glob("/tmp/rust_*")
     selenium_dirs.extend(glob.glob("/tmp/Temp-*"))
     selenium_dirs.extend(glob.glob("/tmp/.org.chromium.*"))
@@ -128,6 +147,21 @@ def clean_dirs(timeout):
 
 
 def run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger: logging.Logger, page_timeout):
+    """Visit given test_urls in the correct browser and settings
+
+    Args:
+        browser_name (str): Name of the browser
+        browser_version (str): Version of the browser
+        binary_location (str): Optional binary location of the browser
+        arguments (List[str]): Optional arguments of the browser (such as headless)
+        debug_input (bool): If True, pauses after each visited URl, default=False
+        test_urls (List[str]): List of URLs to visit
+        logger (logging.Logger): Logger instance to log output to
+        page_timeout (int): How long to wait after a page is loaded; Max page load timeout is 2xpage_timeout
+
+    Returns:
+        List[str]: List of openend processes (such that they can be killed later if they were not correctly closed by Selenium)
+    """
     try:
         url = None
         processes = []
@@ -136,47 +170,58 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
         extra = {"browser": browser_name, "browser_version": browser_version, "binary_location": binary_location, "arguments": arguments}
         logger.info(f"Start {browser_name} ({browser_version})", extra=extra)
         start = datetime.datetime.now()
-        # Try getting a driver twice (sometimes Safari fails the first attempt)
+
+        # Try getting a driver
         try:
             driver = get_browser(browser_name, browser_version,
                             binary_location, arguments)
         except (WebDriverException, OSError):
             logger.error(f"First get_browser failed.", exc_info=True, extra=extra)
+            # Try twice (sometimes Safari fails the first attempt and succeeds for the second)
             driver = get_browser(browser_name, browser_version,
                             binary_location, arguments)
+
         processes = get_child_processes(driver.service.process.pid)
-        # Max page load timeout
+        # Set the max page load timeout
         driver.set_page_load_timeout(2 * page_timeout)
-        # print(driver.capabilities)
         # Store the ID of the original window
         original_window = driver.current_window_handle
+        # Visit all test_urls
         for url in test_urls:
+            # Do not visit originAgentCluster URLs (feature removed from the tests)
             if "originAgentCluster" in url:
                 continue
             try:
-                driver.set_window_position(-5000, 0)  # Position the window off-screen (necessary on macOS such that the device stays more or less usable)
+                # Position the window off-screen (necessary for macOS headfull mode, such that the device stays more or less usable)
+                driver.set_window_position(-5000, 0)
                 logger.debug(f"Attempting: {url}", extra=extra)
-                # Create a new window for each test/URL; another option would be to restart the driver for each test but that is even slower
+                # Create a new window for each test URL
                 driver.switch_to.new_window('window')
-                driver.set_window_position(-5000, 0)  # Position the new window off-screen as well
+                # Position the new window off-screen as well
+                driver.set_window_position(-5000, 0)
                 new_window = driver.current_window_handle
+                # Visit a URL that deactivates HSTS for HSTS related tests
                 if "upgrade" in url:
                     driver.get(HSTS_DEACTIVATE)
                 driver.get(url)
-                # print(driver.title)
+
                 # Switch back to the original window (if the test opens new ones)
-                # Only required on firefox; Brave does not like it
+                # Required on firefox; can fail in some browsers
                 try:
                     if browser_name == "firefox":
                         driver.switch_to.window(new_window)
                 except Exception:
                     logger.error("Switching browser window failed", exc_info=True, extra=extra)
-                # Wait until the results are saved on the server (after finishing fetch request, a div with id "finished" is added to the DOM)
+
+                # Normal mode: get test timeout from URL
                 if not "test-page-runner" in url:
                     url_timeout = int(re.search("timeout=(\d+)", url)[1])
+                # test-page-runner mode for MacOS: page_timeout == timeout
                 else:
                     url_timeout = 0
                 timeout = max(page_timeout, url_timeout+2)
+
+                # Wait until the results are saved on the server (after finishing fetch request, a div with id "finished" is added to the DOM)
                 WebDriverWait(driver, timeout).until(
                     EC.presence_of_element_located((By.ID, "finished")))
                 cur_url += 1
@@ -215,10 +260,16 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
                 return processes
 
 
-
 def worker_function(args):
+    """Helper function to execute run_task in different worker processes.
+
+    Args:
+        args (**kwargs): log_path, browser_name, browser_version, binary_location, arguments, debug_input, test_urls, timeout, page_timeout
+    """
+    # Extract arguments
     log_path, browser_name, browser_version, binary_location, arguments, debug_input, test_urls, timeout, page_timeout = args
 
+    # Setup logging
     log_filename = f"{log_path}-{browser_name}-{browser_version}.json"
     file_handler = logging.FileHandler(log_filename)
     file_handler.setLevel(logging.INFO)
@@ -227,87 +278,94 @@ def worker_function(args):
     logger.propagate = False
     logger.setLevel(logging.INFO)
     logger.addHandler(file_handler)
+
     processes = []
+    # Execute run_task with a Timeout of timeout
     with CustomErrorTimeout(timeout):
         try:
             processes = run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger, page_timeout)
         except (CustomTimeout, Exception):
             logger.error("Fatal outer exception!", exc_info=True)
 
-    # Sometimes driver.quit and similar do not work, thus we kill the processes explicitely once again
-    # Another approach would be to have a separate watchdog process to kill stale drivers + browsers
+    # Sometimes driver.quit and similar do not work correctly, thus we kill the processes explicitely once again
     kill_processes(processes)
-    # They also fail to remove all temp directories thus we remove them manually
+    # They can also fail to remove all temp directories thus we remove them manually
     clean_dirs(timeout)
-    # We only want to have one log handler per process
+    # We have to remove the file_handler if the process is reused
     logger.removeHandler(file_handler)
 
 
 def setup_process(log_path):
+    """Setup function for each process
+
+    Args:
+        log_path (str): Path of dir where to log to.
+    """
     # Slowly start all processes, one new every second
     name = multiprocessing.current_process().name
     num = int(name.rsplit("-", maxsplit=1)[1]) - 1
     time.sleep(num)
 
-log_path = f"logs/desktop-selenium/"
-Path(log_path).mkdir(parents=True, exist_ok=True)
-file_handler = logging.FileHandler(f"logs/desktop-selenium/{datetime.datetime.now().date().strftime('%Y-%m-%d')}_unraisable.json")
-file_handler.setFormatter(ecs_logging.StdlibFormatter())
-
-# Set up logging to a file with the specified level and handler
-logging.basicConfig(level=logging.ERROR, handlers=[file_handler])
 
 def unraisable_hook(unraisable):
     """Log unraisable exceptions to a file"""
     for item in unraisable:
         logging.error(f"Unraisable exception: {item}")
 
+
+# Set up logging to a file with the specified level and handler
+log_path = f"logs/desktop-selenium/"
+Path(log_path).mkdir(parents=True, exist_ok=True)
+file_handler = logging.FileHandler(f"logs/desktop-selenium/{datetime.datetime.now().date().strftime('%Y-%m-%d')}_unraisable.json")
+file_handler.setFormatter(ecs_logging.StdlibFormatter())
+logging.basicConfig(level=logging.ERROR, handlers=[file_handler])
 # Set the unraisable hook globally
 sys.unraisablehook = unraisable_hook
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Run tests on Desktop Selenium.")
+    parser = argparse.ArgumentParser(description="Run tests on Desktop Selenium.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    # General arguments
     parser.add_argument("--resp_type", choices=["basic", "debug", "parsing"], default="basic",
-                        help="Specify the response type (default: basic)")
+                        help="Specify the response type")
     parser.add_argument("--debug_browsers", action="store_true",
-                        help="Toggle on debugging for browser selection")
+                        help="Toggle on to use debug browsers only")
     parser.add_argument("--debug_input", action="store_true",
-                        help="Toggle on debugging for input(Next) during the run.")
+                        help="Toggle on debugging to wait for user input between each URL.")
     parser.add_argument("--ignore_certs", action="store_true",
                         help="Ignore certificate errors (necessary for local/debug run)")
     parser.add_argument("--run_mode", choices=["run_all", "repeat"], default="run_all",
-                        help="Specify the mode (default: run_all)")
-    parser.add_argument("--num_browsers", default=60, type=int, help="How many browsers to start in parallel (max).")
+                        help="Specify the run_mode. If run_all all tests are executed, if repeat only the ones in ../repeat.json.")
+    parser.add_argument("--num_browsers", default=60, type=int, help="How many browsers to start in parallel at most.")
     parser.add_argument("--max_urls_until_restart", default=100, type=int, help="Maximum number of URLs until the browser is restarted.")
-    parser.add_argument("--timeout_task", default=1500, type=int, help="Timeout for a single task (max_urls_until_restart URLs in one browser) in seconds.")
-    parser.add_argument("--gen_page_runner", action="store_true", help="Toggle the generate test-page runner mode.")
-    parser.add_argument("--gen_multiplier", default=1, type=int, help="How often to include each URL in the test runner page.")
-    parser.add_argument("--page_runner_json", default="", type=str, help="Path to a json list of page_runner URLs to visit")
+    parser.add_argument("--timeout_task", default=1500, type=int, help="Timeout for a single task in seconds (max_urls_until_restart URLs in one browser).")
     parser.add_argument("--max_resps", default=10, type=int, help="Maximum number of responses per parsing test URL")
     parser.add_argument("--max_popups", default=100, type=int, help="Maximum number of popus per test URL")
+    # Arguments for the test-page-runner mode (generation or execution)
+    parser.add_argument("--gen_page_runner", action="store_true", help="Toggle the generate test-page-runner mode.")
+    parser.add_argument("--gen_multiplier", default=1, type=int, help="How often to include each URL in the test-page-runner page.")
+    parser.add_argument("--page_runner_json", default="", type=str, help="Path to a json list of generated test-page-runner URLs to visit")
     args = parser.parse_args()
 
-    # (browser_name, version, binary_location (e.g., for brave), arguments (e.g, for headless), browser_id
+    # Browser Config:
+    # (browser_name, version, binary_location (e.g., for brave), arguments (e.g, for headless), browser_id)
+    # MacOS
     if sys.platform == "darwin":
-        # Only run Safari (headfull as no headless mode exists)
-        # Initial experiments showed almost no differences between Linux and macOS versions of brave, chrome, firefox
         config = [
+            # Only run Safari (headfull as no headless mode exists)
             # Released 2024-01-22 (17.3 (19617.2.4.11.8))
             # ("safari", "17.3.1", None, None, get_or_create_browser("safari", "17.3.1", "macOS 14.3.1", "real", "selenium", "")),
+            # Released 2024-05-13 (17.5 (19618.2.12))
             ("safari", "17.5", None, [], get_or_create_browser("safari", "17.5", "macOS 14.5", "real", "selenium", "")),
 
             # Brave without updates on MacOS
             # Download .dmg from https://github.com/brave/brave-browser/releases and install
             # E.g., https://github.com/brave/brave-browser/releases/tag/v1.60.118, rename the file, run with --disable-brave-updage
+            # Version has to be the major version of the corresponding chromium version to select the correct driver
             # ("brave", "119", "/Applications/Brave Browser 1.60.118.app/Contents/MacOS/Brave Browser",
             # ["--headless=new", "--disable-brave-update"], get_or_create_browser("brave", "1.60.118 (119.0.6045.163)", "macOS 14.2.1", "headless-new", "selenium", "")),
         ]
     # Linux Ubuntu
     else:
-        # Initial experiments revealed that there are no differences between --headless=new and Xvfb for Chromium-based browsers and -headless and Xvfb for Firefox
-        # As headless browsers are faster, less resource intensive, and more stable we decided to only test headless versions!
-        # (One exception is download handling in brave where there is a small difference between brave headless and headfull)
-
         # Headless (new)
         config = [
             # Major browsers (managed by Selenium itself)
@@ -342,31 +400,26 @@ if __name__ == '__main__':
             ("brave", "121", "/home/ubuntu/brave-versions/v1.62.156/brave-browser",
              ["--headless=new"], get_or_create_browser("brave", "v1.62.156 (121.0.6167.139)", "Ubuntu 22.04", "headless-new", "selenium", "")),
         ]
-        # Headfull option
-        use_headfull = False
-        if use_headfull:
-                config = config + [
-                    ("chrome", "121", None, None, get_or_create_browser("chrome", "121", "Ubuntu 22.04", "xvfb", "selenium", "")),
-                    ("firefox", "122", None, None, get_or_create_browser("firefox", "122", "Ubuntu 22.04", "xvfb", "selenium", "")),
-                    ("brave", "121", "/home/ubuntu/brave-versions/v1.62.156/brave-browser", None,
-                    get_or_create_browser("brave", "v1.62.156 (121.0.6167.139)", "Ubuntu 22.04", "xvfb", "selenium", ""))
-                ]
 
     if args.debug_browsers:
         config = [
+            # Configure browsers to use for debug runs manually here
             ("chrome", "128", None, ["--headless=new"], get_or_create_browser("chrome", "128", "Ubuntu 22.04", "headless-new", "selenium", "")),
         ]
 
+    # Use the debug Unknown browser if generating the page-runner json File
     if args.gen_page_runner:
         config = [("Unknown", "Unknown", None, None, get_or_create_browser("Unknown", "Unknown", "Unknown", "real", "manual", None))]
 
+    # Setup variables related to logging and more
     now = f"{datetime.datetime.now()}"
     log_path = f"logs/desktop-selenium/{now}"
-
     all_args = []
     url_list = []
     rand_token = generate_short_uuid()
     chunk_id = 0
+
+    # If page_runner_json is set, load the URLs from the file
     if args.page_runner_json != "":
         with open(args.page_runner_json, "r") as f:
             urls = json.load(f)
@@ -379,6 +432,7 @@ if __name__ == '__main__':
             assert(int(re.findall("runner-(\d+)", url)[0]) == 1)
             url = url + f"?browser_id={browser_id}"
             all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, [url], args.timeout_task, args.timeout_task-60))
+    # Otherwise load the test_urls by using get_tests or from repeat.json
     else:
         for scheme in ["http", "https"]:
             for browser_name, browser_version, binary_location, arguments, browser_id in config:
@@ -392,31 +446,30 @@ if __name__ == '__main__':
                     with open("../repeat.json", "r") as f:
                         test_urls = json.load(f).get(str(browser_id), [])
                         test_urls = list(filter(lambda s: s.startswith(f"{scheme}://"), test_urls))
+                        # Increased timeout for repeat tests
                         page_timeout = 3 * TIMEOUT
                     if not len(test_urls):
                         continue
                 else:
                     raise Exception(f"Unknown run mode: {args.run_mode}")
 
+                # Chunk the test_urls according to the max_urls_until_restart setting
                 url_chunks = [test_urls[i:i + args.max_urls_until_restart] for i in range(0, len(test_urls), args.max_urls_until_restart)]
                 for url_chunk in url_chunks:
                     all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, url_chunk, args.timeout_task, page_timeout))
+
                     if args.gen_page_runner:
                         url_chunk = url_chunk * args.gen_multiplier
                         url_list.append(create_test_page_runner(browser_id, f"{rand_token}-{chunk_id}", url_chunk))
                         chunk_id += 1
 
+    # If the gen_page_runner option is set, generate a JSON with a list of URLs to visit
     if args.gen_page_runner:
         print(f"URLs to visit: {url_list}")
         with open(f"{args.resp_type}-MaxURLs{args.max_urls_until_restart}-MaxResps{args.max_resps}-MaxPopups{args.max_popups}-{rand_token}.json", "w") as f:
             json.dump(url_list, f)
+    # Otherwise create up to num_browsers processes and start running tests in all of them
     else:
         with Pool(processes=args.num_browsers, initializer=setup_process, initargs=(log_path,)) as p:
             r = list(tqdm(p.imap_unordered(worker_function, all_args), total=len(all_args), desc="Header Parsing Progress (URL Chunks)", leave=True, position=0))
             # print(r)
-
-    # Headfull (linux):
-    # Xvfb :99 -screen 0 1920x1080x24 &
-    # x11vnc -display :99 -bg -shared -forever -passwd abc -xkb -rfbport 5900
-    # export DISPLAY=:99 && fluxbox -log fluxbox.log &
-    # export DISPLAY=:99 && python desktop_selenium.py

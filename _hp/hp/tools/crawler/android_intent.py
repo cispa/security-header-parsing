@@ -6,7 +6,7 @@ import numpy as np
 
 
 from hp.tools.crawler.desktop_selenium import CustomErrorTimeout, CustomTimeout
-from hp.tools.crawler.utils import get_tests, get_or_create_browser, TIMEOUT
+from hp.tools.crawler.utils import get_tests, get_or_create_browser
 from multiprocessing import Pool
 import psycopg
 import uuid
@@ -206,7 +206,7 @@ def main(browser_list, url_dict, repeat_times, num_devices, resp_type, auto_rest
 
 	device_ids = get_available_device()
 	while len(device_ids) > 0:
-		print('Force stop current emulatos ...')
+		print('Force stop current emulators ...')
 		force_stop_emulators()
 		device_ids = get_available_device()
 		time.sleep(2)
