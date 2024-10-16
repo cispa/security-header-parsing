@@ -5,18 +5,25 @@ from hp.tools.models import Result, Session
 
 @json_handler
 def main(request, response):
+    """Store tests result in the database
+
+    Args:
+        request: POST request with JSON body containing test results
+        response: Response to generate
+
+    Returns:
+        response: JSON response which is either {'Status': 'Success'} or {'Error': str(e)}
+    """
     with Session() as session:
         try:
             req = json.loads(request.body)
-            # print(req)
             browser_id = req["browser_id"]
             org_scheme = req["org_scheme"]
             org_host = req["org_host"]
             full_url = req["full_url"]
 
             for test in req["tests"]:
-                # print(test)
-                outcome_type = str(type(test["outcome"]))  # Not useful if test["outcome"] always is a JSON dict
+                outcome_type = str(type(test["outcome"]))
                 outcome_value = test["outcome"]
 
                 test_name = test["name"].split("|")[0]
@@ -24,10 +31,7 @@ def main(request, response):
                 test_message = test["message"]
                 test_stack = test["stack"]
 
-                # TODO: get testcase ID from the test; see models.py for challenges (test needs to know it's own id?)
-                # Or ignore testcase ID? every test has a name (e.g., simple_framing_test)
-                # Other properties of the test are saved in relation, resp_scheme and resp_host (to differentiate between same-org/cross-org framing and similar)
-                testcase_id = 1 
+                testcase_id = 1  # Always 1; test are identified by name, relation, resp_scheme and resp_host, ...
                 response_id = test["name"].split("|")[-1]
 
                 resp_scheme = test["resp_scheme"]
@@ -40,7 +44,6 @@ def main(request, response):
                             resp_scheme=resp_scheme, resp_host=resp_host, relation_info=relation,
                             org_host=org_host, org_scheme=org_scheme, full_url=full_url)
                 session.add(res)
-                # print("\n Stored Successfully \n")
             res = {'Status': 'Success'}
             session.commit()
             return res

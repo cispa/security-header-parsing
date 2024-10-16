@@ -3,19 +3,20 @@ import psycopg
 import json
 
 # Setup the config
-try:
-    proj_config = json.load(open("config.json"))
-except OSError:
-    try:
-        proj_config = json.load(open("_hp/tools/config.json"))
-    except OSError:
-        proj_config = json.load(open("../config.json"))
-
+proj_config = json.load(open("_hp/hp/tools/config.json"))
 DB_URL = proj_config['DB_URL'].replace("postgresql+psycopg2://", "postgresql://")
-
 
 @json_handler
 def main(request, response):
+    """Notify runner clients via postgres pg_notify that their run is doen.
+
+    Args:
+        request: GET request with run_id
+        response: Response to be generated
+
+    Returns:
+        JSON: returns {"result": "done"} or the postgres error
+    """
     run_id = request.GET.get("run_id", "unknown")
     sql = "SELECT pg_notify(%s, %s);"
     try:
@@ -24,5 +25,5 @@ def main(request, response):
     except psycopg.Error as e:
         print("Error notifying page runner:", e)
         return {"result": str(e)}
-    
+
     return {"result": "done"}

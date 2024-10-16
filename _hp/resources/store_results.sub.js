@@ -1,12 +1,16 @@
-// More helper functions here!
+/*
+Functions and helpers to run the "Head(er)s Up!" browser tests and store the final results in the database
+*/
+// Scheme and host of the top-level file (original scheme/host)
 var org_scheme = location.port == 9000 ? "http2" : location.protocol == "http:" ? "http" : "https";
 var org_host = location.hostname;
 
+// String to search for on the page; Only necessary for manual debugging of the COEP bug
 let search = urlParams.get('search') || undefined;
 
 // We always visit the testpages at http://sub.headers.websec.saarland or https://sub.headers.websec.saarland
-// We then create tests for http, https, ~~and http2~~ for the following cases:
-// same-org, 2x same-site (parent-domain + sub-domain), cross-site
+// We then create tests for the following origins:
+// (https and https) X same-org, 2x same-site (parent-domain + sub-domain), cross-site
 function get_test_origins(resp_type) {
   const same_host = 'sub.{{host}}';
   const parent = '{{host}}';
@@ -24,13 +28,16 @@ function get_test_origins(resp_type) {
       origins.push(`http://${host}`);
     }
     origins.push(`https://${host}`);
-    // H2 has a process leak? after a while 7k+ processes are open and everything crashes
+
+    // The WPT HTTP/2 server has a process leak: after a while 7k+ processes are open and everything crashes
     // Occurs for both with/without settings to allow for invalid responses
+    // For now do not test HTTP/2
     //origins.push(`https://${host}:{{ports[h2][0]}}`);
   }
   return origins;
 };
 
+// Helper to wait for a postMessage from a specific frame
 function waitForMessageFrom(frame, test) {
   return new Promise(resolve => {
     window.addEventListener("message", test.step_func(e => {
@@ -41,32 +48,38 @@ function waitForMessageFrom(frame, test) {
   });
 }
 
-// Run all tests for origin relations and similar!
+// Run all declared tests for the specified origins
 function run_tests(test_declarations, path, label, origins) {
-  const resp_type = urlParams.get("resp_type") || "debug"; // Default resp_type is debug
+  // Which tests to run: debug (default), basic, parsing
+  const resp_type = urlParams.get("resp_type") || "debug";
+  // Which tests to run (from first_id to last_id)
   const first_id = parseInt(urlParams.get("first_id"), 10) || null;
   const last_id = parseInt(urlParams.get("last_id"), 10) || null;
+  // If tests open popups, which to run (from first_popup to last_popup)
   const first_popup = parseInt(urlParams.get("first_popup"), 10) || 0;
   const last_popup = parseInt(urlParams.get("last_popup"), 10) || Infinity;
+  // Do not run any popup tests
   const run_no_popup = urlParams.get("run_no_popup") || 'yes';
 
-  // Manual confirmation mode
+  // Settings for the manual confirmation mode
+  // Only run this exact test instance
   const t_resp_id = parseInt(urlParams.get("t_resp_id"), 10) || null;
   const t_resp_origin = urlParams.get("t_resp_origin") || null;
   const element_relation = urlParams.get("t_element_relation") || null;
 
-  // Fetch origin relations if not specified
+  // If no origin relations are specified, run for the default origins of the `resp_type`
   if (!origins) {
     origins = get_test_origins(resp_type);
   }
 
-  // If &first_id=<first_id>&last_id=<last_id>; run on the specified ids
+  // For automated testing run on the specified ids (&first_id=<first_id>&last_id=<last_id>;)
   let popup_count = 0;
   if (first_id && last_id) {
     for (var response_id = first_id; response_id < last_id + 1; response_id++) {
       for (var origin of origins) {
         for (let test of test_declarations) {
-          // Only run exactly one test in the manual confirmation mode (the manual confirmation mode has to use clean_urls without popup_settings!)
+          // Only run exactly one test in the manual confirmation mode
+          // (the manual confirmation mode has to use clean_urls without popup_settings!)
           if (t_resp_id) {
             if (t_resp_id != response_id) {
               continue
@@ -108,6 +121,7 @@ function run_tests(test_declarations, path, label, origins) {
   console.log(`All popups: ${popup_count}`);
 }
 
+// Helper to create nested tests
 function nested_test(frame_element, sandbox, url, response_id, element, test_info, test_name) {
   async_test(t => {
     t.set_test_info(url, test_info);
@@ -145,9 +159,10 @@ function nested_test(frame_element, sandbox, url, response_id, element, test_inf
   }, test_name);
 }
 
-// Store result helpers!
+// Store all the results on our database
 async function save_result(tests, status) {
   console.log(tests);
+  // Convert the WPT test results to our format
   var test_results = tests.map(function (x) {
     return {
       name: x.name, outcome: x.outcome, status: x.status, message: x.message, stack: x.stack,
@@ -155,9 +170,9 @@ async function save_result(tests, status) {
     }
   });
   var data = {
-    // Results for the individual tests + metainfo (which browser)
+    // Results for the individual tests + metainfo (e.g., which browser)
     tests: test_results,
-    browser_id: urlParams.get('browser_id') || 1, // One is the unknown browser!
+    browser_id: urlParams.get('browser_id') || 1, // "1" is the unknown browser!
     // Other metadata (status etc. of the complete test file run)
     test: window.location.href,
     status: status.status,
@@ -167,6 +182,7 @@ async function save_result(tests, status) {
     org_host: org_host,
     full_url: document.location.href
   };
+  // Store the results at the database
   await fetch('https://{{host}}:{{ports[https][0]}}/_hp/server/store_results.py', {
     method: 'POST',
     body: JSON.stringify(data),
@@ -181,12 +197,13 @@ async function save_result(tests, status) {
   d.id = "finished";
   document.body.appendChild(d);
 
-  // Try to stop the page runner
+  // Stop the run_id page runner by notifying the runner via postgres
   let run_id = urlParams.get('run_id') || undefined;
   if (run_id) {
     await fetch(`${location.origin}/_hp/server/notify_runner_clients.py?run_id=${run_id}`);
   }
 
+  // For manual debugging of the COEP test only
   if (search) {
     // Get the content of the webpage
     const webpageContent = document.body.innerText;
@@ -209,10 +226,11 @@ async function save_result(tests, status) {
   try {
     window.opener.postMessage("finished", "*");
   } catch (e) {
-    // Openere page does not exist; test opened directly
+    // Opener page does not exist; test opened directly
     console.log(e);
   }
 
 
 };
+// Save the results if the tests are finished
 add_completion_callback(save_result);
