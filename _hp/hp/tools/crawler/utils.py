@@ -24,18 +24,26 @@ FINAL_REQ_TIMEOUT = 1
 # Also we finish early when we see the #finished div in the page with Selenium which we cannot do on mobile
 TIMEOUT = BROWSER_START_TIMEOUT + GLOBAL_TEST_TIMEOUT + FINAL_REQ_TIMEOUT
 
+# Load the WPT Config
+try:
+	wpt_config = json.load(open("_hp/wpt-config.json"))
+except OSError:
+	try:
+		wpt_config = json.load(open("../../wpt-config.json"))
+	except OSError:
+		wpt_config = json.load(open("../../../wpt-config.json"))
 
-base_host = "sub.headers.websec.saarland"
+base_host = f"sub.{wpt_config['browser_host']}"
 base_dir = "_hp/tests"
 HSTS_DEACTIVATE = f"https://{base_host}/_hp/common/empty.html?pipe=header(strict-transport-security,max-age=0)|status(200)"
 
 
 test_info = [
     # Only for basic tests!
-    
+
     # [(test_file_name, label_name, number_of_response_ids, num_popup_parsing, num_popup_basic)]
     # number_of_response_ids is the maxium number of response_ids allowed for parsing tests
-    ("fetch-cors.sub.html", "CORS", 1, 0, 0),  # Tests: 32 (8*4), 4 
+    ("fetch-cors.sub.html", "CORS", 1, 0, 0),  # Tests: 32 (8*4), 4
     # Comment: Num tests per resp_id: <basic/debug> (Origin relations x NumTests), parsing (for one base URL; x2 as most tests are loaded from both HTTP and HTTPS)
 
     # Only for parsing tests!
@@ -46,7 +54,7 @@ test_info = [
     ("fetch-cors.sub.html", "CORS-ACAM", 5, 0, 0),  # Tests: 32 (8*4), 4
     ("fetch-cors.sub.html", "CORS-ACAH", 5, 0, 0),  # Tests: 32 (8*4), 4
     ("fetch-cors.sub.html", "CORS-ACEH", 5, 0, 0),  # Tests: 32 (8*4), 4
-    
+
     # All tests!
     ("framing.sub.html", "XFO", 5, 0, 0),  # Tests:  72 (8*9), 2
     ("framing.sub.html", "CSP-FA", 5, 0, 0),  # Tests:  72 (8*9), 2
@@ -61,7 +69,7 @@ test_info = [
     ("subresource-loading-csp.sub.html", "CSP-IMG", 5, 0, 0),  # Tests: 8 (8*1), 1
     ("window-references-coop.sub.html", "COOP", 1, 1, 8),  # Tests: 8 (8*1), 1
     ("script-execution-xcto.sub.html", "XCTO", 5, 0, 0), # Tests: 8 (8*1), 1
-   
+
     # HTTP only
     ("upgrade-hsts.sub.html", "HSTS", 1, 0, 0),    # Tests: 4 (2*2), 4 (2*2) # Promise tests thus only one resp_id
 ]
@@ -93,7 +101,7 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000, br
                 continue
             if label == "OAC" and resp_type == "parsing":
                 continue
-        
+
         # HSTS test are not executed for HTTPS
         if "upgrade" in url and scheme == "https":
             continue
@@ -103,7 +111,7 @@ def get_tests(resp_type, browser_id, scheme, max_popups=1000, max_resps=1000, br
                 continue
             if label == "CORS" and resp_type == "parsing":
                 continue
-        
+
         # Allow more than one response_id per test for parsing tests
         if resp_type == "parsing":
             max_resp_ids = min(num_resp_ids, max_resps)
@@ -218,7 +226,7 @@ def create_test_page_runner(browser_id, identifier, test_urls):
 def generate_short_uuid(length=6):
     if length <= 0:
         raise ValueError("Length must be a positive integer")
-    
+
     # Generate a UUID
     full_uuid = uuid.uuid4()
     # Convert it to a string and extract the specified number of characters

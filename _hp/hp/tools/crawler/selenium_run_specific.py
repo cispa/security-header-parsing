@@ -1,6 +1,4 @@
-from hp.tools.crawler.utils import TIMEOUT, generate_short_uuid, get_tests, HSTS_DEACTIVATE, create_test_page_runner
-
-from hp.tools.create_browsers import get_or_create_browser
+from hp.tools.crawler.utils import TIMEOUT, generate_short_uuid, get_tests, HSTS_DEACTIVATE, create_test_page_runner, get_or_create_browser
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC

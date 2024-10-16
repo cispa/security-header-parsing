@@ -8,8 +8,7 @@ import sys
 import time
 
 from tqdm import tqdm
-from hp.tools.crawler.utils import TIMEOUT, generate_short_uuid, get_tests, HSTS_DEACTIVATE, create_test_page_runner
-from hp.tools.create_browsers import get_or_create_browser
+from hp.tools.crawler.utils import TIMEOUT, generate_short_uuid, get_tests, HSTS_DEACTIVATE, create_test_page_runner, get_or_create_browser
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -47,7 +46,7 @@ def get_child_processes(parent_pid):
         return child_processes
     except psutil.NoSuchProcess:
         return []
-    
+
 
 def kill_processes(pid_list):
     for process in pid_list:
@@ -55,7 +54,7 @@ def kill_processes(pid_list):
             process.terminate()
         except psutil.NoSuchProcess:
             pass
-    
+
     try:
         psutil.wait_procs(pid_list, timeout=5)
     except psutil.NoSuchProcess:
@@ -128,7 +127,7 @@ def clean_dirs(timeout):
             pass
 
 
-def run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger: logging.Logger, page_timeout):  
+def run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger: logging.Logger, page_timeout):
     try:
         url = None
         processes = []
@@ -136,7 +135,7 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
         cur_url = 0
         extra = {"browser": browser_name, "browser_version": browser_version, "binary_location": binary_location, "arguments": arguments}
         logger.info(f"Start {browser_name} ({browser_version})", extra=extra)
-        start = datetime.datetime.now() 
+        start = datetime.datetime.now()
         # Try getting a driver twice (sometimes Safari fails the first attempt)
         try:
             driver = get_browser(browser_name, browser_version,
@@ -155,11 +154,11 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
             if "originAgentCluster" in url:
                 continue
             try:
-                driver.set_window_position(-5000, 0)  # Posititon the window off-screen (necessary on macOS such that the device stays more or less usable)
+                driver.set_window_position(-5000, 0)  # Position the window off-screen (necessary on macOS such that the device stays more or less usable)
                 logger.debug(f"Attempting: {url}", extra=extra)
                 # Create a new window for each test/URL; another option would be to restart the driver for each test but that is even slower
                 driver.switch_to.new_window('window')
-                driver.set_window_position(-5000, 0)  # Posititon the new window off-screen as well
+                driver.set_window_position(-5000, 0)  # Position the new window off-screen as well
                 new_window = driver.current_window_handle
                 if "upgrade" in url:
                     driver.get(HSTS_DEACTIVATE)
@@ -219,7 +218,7 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
 
 def worker_function(args):
     log_path, browser_name, browser_version, binary_location, arguments, debug_input, test_urls, timeout, page_timeout = args
-    
+
     log_filename = f"{log_path}-{browser_name}-{browser_version}.json"
     file_handler = logging.FileHandler(log_filename)
     file_handler.setLevel(logging.INFO)
@@ -234,7 +233,7 @@ def worker_function(args):
             processes = run_task(browser_name, browser_version, binary_location, arguments, debug_input, test_urls, logger, page_timeout)
         except (CustomTimeout, Exception):
             logger.error("Fatal outer exception!", exc_info=True)
-    
+
     # Sometimes driver.quit and similar do not work, thus we kill the processes explicitely once again
     # Another approach would be to have a separate watchdog process to kill stale drivers + browsers
     kill_processes(processes)
@@ -248,7 +247,7 @@ def setup_process(log_path):
     # Slowly start all processes, one new every second
     name = multiprocessing.current_process().name
     num = int(name.rsplit("-", maxsplit=1)[1]) - 1
-    time.sleep(num)  
+    time.sleep(num)
 
 log_path = f"logs/desktop-selenium/"
 Path(log_path).mkdir(parents=True, exist_ok=True)
@@ -308,7 +307,7 @@ if __name__ == '__main__':
         # Initial experiments revealed that there are no differences between --headless=new and Xvfb for Chromium-based browsers and -headless and Xvfb for Firefox
         # As headless browsers are faster, less resource intensive, and more stable we decided to only test headless versions!
         # (One exception is download handling in brave where there is a small difference between brave headless and headfull)
-            
+
         # Headless (new)
         config = [
             # Major browsers (managed by Selenium itself)
@@ -319,7 +318,7 @@ if __name__ == '__main__':
             ("firefox", "122", None, ["-headless"], get_or_create_browser("firefox", "122", "Ubuntu 22.04", "headless", "selenium", "")),
             # Released 2024-01-25
             # ("edge", "121", None, ["--headless=new"], get_or_create_browser("edge", "121", "Ubuntu 22.04", "headless-new", "selenium", "")),
-            
+
             # To compare between versions use additional chrome and firefox versions
             # Released 2024-02-14
             ("chrome", "122", None, ["--headless=new"], get_or_create_browser("chrome", "122", "Ubuntu 22.04", "headless-new", "selenium", "")),
@@ -342,7 +341,7 @@ if __name__ == '__main__':
             # Latest as of 2024-02-05
             ("brave", "121", "/home/ubuntu/brave-versions/v1.62.156/brave-browser",
              ["--headless=new"], get_or_create_browser("brave", "v1.62.156 (121.0.6167.139)", "Ubuntu 22.04", "headless-new", "selenium", "")),
-        ]  
+        ]
         # Headfull option
         use_headfull = False
         if use_headfull:
@@ -352,7 +351,7 @@ if __name__ == '__main__':
                     ("brave", "121", "/home/ubuntu/brave-versions/v1.62.156/brave-browser", None,
                     get_or_create_browser("brave", "v1.62.156 (121.0.6167.139)", "Ubuntu 22.04", "xvfb", "selenium", ""))
                 ]
-    
+
     if args.debug_browsers:
         config = [
             ("chrome", "128", None, ["--headless=new"], get_or_create_browser("chrome", "128", "Ubuntu 22.04", "headless-new", "selenium", "")),
@@ -398,7 +397,7 @@ if __name__ == '__main__':
                         continue
                 else:
                     raise Exception(f"Unknown run mode: {args.run_mode}")
-            
+
                 url_chunks = [test_urls[i:i + args.max_urls_until_restart] for i in range(0, len(test_urls), args.max_urls_until_restart)]
                 for url_chunk in url_chunks:
                     all_args.append((log_path, browser_name, browser_version, binary_location, arguments, args.debug_input, url_chunk, args.timeout_task, page_timeout))
