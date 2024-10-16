@@ -50,7 +50,6 @@ def connect(param_dict=None, quiet=False):
         print("Connection successful")
     return conn
 
-
 def postgresql_to_dataframe(conn, select_query, non_cat=None):
     """
     Tranform a SELECT query into a pandas dataframe
@@ -85,7 +84,6 @@ def to_cat(column, non_cat=[]):
     else:
         return column.astype('category')
 
-
 def clean_url(url):
     # Set browser_id=1 (unknown) to not accidentally include them in our real data collection
     url = re.sub(r"browser_id=(\d+)", "browser_id=1", url)
@@ -95,20 +93,19 @@ def clean_url(url):
     return url
 
 def make_clickable(url):
-    # Clickable links for debugging
+    """Clickable links for debugging"""
     url = clean_url(url)
     return clickable(url, url)
 
 def clickable(title=None, url=None):
+    """Make something clickable"""
     if not title:
         title = url
     return f'<a href="{url}" target="_blank">{title}</a>'
 
-
-
-
 def add_columns(df):
-    # Create extra columns
+    """Create extra columns: e.g., clean_url and filtered outcome_str"""
+    
     df["outcome_str"] = df["outcome_value"].fillna("None").astype(str)
     df["clean_url"] = df["full_url"].apply(clean_url)
     @lru_cache(maxsize=None)
@@ -140,14 +137,8 @@ def add_columns(df):
     # Firefox: {'window.open.opener': 'object "TypeError: w is null"'}
     df["outcome_str"] = df["outcome_str"].replace("TypeError: w is null", "No window-reference. Probably popup blocked", regex=True)
     df["outcome_str"] = df["outcome_str"].replace("TypeError: Cannot read properties of null (reading \'opener\')", "No window-reference. Probably popup blocked", regex=True)
-
     
-
-    
-    # For document referrer we do not want to know the exact resp_id and count
-    # We only want to know whether it is a origin or the full URl?
-    #df['outcome_str'] = df['outcome_str'].replace(r'resp_id=\d+', 'resp_id=<resp_id>', regex=True)
-    #df['outcome_str'] = df['outcome_str'].replace(r'count=\d+', 'count=<count>', regex=True)
+    # For document referrer we only want to know whether it is a origin or the full URl?
     df['outcome_str'] = df['outcome_str'].apply(lambda x: 'document.referrer: full_url' if 'responses.py?feature_group' in x else x)
     # The differences always only are between http-origin, https-origin, full-url, none, timeout; there is never a difference between the various origins, thus we can merge them to make our live easier
     df["outcome_str"] = df["outcome_str"].apply(lambda x: "document.referrer: https://origin" if "https://" in x else x)
