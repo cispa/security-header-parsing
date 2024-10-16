@@ -25,7 +25,7 @@ Base = declarative_base()
 
 
 class BaseModel(Base):
-    """Base model each model inherits from."""
+    """Base model each model inherits from including timestamps."""
     __abstract__ = True
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow,
@@ -33,7 +33,7 @@ class BaseModel(Base):
 
 
 class TestCase(BaseModel):
-    """Model for all implemented tests."""
+    """Model for all implemented tests (unused)."""
     __tablename__ = 'TestCase'
     id = Column(Integer, primary_key=True)
     # feature_group: e.g., Framing, Script Execution, ...
@@ -42,7 +42,7 @@ class TestCase(BaseModel):
     test_file = Column(String)
     # test_name: e.g., cross-origin simple framing, ...
     test_name = Column(String)
-    # Additional Information (?)
+    # Additional Information
     additional_info = Column(String)
 
     # Helper
@@ -56,7 +56,7 @@ class TestCase(BaseModel):
 
 
 class Browser(BaseModel):
-    """Model to save information of each tested browser."""
+    """Model to save information of each tested browser configuration."""
     __tablename__ = 'Browser'
     id: Mapped[int] = mapped_column(primary_key=True)
     name = Column(String)
@@ -66,7 +66,7 @@ class Browser(BaseModel):
         Enum('real', 'xvfb', 'headless', 'headless-new', name='headless_mode'))
     automation_mode = Column(Enum(
         'manual', 'intent', 'selenium', 'playwright', 'other', name='automation_mode'))
-    # For example playwright or selenium version?
+    # Space for additional information about a browser configuration
     add_info = Column(String)
 
     # Helper
@@ -104,9 +104,8 @@ class Response(BaseModel):
     )
 
 
-# All the above tables get created before we run the tests
+# All the above tables get filled before we run any of the tests
 # Only the result table below is filled during the experiment
-
 
 class Result(BaseModel):
     """Model to save the results of our tests."""
@@ -119,7 +118,7 @@ class Result(BaseModel):
     outcome_value = Column(JSONB)
 
     # Provided by testharness.sub.js
-    # Alternative for testcase_id? Otherwise we need to figure out how each wpt-test knows it's own testcase_id?
+    # Alternative for testcase_id:
     test_name = Column(String)
     test_status = Column(Integer)
     test_message = Column(String)
@@ -144,19 +143,13 @@ class Result(BaseModel):
     testcase: Mapped["TestCase"] = relationship(back_populates="result")
     response: Mapped["Response"] = relationship(back_populates="result")
 
-    # All tests that we have to run are:
-    # TestCase * Browser * Response (subset of responses relevant for the selected TestCase)
-    # TODO: how do we want to run these?
-    # 1. Precreate all and select ones that are not yet processed for each run?
-    # 2. Distribute IDs to each run and have them filled one by one (Currenty implemented?)
-    # 3. Something else?
     status = Column(Enum('FREE', 'PROCESSING', 'FINISHED', name='status'))
 
     # For easier manual debugging
     full_url = Column(String)
 
 
-# Run the DB Stuff
+# Create the DB
 # Create a SQLAlchemy engine
 engine = create_engine(DB_URL)
 
@@ -168,7 +161,7 @@ Session = sessionmaker(bind=engine)
 
 # Create dummy data entries
 if __name__ == "__main__":
-    from crawler.utils import get_or_create
+    from hp.tools.crawler.utils import get_or_create
     with Session() as session:
         # Always make sure that the unknown browser exist with ID=1!
         b = get_or_create(session, Browser, name="Unknown", version="Unknown",

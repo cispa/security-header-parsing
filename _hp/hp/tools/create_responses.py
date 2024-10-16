@@ -1,3 +1,7 @@
+"""
+Generates all debug and basic responses.
+Parsing responses are generated in analysis/response_header_generation.ipynb
+"""
 from hp.tools.models import Response, Session
 
 from hp.tools.crawler.utils import get_or_create
@@ -5,17 +9,26 @@ import json
 
 # Common area
 # Redirect to empty response, has ACAO *, other than that no special headers!
-redirect_empty = ("location", "https://sub.headers.websec.saarland/_hp/common/empty.html")
-site = "sub.headers.websec.saarland"
-origin_s = "https://sub.headers.websec.saarland"
-origin = "http://sub.headers.websec.saarland"
+try:
+	wpt_config = json.load(open("_hp/wpt-config.json"))
+except OSError:
+	try:
+		wpt_config = json.load(open("../../wpt-config.json"))
+	except OSError:
+		wpt_config = json.load(open("../../../wpt-config.json"))
+
+base_host = wpt_config["browser_host"]
+redirect_empty = ("location", f"https://sub.{base_host}/_hp/common/empty.html")
+site = f"sub.{base_host}"
+origin_s = f"https://sub.{base_host}"
+origin = f"http://sub.{base_host}"
 origin_sp = f"{origin_s}:443"
 home = f"{origin_s}/"
 home_p = f"{origin_sp}/"
-parent = "https://headers.websec.saarland"
-child = "https://sub.sub.headers.websec.saarland"
-parent_childs = "*.headers.websec.saarland"
-self_childs = "*.sub.headers.websec.saarland"
+parent = f"https://{base_host}"
+child = f"https://sub.sub.{base_host}"
+parent_childs = f"*.{base_host}"
+self_childs = f"*.sub.{base_host}"
 
 
 # Some feature groups have more than one group of responses (label in the DB), e.g., framing has both XFO, CSP, and XFO vs CSP
@@ -46,7 +59,7 @@ header_deny = [(header_name, v1)]
 header_allow = [(header_name, v2)]
 create_responses([header_deny, header_allow], label)
 header_list = [[(header_name, value)] for value in all_values]
-header_list = header_list + [[], 
+header_list = header_list + [[],
                [(header_name, f"{v1}, {v3}, {v4}")],
             ]
 create_responses(header_list, label, resp_type="basic")
@@ -77,7 +90,7 @@ header_deny = [(header_name, v2)]
 header_allow = [(header_name, v3)]
 create_responses([header_deny, header_allow], label)
 header_list = [[(header_name, value)] for value in all_values]
-header_list = header_list + [[], 
+header_list = header_list + [[],
                [(header_name, f"{v2}, {v3}, {v4}")],
             ]
 create_responses(header_list, label, resp_type="basic")
@@ -124,7 +137,7 @@ header_deny = [(header_name, v2)]
 header_allow = [(header_name, v4)]
 create_responses([header_deny, header_allow], label)
 header_list = [[(header_name, value)] for value in all_values]
-header_list = header_list + [[], 
+header_list = header_list + [[],
                [(header_name, f"{v1}, {v3}, {v4}")],
             ]
 create_responses(header_list, label, resp_type="basic")
@@ -150,7 +163,7 @@ header_deny = [(header_name, v2)]
 header_allow = [(header_name, v1)]
 create_responses([header_deny, header_allow], label)
 header_list = [[(header_name, value)] for value in all_values]
-header_list = header_list + [[], 
+header_list = header_list + [[],
                [(header_name, f"{v1}, {v3}, {v4}")],
             ]
 create_responses(header_list, label, resp_type="basic")
@@ -174,7 +187,7 @@ header_deny = [(header_name, v3)]
 header_allow = [(header_name, v1)]
 create_responses([header_deny, header_allow], label)
 header_list = [[(header_name, value)] for value in all_values]
-header_list = header_list + [[], 
+header_list = header_list + [[],
                [(header_name, f"{v1}, {v3}, {v4}")],
             ]
 create_responses(header_list, label, resp_type="basic")
@@ -235,7 +248,7 @@ header_deny = [(header_name, v2)]
 header_allow = [(header_name, v3)]
 create_responses([header_deny, header_allow], label)
 header_list = [[(header_name, value)] for value in all_values]
-header_list = header_list + [[], 
+header_list = header_list + [[],
                [(header_name, f"{v2}, {v3}, {v4}")],
             ]
 create_responses(header_list, label, resp_type="basic")
@@ -266,7 +279,7 @@ header_deny = [(header_name, v2)]
 header_allow = [(header_name, v3)]
 create_responses([header_deny, header_allow], label)
 header_list = [[(header_name, value)] for value in all_values]
-header_list = header_list + [[], 
+header_list = header_list + [[],
                [(header_name, f"{v2}, {v3}, {v4}")],
             ]
 create_responses(header_list, label, resp_type="basic")
@@ -289,7 +302,7 @@ v7 = "max-age=-5"
 header_deny = [(header_name, v1)]
 header_allow = [(header_name, v2)]
 create_responses([header_deny, header_allow], label)
-header_list = [[(header_name, "*")], [], 
+header_list = [[(header_name, "*")], [],
                [(header_name, "null")], [(header_name, v1)],
                [(header_name, v2)], [(header_name, v3)],
                [(header_name, v4)], [(header_name, v5)],
@@ -319,7 +332,7 @@ v7 = "false"
 header_deny = [(header_name, v1)]  # Set OAC, secure value
 header_allow = [(header_name, v2)] # Disable OAC, insecure value
 create_responses([header_deny, header_allow], label)
-header_list = [[(header_name, "*")], [], 
+header_list = [[(header_name, "*")], [],
                [(header_name, "null")], [(header_name, v1)],
                [(header_name, v2)], [(header_name, v3)],
                [(header_name, v4)], [(header_name, v5)],
@@ -342,7 +355,7 @@ header_name = "Permissions-Policy" # https://w3c.github.io/webappsec-permissions
 header_deny = [(header_name, "fullscreen=()")]
 header_allow = [(header_name, "fullscreen=(*)")]
 create_responses([header_deny, header_allow], label)
-header_list = [[(header_name, "*")], [], 
+header_list = [[(header_name, "*")], [],
                [(header_name, "null")], [(header_name, "fullscreen=")], [(header_name, "fullscreen=*")], [(header_name, "fullscreen=()")],
                [(header_name, "fullscreen=(self)")], [(header_name, f"fullscreen=({origin_s})")],
                [(header_name, f"fullscreen=({parent_childs})")], [(header_name, f"fullscreen=({self_childs})")],
@@ -377,7 +390,7 @@ v9 = ""
 header_deny = [(header_name, v1)]
 header_allow = [(header_name, v8)]
 create_responses([header_deny, header_allow], label)
-header_list = [[(header_name, "*")], [], 
+header_list = [[(header_name, "*")], [],
                [(header_name, "null")], [(header_name, v1)],
                [(header_name, v2)], [(header_name, v3)],
                [(header_name, v4)], [(header_name, v5)],
@@ -399,7 +412,7 @@ header_allow = [(header_name, "*")]
 # Debug tests
 create_responses([header_deny, header_allow], label)
 # Basic tests
-header_list = [[(header_name, "*")], [], 
+header_list = [[(header_name, "*")], [],
                [(header_name, "null")], [(header_name, origin_s)],
                [(header_name, origin)], [(header_name, parent)],
                [(header_name, home)], [(header_name, origin_sp)],
@@ -423,7 +436,7 @@ header_allow = [(header_name, "*")]
 # Debug tests
 create_responses([header_deny, header_allow], label)
 # Basic tests
-header_list = [[(header_name, "nosniff")], [], 
+header_list = [[(header_name, "nosniff")], [],
                [(header_name, "null")], [(header_name, origin_s)],
                [(header_name, origin)], [(header_name, parent)],
                [(header_name, home)], [(header_name, origin_sp)],

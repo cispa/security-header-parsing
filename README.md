@@ -24,6 +24,10 @@ Our modified version of the wptserve HTTP server implementation can be found in 
   - Android: `poetry run python android_intent.py` (Additional config required)
   - MacOS/Ubuntu: `poetry run python desktop_selenium.py` (For a quick test run: `poetry run python desktop_selenium.py --debug_browsers --resp_type debug --ignore_certs`)
   - iPadOS/iOS: `poetry run python desktop_selenium.py ----gen_page_runner --page_runner_json urls.json --max_urls_until_restart 10000"`, then visit the URLs in that file manually
+  - TODO: Exact settings of the runs for our experiment:
+    - TODO: some information about how to exactly reproduce our results?
+    - TODO: repeat to ensure each test has 5x repetitions (`poetry run python create_repeat ...`)
+    - ...
 - Analysis:
   - Run `cd _hp/hp/tools/analysis && poetry run jupyter-lab`
   - Open `_hp/hp/tools/analysis/main_analysis_desktop_basic+parsing.ipynb` (Also contains the mobile analysis)
@@ -31,7 +35,7 @@ Our modified version of the wptserve HTTP server implementation can be found in 
 ## Inventory
 - `_hp/`: All test and analysis code for the paper:
   - `common/`: Response helper files required for the tests
-  - `resources/`: 
+  - `resources/`:
     - `store_results.sub.js`: Main JavaScript file with all helper functions such that our test functions work
     - `testharness.sub.js`: Modified testharness.js to store the recorded output additonally to the test status
   - `server/`: Custom server endpoints to save data in our database and serve the correct responses from the DB
