@@ -2,31 +2,16 @@
 	"chrome":{
 	   "package_name":"com.android.chrome",
 	   "intent":"com.google.android.apps.chrome.Main",
-	   "version":"121.0.6167.180"	   	   
-	},
-	"opera":{
-	   "package_name":"com.opera.browser",
-	   "intent":"com.opera.android.BrowserActivity",	   
-	   "version":"80.5.4244.78163"	   
+	   "version":"121.0.6167.180"
 	},
 	"brave":{
 	   "package_name":"com.brave.browser",
-	   "intent":"org.chromium.chrome.browser.ChromeTabbedActivity",	   
+	   "intent":"org.chromium.chrome.browser.ChromeTabbedActivity",
 	   "version":"1.62.165"
 	},
 	"firefox_beta": {
 		"package_name":"org.mozilla.firefox_beta",
-	   	"intent":"org.mozilla.fenix.IntentReceiverActivity",	   
+	   	"intent":"org.mozilla.fenix.IntentReceiverActivity",
 	   	"version":"123.0b9"
-	},
-	"duckduckgo": {		
-		"package_name":"com.duckduckgo.mobile.android",
-	   	"intent":"com.duckduckgo.app.browser.BrowserActivity",	   
-	   	"version":"5.194.0"
-	},
-	"torbrowser_alpha": {		
-		"package_name":"org.torproject.torbrowser_alpha",
-	   	"intent":"org.mozilla.fenix.IntentReceiverActivity",	   
-	   	"version":"115.2.1-beta"
 	}
  }
