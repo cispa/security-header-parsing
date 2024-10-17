@@ -46,7 +46,9 @@ export DISPLAY=:99 && fluxbox -log fluxbox.log &
 
 ### Desktop Browsers (MacOS)
 - Have to be run on a real MacOS device, we used version 17.3 and 17.5 (adjust the browser configuration in `desktop_selenium.py` if using another version).
+- On MacOS the `setup.bash` script does not work. Instead manually install [poetry](https://python-poetry.org/docs/#installing-with-the-official-installer) and run `poetry install` in the `_hp` directory and append the entries from [host-config.txt](_hp/host-config.txt) to `/etc/hosts`.
 - Make sure that the MacOS device can reach the Header Testing server. (Alternatively it could also work to run the header testing server and the database locally on the MacOS device).
+- To be able to use Selenium with Safari, one needs to activate remote automation. In Safari: develop -> developer settings -> developer settings -> allow remote automation.
 - If using self-signed certs, add `--ignore_certs` to all commands.
 - Execute `cd _hp/hp/tools/crawler`
 - Full run:
