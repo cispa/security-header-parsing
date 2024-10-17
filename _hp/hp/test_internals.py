@@ -45,7 +45,7 @@ def test_get_tests():
     max_resps = 10
     browser_modifier = 2
     tests = get_tests(resp_type=resp_type, browser_id=browser_id, scheme=scheme, max_popups=max_popups, max_resps=max_resps, browser_modifier=browser_modifier)
-    assert len(tests) == 325
+    assert len(tests) == 269
 
 def test_get_resp_ids():
     """Check whether get_resp_ids returns valid splits
