@@ -315,7 +315,7 @@ if __name__ == '__main__':
 	ap.add_argument('-browsers', '--browsers', dest='browsers', type=str, required=True, nargs='+', choices=browser_list)
 	ap.add_argument('-url_json', '--url_json', default='', type=str, help='Optional path to a json list of create_repeat.py tests')
 	ap.add_argument('-repeat', '--repeat', default=1, type=int, help='Repeat each test x times.')
-	ap.add_argument('-num_devices', '--num_devices', dest='num_devices', type=int, help='How many emulators to start/use')
+	ap.add_argument('-num_devices', '--num_devices', dest='num_devices', default=1, type=int, help='How many emulators to start/use')
 	ap.add_argument('-type', '--resp_type', choices=['basic', 'debug', 'parsing'], default='basic', help='Specify the response type (default: basic)')
 	ap.add_argument('-auto_restart', action='store_true', help='Automatically restart the emulator every 100 URLs.')
 

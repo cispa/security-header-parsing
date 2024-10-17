@@ -64,13 +64,32 @@ export DISPLAY=:99 && fluxbox -log fluxbox.log &
 ### Mobile Browsers (Android)
 - Execute `cd _hp/hp/tools/crawler`
 - To run the tests on Android devices, first some emulators have to be set up and the browsers have to be installed and configured:
-  - TODO: include all info here (Tin)
-  - Emulator Setup (install adb, setup emulator, ...)
-  - Browser Installation and Setup
-  - Additional browser config (popups need to be allowed):
-    - Chrome: By default, Pop-ups and redirects are blocked. To allow, go to Settings/Site Settings/ Turn on the Pop-Ups and Redirects option
-    - Brave: By default, the pop-ups are blocked by the Privacy Shields setting. To enable, go to Settings/Brave Shields & privacy/ Allow all trackers and ads
-    - To allow popups, to go about:config, and then set dom.disable_open_during_load to false.
+  - Download the Android SDK Command-Line Tools (command line tools only) form the Android Studio downloads page and unpack it in a folder called `AndroidSDK` (see https://developer.android.com/tools/sdkmanager).
+  - Add `cmdline-tools` to the path: e.g., `export PATH=<path-to-AndroidSDK>/cmdline-tools/latest/bin/:$PATH`
+  - Install `platform-tools` and `emulator`: `sdkmanager platform-tools emulator`
+  - Add `platform-tools` to the path: e.g., `export PATH=<path-to-AndroidSDK>/platform-tools/:$PATH`
+  - Add `emulator` to the path: e.g., `export PATH=<path-to-AndroidSDK/emulator/:$PATH`
+  - Install and create a Pixel 3 Device with Android 11 installed:
+    - Run `sdkmanager --install "platforms;android-30" "system-images;android-30;google_apis;x86_64`
+    - Run `avdmanager create avd -n device_1 -k "system-images;android-30;google_apis;x86_64" --device "pixel_3" --force`
+  - Install `scrcpy` to be able to interact with the Android Device: `apt install scrcpy`
+  - Browser Installation and Setup:
+    - Start the emulator: `emulator @device_1 -screen multi-touch -no-window -port 5554&`
+    - Attach with `scrcpy`
+    - Setup required browsers:
+      - Download the corresponding APKs:
+        - Chrome: https://www.apkmirror.com/apk/google-inc/chrome/chrome-121-0-6167-180-release/ (x86 APK)
+        - Brave: https://www.apkmirror.com/apk/brave-software/brave-browser/brave-browser-1-62-165-release/ (x86 APK)
+        - Firefox Beta: https://www.apkmirror.com/apk/mozilla/firefox-beta/firefox-beta-123-0b9-release/ (universal APK)
+      - Install the APKs:
+        - Run `adb -s emulator-5554 install -r -g <path to apk>` for all three APKs
+    - Additional browser config (popups need to be allowed):
+      - Open all browsers and go through their setup screen, then allow popups in all of them:
+      - Open chrome: By default, Pop-ups and redirects are blocked. To allow, go to `Settings/Site Settings/ Turn on the Pop-Ups and Redirects option`
+      - Open brave: By default, Pop-ups and redirects are blocked. To allow, go to `Settings/Site Settings/ Turn on the Pop-Ups and Redirects option`
+      - Open firefox_beta: To allow popups, go to `about:config`, and then set `dom.disable_open_during_load` to false.
+    - Stop the emulator: `adb -s emulator-5554 emu kill`
+  - @Tin check if all the info here is accurate/correct
 - The emulators also need to be able to reach the Header Testing server.
 - Issue: currently does not work with the self-signed certs, make sure to have correct certs setup
 - Full run:
