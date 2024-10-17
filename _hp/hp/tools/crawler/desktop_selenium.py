@@ -188,9 +188,6 @@ def run_task(browser_name, browser_version, binary_location, arguments, debug_in
         original_window = driver.current_window_handle
         # Visit all test_urls
         for url in test_urls:
-            # Do not visit originAgentCluster URLs (feature removed from the tests)
-            if "originAgentCluster" in url:
-                continue
             try:
                 # Position the window off-screen (necessary for macOS headfull mode, such that the device stays more or less usable)
                 driver.set_window_position(-5000, 0)

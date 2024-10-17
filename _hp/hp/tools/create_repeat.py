@@ -28,7 +28,7 @@ def calc_repeat(selection_str, mult_resp_ids):
     "Browser".name, "Browser".version, "Browser".headless_mode, "Browser".os, "Browser".automation_mode, "Browser".add_info
     FROM "Result"
     JOIN "Response" ON "Result".response_id = "Response".id JOIN "Browser" ON "Result".browser_id = "Browser".id
-    WHERE "Browser".name != 'Unknown' and "Response".resp_type != 'debug' and test_status = 0
+    WHERE "Browser".name != 'Unknown' and "Response".resp_type != 'debug' and test_status = 0 and "Response".label != 'OAC'
     and {selection_str};
     """
     df = get_data(Config(), initial_data)

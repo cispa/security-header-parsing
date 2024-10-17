@@ -59,7 +59,6 @@ test_info = [
     ("framing.sub.html", "CSP-FA", 5, 0, 0),  # Tests:  72 (8*9), 2
     ("framing.sub.html", "CSPvsXFO", 5, 0, 0),  # Tests:  72 (8*9), 2
     ("fullscreen-api-pp.sub.html", "PP", 5, 0, 0),  # Tests: 32 (8*4), 2
-    ("originAgentCluster-oac.sub.html", "OAC", 1, 1, 8),  # Tests: 24 (8*3), 1
     ("perfAPI-tao.sub.html", "TAO", 10, 0, 0),  # Tests: 8 (8*1), 1
     ("referrer-access-rp.sub.html", "RP", 10, 0, 8),  # Tests: 16 (8*2), 1
     ("script-execution-csp.sub.html", "CSP-SCRIPT", 10, 0, 0),  # Tests: 16 (8*2), 1
@@ -76,7 +75,6 @@ test_info = [
 
 # Some tests often need longer, thus we increase their timeouts with the following modifiers
 timeout_modifiers = {
-    "OAC": 2,
     "RP": 2,
     "XFO": 2,
     "CSP-FA": 2,

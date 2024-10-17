@@ -58,8 +58,6 @@ def get_body(feature_group, resp):
         file = open("_hp/common/swag.jpg", "rb")
     elif feature_group in ["framing"]:
         file = open("_hp/common/iframes.html", "rb")
-    elif feature_group in ["oac"]:
-        file = open("_hp/common/frame-oac.html", "rb")
     elif feature_group in ["csp-script"]:
         file = open("_hp/common/frame-script-csp.html", "rb")
     elif feature_group in ["csp-img"]:
