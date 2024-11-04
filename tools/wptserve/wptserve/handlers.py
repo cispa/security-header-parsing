@@ -475,6 +475,20 @@ class ErrorHandler:
     def __call__(self, request, response):
         response.set_error(self.status)
 
+class RedirectHandler:
+    def __init__(self, base_path=None, url_base="/", location="https://swag.cispa.saarland/crawler.html"):
+        self.data = ""
+        self.resp_headers = [("location", location)]
+        self.handler = handler(self.handle_request)
+
+
+    def handle_request(self, request, response):
+        return 302, self.resp_headers, self.data
+
+    def __call__(self, request, response):
+        rv = self.handler(request, response)
+        return rv
+
 
 class StringHandler:
     def __init__(self, data, content_type, **headers):

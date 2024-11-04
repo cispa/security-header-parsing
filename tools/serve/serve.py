@@ -578,8 +578,8 @@ class RoutesBuilder:
             ("*", "/.well-known/web-identity", handlers.PythonScriptHandler),
             ("*", "_hp/*.py", handlers.PythonScriptHandler),
             ("GET", "_hp/*", handlers.FileHandler),
-            ("OPTIONS", "*.asis", handlers.AsIsHandler)
-
+            ("OPTIONS", "*.asis", handlers.AsIsHandler),
+            ("*", "/", handlers.RedirectHandler)
         ]
 
         for (method, suffix, handler_cls) in routes:
