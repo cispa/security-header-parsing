@@ -403,16 +403,16 @@ if __name__ == '__main__':
             ("brave", "121", "/home/ubuntu/brave-versions/v1.62.156/brave-browser",
              ["--headless=new"], get_or_create_browser("brave", "v1.62.156 (121.0.6167.139)", "Ubuntu 22.04", "headless-new", "selenium", "")),
         ]
-    if args.new_browsers:
-        config = [
-            # Released 2024-11-06
-            ("chrome", "131", None, ["--headless=new"], get_or_create_browser("chrome", "131", "Ubuntu 22.04", "headless-new", "selenium", "")),
-            # Released 2024-11-26
-            ("firefox", "133", None, ["-headless"], get_or_create_browser("firefox", "133", "Ubuntu 22.04", "headless", "selenium", "")),
-            # Released 2024-12-11 
-            ("brave", "131", "/home/ubuntu/brave-versions/v1.73.101/brave-browser",
-             ["--headless=new"], get_or_create_browser("brave", "v1.73.101 (Chromium 131.0.6778.139)", "Ubuntu 22.04", "headless-new", "selenium", "")),
-        ]
+        if args.new_browsers:
+            config = [
+                # Released 2024-11-06
+                ("chrome", "131", None, ["--headless=new"], get_or_create_browser("chrome", "131", "Ubuntu 22.04", "headless-new", "selenium", "")),
+                # Released 2024-11-26
+                ("firefox", "133", None, ["-headless"], get_or_create_browser("firefox", "133", "Ubuntu 22.04", "headless", "selenium", "")),
+                # Released 2024-12-11 
+                ("brave", "131", "/home/ubuntu/brave-versions/v1.73.101/brave-browser",
+                ["--headless=new"], get_or_create_browser("brave", "v1.73.101 (Chromium 131.0.6778.139)", "Ubuntu 22.04", "headless-new", "selenium", "")),
+            ]
     if args.debug_browsers:
         config = [
             # Configure browsers to use for debug runs manually here

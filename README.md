@@ -47,7 +47,7 @@ export DISPLAY=:99 && fluxbox -log fluxbox.log &
 ```
 
 ### Desktop Browsers (MacOS)
-- Have to be run on a real MacOS device, we used version 17.3 and 17.5 (adjust the browser configuration in `desktop_selenium.py` if using another version).
+- Have to be run on a real MacOS device, we used version 17.3, 17.5, and 18.2 (adjust the browser configuration in `desktop_selenium.py` if using another version).
 - On MacOS the `setup.bash` script does not work. Instead manually install [poetry](https://python-poetry.org/docs/#installing-with-the-official-installer) and run `poetry install` in the `_hp` directory and append the entries from [host-config.txt](_hp/host-config.txt) to `/etc/hosts`.
 - Make sure that the MacOS device can reach the Header Testing server. (Alternatively it could also work to run the header testing server and the database locally on the MacOS device).
 - To be able to use Selenium with Safari, one needs to activate remote automation. In Safari: develop -> developer settings -> developer settings -> allow remote automation.
@@ -61,6 +61,7 @@ export DISPLAY=:99 && fluxbox -log fluxbox.log &
   - On the MacOS device:
     - Run the basic tests: `for i in {1..5}; do poetry run python desktop_selenium.py --num_browsers 1 --page_runner_json <basic-test-json> --timeout_task 1000; done`
     - Run the parsing tests: `for i in {1..5}; do poetry run python desktop_selenium.py --num_browsers 1 --page_runner_json <parsing-test-json> --timeout_task 10000; done`
+    - Add `--new_browsers` for running on 18.2
   - It can happen that not all tests recorded 5 results, thus run the following to ensure that all tests are executed at least 5 times:
     - For the basic tests: `poetry run python create_repeat.py --selection_str "\"Response\".resp_type = 'basic' and \"Browser\".os != 'Android 11'"` and `poetry run python desktop_selenium.py --num_browsers 1 --run_mode repeat --timeout_task 10000`
     - For the parsing tests: `poetry run python create_repeat.py --selection_str "\"Response\".resp_type = 'parsing' and \"Browser\".os != 'Android 11'"` and `poetry run python desktop_selenium.py --num_browsers 1 --run_mode repeat --timeout_task 10000`
