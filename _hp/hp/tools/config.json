@@ -1,0 +1,3 @@
+{
+    "DB_URL": "postgresql+psycopg2://localhost:5432/http_header_demo"
+}

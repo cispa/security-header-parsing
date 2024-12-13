@@ -71,3 +71,4 @@ filebeat.yaml
 _hp/asis/
 trees/
 pre_*.ipynb
+nohup.out

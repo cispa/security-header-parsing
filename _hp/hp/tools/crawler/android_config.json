@@ -1,0 +1,17 @@
+{
+	"chrome":{
+	   "package_name":"com.android.chrome",
+	   "intent":"com.google.android.apps.chrome.Main",
+	   "version":"121.0.6167.180"
+	},
+	"brave":{
+	   "package_name":"com.brave.browser",
+	   "intent":"org.chromium.chrome.browser.ChromeTabbedActivity",
+	   "version":"1.62.165"
+	},
+	"firefox_beta": {
+		"package_name":"org.mozilla.firefox_beta",
+	   	"intent":"org.mozilla.fenix.IntentReceiverActivity",
+	   	"version":"123.0b9"
+	}
+ }

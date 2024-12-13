@@ -1,0 +1,55 @@
+Values for x-content-type-options:
+nosniff 99,061
+"nosniff" always 69
+no-sniff 23
+nosniff; 19
+nosniff” 19
+nosniff, nosniff 18
+: nosniff 12
+"nosniff" 10
+'nosniff' 10
+9
+: nosniff 8
+nosniff always 5
+SAMEORIGIN 5
+nosniff 4
+nosnif 4
+1; mode=block 3
+nosniffSAMEORIGIN 3
+no sniff 3
+nosniffnosniff 3
+"nosniff" always; 2
+X-Content-Type-Options: nosniff 2
+nosniff� 2
+DENY 2
+'nosniff' always 2
+nosniffon 2
+nonsniff 1
+ALLOW 1
+nosniff' 1
+Header always append X-Content-Type-Options nosniff 1
+nosniff 1
+value= nosniff 1
+nosniff, public 1
+nosniffN 1
+nosniff,nosniff 1
+“nosniff” 1
+strict-origin-when-cross-origin 1
+add_header X-Content-Type-Options "nosniff" always; 1
+sniff 1
+nosniffProtection 1
+text/html,text/plain,text/json,application/json 1
+nosniffs 1
+nosniff" 1
+nosniff; frame-ancestors 'none'; 1
+yes 1
+nosniff. 1
+nosnoop 1
+nosniff; case-insensitive 1
+nosniff;mode=block 1
+noff 1
+none 1
+nosniff, nosniff, nosniff 1
+sniff; preload; always 1
+nosniffStrict-Transport-Security 1
+\'nosniff\' 1

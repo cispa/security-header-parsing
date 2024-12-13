@@ -1,14 +1,20 @@
 /*global self*/
 /*jshint latedef: nofunc*/
 
+/*
+Adapted testharness.sub.js API.
+It adds the `Test.report_outcome` function such that in addition to pass/fail an arbitrary outcome value can be stored.
+*/
+
 /* Documentation: https://web-platform-tests.org/writing-tests/testharness-api.html
  * (../docs/_writing-tests/testharness-api.md) */
+
+// Default timeout is 5 seconds, test can override if needed
 let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
 test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
 
  (function (global_scope)
  {
-     // default timeout is 5 seconds, test can override if needed
      var settings = {
          output: true,
          harness_timeout:{
@@ -19,9 +25,9 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          message_events: ["start", "test_state", "result", "completion"],
          debug: false,
      };
- 
+
      var xhtml_ns = "http://www.w3.org/1999/xhtml";
- 
+
      /*
       * TestEnvironment is an abstraction for the environment in which the test
       * harness is used. Each implementation of a test environment has to provide
@@ -43,7 +49,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
       *   float test_timeout();
       * };
       */
- 
+
      /*
       * A test environment with a DOM. The global object is 'window'. By default
       * test results are displayed in a table. Any parent windows receive
@@ -58,14 +64,14 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          var this_obj = this;
          this.message_events = [];
          this.dispatched_messages = [];
- 
+
          this.message_functions = {
              start: [add_start_callback, remove_start_callback,
                      function (properties) {
                          this_obj._dispatch("start_callback", [properties],
                                             {type: "start", properties: properties});
                      }],
- 
+
              test_state: [add_test_state_callback, remove_test_state_callback,
                           function(test) {
                               this_obj._dispatch("test_state_callback", [test],
@@ -91,11 +97,11 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                                   asserts: asserts.map(assert => assert.structured_clone())});
                           }]
          }
- 
+
          on_event(window, 'load', function() {
              this_obj.all_loaded = true;
          });
- 
+
          on_event(window, 'message', function(event) {
              if (event.data && event.data.type === "getmessages" && event.source) {
                  // A window can post "getmessages" to receive a duplicate of every
@@ -109,7 +115,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              }
          });
      }
- 
+
      WindowTestEnvironment.prototype._dispatch = function(selector, callback_args, message_arg) {
          this.dispatched_messages.push(message_arg);
          this._forEach_windows(
@@ -133,7 +139,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                      }
                  });
      };
- 
+
      WindowTestEnvironment.prototype._forEach_windows = function(callback) {
          // Iterate over the windows [self ... top, opener]. The callback is passed
          // two objects, the first one is the window object itself, the second one
@@ -157,37 +163,37 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              }
              this.window_cache = cache;
          }
- 
+
          forEach(cache,
                  function(a) {
                      callback.apply(null, a);
                  });
      };
- 
+
      WindowTestEnvironment.prototype.on_tests_ready = function() {
          var output = new Output();
          this.output_handler = output;
- 
+
          var this_obj = this;
- 
+
          add_start_callback(function (properties) {
              this_obj.output_handler.init(properties);
          });
- 
+
          add_test_state_callback(function(test) {
              this_obj.output_handler.show_status();
          });
- 
+
          add_result_callback(function (test) {
              this_obj.output_handler.show_status();
          });
- 
+
          add_completion_callback(function (tests, harness_status, asserts_run) {
              this_obj.output_handler.show_results(tests, harness_status, asserts_run);
          });
          this.setup_messages(settings.message_events);
      };
- 
+
      WindowTestEnvironment.prototype.setup_messages = function(new_events) {
          var this_obj = this;
          forEach(settings.message_events, function(x) {
@@ -201,24 +207,24 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          });
          this.message_events = new_events;
      }
- 
+
      WindowTestEnvironment.prototype.next_default_test_name = function() {
          var suffix = this.name_counter > 0 ? " " + this.name_counter : "";
          this.name_counter++;
          return get_title() + suffix;
      };
- 
+
      WindowTestEnvironment.prototype.on_new_harness_properties = function(properties) {
          this.output_handler.setup(properties);
          if (properties.hasOwnProperty("message_events")) {
              this.setup_messages(properties.message_events);
          }
      };
- 
+
      WindowTestEnvironment.prototype.add_on_loaded_callback = function(callback) {
          on_event(window, 'load', callback);
      };
- 
+
      WindowTestEnvironment.prototype.test_timeout = function() {
          var metas = document.getElementsByTagName("meta");
          for (var i = 0; i < metas.length; i++) {
@@ -231,7 +237,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          return settings.harness_timeout.normal;
      };
- 
+
      /*
       * Base TestEnvironment implementation for a generic web worker.
       *
@@ -253,7 +259,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          this.message_list = [];
          this.message_ports = [];
      }
- 
+
      WorkerTestEnvironment.prototype._dispatch = function(message) {
          this.message_list.push(message);
          for (var i = 0; i < this.message_ports.length; ++i)
@@ -261,7 +267,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              this.message_ports[i].postMessage(message);
          }
      };
- 
+
      // The only requirement is that port has a postMessage() method. It doesn't
      // have to be an instance of a MessagePort, and often isn't.
      WorkerTestEnvironment.prototype._add_message_port = function(port) {
@@ -271,15 +277,15 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              port.postMessage(this.message_list[i]);
          }
      };
- 
+
      WorkerTestEnvironment.prototype.next_default_test_name = function() {
          var suffix = this.name_counter > 0 ? " " + this.name_counter : "";
          this.name_counter++;
          return get_title() + suffix;
      };
- 
+
      WorkerTestEnvironment.prototype.on_new_harness_properties = function() {};
- 
+
      WorkerTestEnvironment.prototype.on_tests_ready = function() {
          var this_obj = this;
          add_start_callback(
@@ -316,15 +322,15 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                      });
                  });
      };
- 
+
      WorkerTestEnvironment.prototype.add_on_loaded_callback = function() {};
- 
+
      WorkerTestEnvironment.prototype.test_timeout = function() {
          // Tests running in a worker don't have a default timeout. I.e. all
          // worker tests behave as if settings.explicit_timeout is true.
          return null;
      };
- 
+
      /*
       * Dedicated web workers.
       * https://html.spec.whatwg.org/multipage/workers.html#dedicatedworkerglobalscope
@@ -340,14 +346,14 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          this._add_message_port(self);
      }
      DedicatedWorkerTestEnvironment.prototype = Object.create(WorkerTestEnvironment.prototype);
- 
+
      DedicatedWorkerTestEnvironment.prototype.on_tests_ready = function() {
          WorkerTestEnvironment.prototype.on_tests_ready.call(this);
          // In the absence of an onload notification, we a require dedicated
          // workers to explicitly signal when the tests are done.
          tests.wait_for_finish = true;
      };
- 
+
      /*
       * Shared web workers.
       * https://html.spec.whatwg.org/multipage/workers.html#sharedworkerglobalscope
@@ -366,14 +372,14 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  }, false);
      }
      SharedWorkerTestEnvironment.prototype = Object.create(WorkerTestEnvironment.prototype);
- 
+
      SharedWorkerTestEnvironment.prototype.on_tests_ready = function() {
          WorkerTestEnvironment.prototype.on_tests_ready.call(this);
          // In the absence of an onload notification, we a require shared
          // workers to explicitly signal when the tests are done.
          tests.wait_for_finish = true;
      };
- 
+
      /*
       * Service workers.
       * http://www.w3.org/TR/service-workers/
@@ -392,7 +398,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                          this_obj._add_message_port(event.source);
                      }
                  }, false);
- 
+
          // The oninstall event is received after the service worker script and
          // all imported scripts have been fetched and executed. It's the
          // equivalent of an onload event for a document. All tests should have
@@ -415,9 +421,9 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              }
          }
      }
- 
+
      ServiceWorkerTestEnvironment.prototype = Object.create(WorkerTestEnvironment.prototype);
- 
+
      ServiceWorkerTestEnvironment.prototype.add_on_loaded_callback = function(callback) {
          if (this.all_loaded) {
              callback();
@@ -425,7 +431,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              this.on_loaded_callback = callback;
          }
      };
- 
+
      /*
       * Shadow realms.
       * https://github.com/tc39/proposal-shadowrealm
@@ -438,9 +444,9 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          this.all_loaded = false;
          this.on_loaded_callback = null;
      }
- 
+
      ShadowRealmTestEnvironment.prototype = Object.create(WorkerTestEnvironment.prototype);
- 
+
      /**
       * Signal to the test environment that the tests are ready and the on-loaded
       * callback should be run.
@@ -464,7 +470,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              this.on_loaded_callback();
          }
      };
- 
+
      ShadowRealmTestEnvironment.prototype.add_on_loaded_callback = function(callback) {
          if (this.all_loaded) {
              callback();
@@ -472,7 +478,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              this.on_loaded_callback = callback;
          }
      };
- 
+
      /*
       * JavaScript shells.
       *
@@ -492,17 +498,17 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          this.message_list = [];
          this.message_ports = [];
      }
- 
+
      ShellTestEnvironment.prototype.next_default_test_name = function() {
          var suffix = this.name_counter > 0 ? " " + this.name_counter : "";
          this.name_counter++;
          return get_title() + suffix;
      };
- 
+
      ShellTestEnvironment.prototype.on_new_harness_properties = function() {};
- 
+
      ShellTestEnvironment.prototype.on_tests_ready = function() {};
- 
+
      ShellTestEnvironment.prototype.add_on_loaded_callback = function(callback) {
          if (this.all_loaded) {
              callback();
@@ -510,13 +516,13 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              this.on_loaded_callback = callback;
          }
      };
- 
+
      ShellTestEnvironment.prototype.test_timeout = function() {
          // Tests running in a shell don't have a default timeout, so behave as
          // if settings.explicit_timeout is true.
          return null;
      };
- 
+
      function create_test_environment() {
          if ('document' in global_scope) {
              return new WindowTestEnvironment();
@@ -546,43 +552,43 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          if (global_scope.GLOBAL && global_scope.GLOBAL.isShadowRealm()) {
              return new ShadowRealmTestEnvironment();
          }
- 
+
          return new ShellTestEnvironment();
      }
- 
+
      var test_environment = create_test_environment();
- 
+
      function is_shared_worker(worker) {
          return 'SharedWorker' in global_scope && worker instanceof SharedWorker;
      }
- 
+
      function is_service_worker(worker) {
          // The worker object may be from another execution context,
          // so do not use instanceof here.
          return 'ServiceWorker' in global_scope &&
              Object.prototype.toString.call(worker) == '[object ServiceWorker]';
      }
- 
+
      var seen_func_name = Object.create(null);
- 
+
      function get_test_name(func, name)
      {
          if (name) {
              return name;
          }
- 
+
          if (func) {
              var func_code = func.toString();
- 
+
              // Try and match with brackets, but fallback to matching without
              var arrow = func_code.match(/^\(\)\s*=>\s*(?:{(.*)}\s*|(.*))$/);
- 
+
              // Check for JS line separators
              if (arrow !== null && !/[\u000A\u000D\u2028\u2029]/.test(func_code)) {
                  var trimmed = (arrow[1] !== undefined ? arrow[1] : arrow[2]).trim();
                  // drop trailing ; if there's no earlier ones
                  trimmed = trimmed.replace(/^([^;]*)(;\s*)+$/, "$1");
- 
+
                  if (trimmed) {
                      let name = trimmed;
                      if (seen_func_name[trimmed]) {
@@ -596,17 +602,17 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  }
              }
          }
- 
+
          return test_environment.next_default_test_name();
      }
- 
+
      /**
       * @callback TestFunction
       * @param {Test} test - The test currnetly being run.
       * @param {Any[]} args - Additional args to pass to function.
       *
       */
- 
+
      /**
       * Create a synchronous test
       *
@@ -628,27 +634,27 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          var test_name = get_test_name(func, name);
          var test_obj = new Test(test_name, properties);
          var value = test_obj.step(func, test_obj, test_obj);
- 
+
          if (value !== undefined) {
              var msg = 'Test named "' + test_name +
                  '" passed a function to `test` that returned a value.';
- 
+
              try {
                  if (value && typeof value.then === 'function') {
                      msg += ' Consider using `promise_test` instead when ' +
                          'using Promises or async/await.';
                  }
              } catch (err) {}
- 
+
              tests.status.status = tests.status.ERROR;
              tests.status.message = msg;
          }
- 
+
          if (test_obj.phase === test_obj.phases.STARTED) {
              test_obj.done();
          }
      }
- 
+
      /**
       * Create an asynchronous test
       *
@@ -676,7 +682,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          var test_obj = new Test(test_name, properties);
          if (func) {
              var value = test_obj.step(func, test_obj, test_obj);
- 
+
              // Test authors sometimes return values to async_test, expecting us
              // to handle the value somehow. Make doing so a harness error to be
              // clear this is invalid, and point authors to promise_test if it
@@ -688,21 +694,21 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              if (value !== undefined) {
                  var msg = 'Test named "' + test_name +
                      '" passed a function to `async_test` that returned a value.';
- 
+
                  try {
                      if (value && typeof value.then === 'function') {
                          msg += ' Consider using `promise_test` instead when ' +
                              'using Promises or async/await.';
                      }
                  } catch (err) {}
- 
+
                  tests.set_status(tests.status.ERROR, msg);
                  tests.complete();
              }
          }
          return test_obj;
      }
- 
+
      /**
       * Create a promise test.
       *
@@ -725,7 +731,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          var test_name = get_test_name(func, name);
          var test = new Test(test_name, properties);
          test._is_promise_test = true;
- 
+
          // If there is no promise tests queue make one.
          if (!tests.promise_tests) {
              tests.promise_tests = Promise.resolve();
@@ -733,7 +739,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          tests.promise_tests = tests.promise_tests.then(function() {
              return new Promise(function(resolve) {
                  var promise = test.step(func, test, test);
- 
+
                  test.step(function() {
                      assert(!!promise, "promise_test", null,
                             "test body must return a 'thenable' object (received ${value})",
@@ -742,7 +748,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                             "test body must return a 'thenable' object (received an object with no `then` method)",
                             null);
                  });
- 
+
                  // Test authors may use the `step` method within a
                  // `promise_test` even though this reflects a mixture of
                  // asynchronous control flow paradigms. The "done" callback
@@ -751,7 +757,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  // Promise does not settle but a `step` function has thrown an
                  // error.
                  add_test_done_callback(test, resolve);
- 
+
                  Promise.resolve(promise)
                      .catch(test.step_func(
                          function(value) {
@@ -767,7 +773,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  });
          });
      }
- 
+
      /**
       * Make a copy of a Promise in the current realm.
       *
@@ -788,11 +794,11 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
       * `await`, etc. We therefore create a new promise in this realm that
       * inherit the value and status from the given promise.
       */
- 
+
      function bring_promise_to_current_realm(promise) {
          return new Promise(promise.then.bind(promise));
      }
- 
+
      /**
       * Assert that a Promise is rejected with the right ECMAScript exception.
       *
@@ -811,7 +817,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                        description, "promise_rejects_js");
              });
      }
- 
+
      /**
       * Assert that a Promise is rejected with the right DOMException.
       *
@@ -863,7 +869,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                         "promise_rejects_dom", constructor);
              });
      }
- 
+
      /**
       * Assert that a Promise is rejected with the provided value.
       *
@@ -882,7 +888,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                             description, "promise_rejects_exactly");
              });
      }
- 
+
      /**
       * Allow DOM events to be handled using Promises.
       *
@@ -907,24 +913,24 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          if (typeof eventTypes == 'string') {
              eventTypes = [eventTypes];
          }
- 
+
          var waitingFor = null;
- 
+
          // This is null unless we are recording all events, in which case it
          // will be an Array object.
          var recordedEvents = null;
- 
+
          var eventHandler = test.step_func(function(evt) {
              assert_true(!!waitingFor,
                          'Not expecting event, but got ' + evt.type + ' event');
              assert_equals(evt.type, waitingFor.types[0],
                            'Expected ' + waitingFor.types[0] + ' event, but got ' +
                            evt.type + ' event instead');
- 
+
              if (Array.isArray(recordedEvents)) {
                  recordedEvents.push(evt);
              }
- 
+
              if (waitingFor.types.length > 1) {
                  // Pop first event from array
                  waitingFor.types.shift();
@@ -940,11 +946,11 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              recordedEvents = null;
              resolveFunc(result);
          });
- 
+
          for (var i = 0; i < eventTypes.length; i++) {
              watchedNode.addEventListener(eventTypes[i], eventHandler, false);
          }
- 
+
          /**
           * Returns a Promise that will resolve after the specified event or
           * series of events has occurred.
@@ -981,7 +987,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                      // or during a subsequent call to wait_for, ignore it.
                      if (!waitingFor || waitingFor.resolve !== resolve)
                          return;
- 
+
                      // This should always fail, otherwise we should have
                      // resolved the promise.
                      assert_true(waitingFor.types.length == 0,
@@ -992,11 +998,11 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                      waitingFor = null;
                      resolveFunc(result);
                  });
- 
+
                  if (timeoutPromise) {
                      timeoutPromise().then(timeout);
                  }
- 
+
                  waitingFor = {
                      types: types,
                      resolve: resolve,
@@ -1004,7 +1010,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  };
              });
          };
- 
+
          /**
           * Stop listening for events
           */
@@ -1013,13 +1019,13 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  watchedNode.removeEventListener(eventTypes[i], eventHandler, false);
              }
          };
- 
+
          test._add_cleanup(stop_watching);
- 
+
          return this;
      }
      expose(EventWatcher, 'EventWatcher');
- 
+
      /**
       * @typedef {Object} SettingsObject
       * @property {bool} single_test - Use the single-page-test
@@ -1048,7 +1054,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
       * SVG test loaded in an HTML wrapper
       *
       */
- 
+
      /**
       * Configure the harness
       *
@@ -1075,7 +1081,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          tests.setup(func, properties);
          test_environment.on_new_harness_properties(properties);
      }
- 
+
      /**
       * Configure the harness, waiting for a promise to resolve
       * before running any `promise_test` tests.
@@ -1096,20 +1102,20 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              return;
          }
          tests.promise_setup_called = true;
- 
+
          if (!tests.promise_tests) {
              tests.promise_tests = Promise.resolve();
          }
- 
+
          tests.promise_tests = tests.promise_tests
              .then(function()
                    {
                        var result;
- 
+
                        tests.setup(null, properties);
                        result = func();
                        test_environment.on_new_harness_properties(properties);
- 
+
                        if (!result || typeof result.then !== "function") {
                            throw "Non-thenable returned by function passed to `promise_setup`";
                        }
@@ -1123,7 +1129,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                         tests.complete();
                     });
      }
- 
+
      /**
       * Mark test loading as complete.
       *
@@ -1144,7 +1150,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  tests.status.status = tests.status.ERROR;
                  tests.status.message = "done() was called without first defining any tests";
              }
- 
+
              tests.complete();
              return;
          }
@@ -1155,7 +1161,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          tests.end_wait();
      }
- 
+
      /**
       * @deprecated generate a list of tests from a function and list of arguments
       *
@@ -1182,7 +1188,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                           Array.isArray(properties) ? properties[i] : properties);
                  });
      }
- 
+
      /**
       * @deprecated
       *
@@ -1197,7 +1203,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      {
          object.addEventListener(event, callback, false);
      }
- 
+
      /**
       * Global version of :js:func:`Test.step_timeout` for use in single page tests.
       *
@@ -1213,7 +1219,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              func.apply(outer_this, args);
          }, timeout * tests.timeout_multiplier);
      }
- 
+
      expose(test, 'test');
      expose(async_test, 'async_test');
      expose(promise_test, 'promise_test');
@@ -1226,7 +1232,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      expose(done, 'done');
      expose(on_event, 'on_event');
      expose(step_timeout, 'step_timeout');
- 
+
      /*
       * Return a string truncated to the given length, with ... added at the end
       * if it was longer.
@@ -1238,7 +1244,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          return s;
      }
- 
+
      /*
       * Return true if object is probably a Node object.
       */
@@ -1257,7 +1263,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              // We're probably cross-origin, which means we aren't a node
              return false;
          }
- 
+
          if (has_node_properties) {
              try {
                  object.nodeType;
@@ -1270,7 +1276,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          return false;
      }
- 
+
      var replacements = {
          "0": "0",
          "1": "x01",
@@ -1308,7 +1314,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          "0xfffe": "ufffe",
          "0xffff": "uffff",
      };
- 
+
      /**
       * Convert a value to a nice, human-readable string
       *
@@ -1356,7 +1362,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              }
              return output + "]";
          }
- 
+
          switch (typeof val) {
          case "string":
              val = val.replace(/\\/g, "\\\\");
@@ -1379,7 +1385,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              if (val === null) {
                  return "null";
              }
- 
+
              // Special-case Node objects, since those come up a lot in my tests.  I
              // ignore namespaces.
              if (is_node(val)) {
@@ -1407,7 +1413,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                      return "Node object of unknown type";
                  }
              }
- 
+
          /* falls through */
          default:
              try {
@@ -1419,11 +1425,11 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
      }
      expose(format_value, "format_value");
- 
+
      /*
       * Assertions
       */
- 
+
      function expose_assert(f, name) {
          function assert_wrapper(...args) {
              let status = Test.statuses.TIMEOUT;
@@ -1457,7 +1463,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          expose(assert_wrapper, name);
      }
- 
+
      /**
       * Assert that ``actual`` is strictly true
       *
@@ -1470,7 +1476,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                  "expected true got ${actual}", {actual:actual});
      }
      expose_assert(assert_true, "assert_true");
- 
+
      /**
       * Assert that ``actual`` is strictly false
       *
@@ -1483,7 +1489,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                   "expected false got ${actual}", {actual:actual});
      }
      expose_assert(assert_false, "assert_false");
- 
+
      function same_value(x, y) {
          if (y !== y) {
              //NaN case
@@ -1495,7 +1501,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          return x === y;
      }
- 
+
      /**
       * Assert that ``actual`` is the same value as ``expected``.
       *
@@ -1524,7 +1530,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                               {expected:expected, actual:actual});
      }
      expose_assert(assert_equals, "assert_equals");
- 
+
      /**
       * Assert that ``actual`` is not the same value as ``expected``.
       *
@@ -1541,7 +1547,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                                {actual:actual});
      }
      expose_assert(assert_not_equals, "assert_not_equals");
- 
+
      /**
       * Assert that ``expected`` is an array and ``actual`` is one of the members.
       * This is implemented using ``indexOf``, so doesn't handle NaN or ±0 correctly.
@@ -1558,7 +1564,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                                 {actual:actual, expected:expected});
      }
      expose_assert(assert_in_array, "assert_in_array");
- 
+
      // This function was deprecated in July of 2015.
      // See https://github.com/web-platform-tests/wpt/issues/2033
      /**
@@ -1582,12 +1588,12 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
           function check_equal(actual, expected, stack)
           {
               stack.push(actual);
- 
+
               var p;
               for (p in actual) {
                   assert(expected.hasOwnProperty(p), "assert_object_equals", description,
                                                      "unexpected property ${p}", {p:p});
- 
+
                   if (typeof actual[p] === "object" && actual[p] !== null) {
                       if (stack.indexOf(actual[p]) === -1) {
                           check_equal(actual[p], expected[p], stack);
@@ -1608,7 +1614,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
           check_equal(actual, expected, []);
      }
      expose_assert(assert_object_equals, "assert_object_equals");
- 
+
      /**
       * Assert that ``actual`` and ``expected`` are both arrays, and that the array properties of
       * ``actual`` and ``expected`` are all the same value (as for :js:func:`assert_equals`).
@@ -1632,11 +1638,11 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              const length_after_offset = Math.floor(max_array_length / 2);
              let upper_bound = Math.min(length_after_offset + offset, arr.length);
              const lower_bound = Math.max(upper_bound - max_array_length, 0);
- 
+
              if (lower_bound === 0) {
                  upper_bound = max_array_length;
              }
- 
+
              const output = arr.slice(lower_bound, upper_bound);
              if (lower_bound > 0) {
                  output.beginEllipsis = true;
@@ -1646,7 +1652,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              }
              return output;
          }
- 
+
          assert(typeof actual === "object" && actual !== null && "length" in actual,
                 "assert_array_equals", description,
                 "value is ${actual}, expected array",
@@ -1657,7 +1663,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                 {expected:shorten_array(expected, expected.length - 1), expectedLength:expected.length,
                  actual:shorten_array(actual, actual.length - 1), actualLength:actual.length
                 });
- 
+
          for (var i = 0; i < actual.length; i++) {
              assert(actual.hasOwnProperty(i) === expected.hasOwnProperty(i),
                     "assert_array_equals", description,
@@ -1673,7 +1679,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
      }
      expose_assert(assert_array_equals, "assert_array_equals");
- 
+
      /**
       * Assert that each array property in ``actual`` is a number within
       * ± `epsilon` of the corresponding property in `expected`.
@@ -1693,7 +1699,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                 "assert_array_approx_equals", description,
                 "lengths differ, expected ${expected} got ${actual}",
                 {expected:expected.length, actual:actual.length});
- 
+
          for (var i = 0; i < actual.length; i++) {
              assert(actual.hasOwnProperty(i) === expected.hasOwnProperty(i),
                     "assert_array_approx_equals", description,
@@ -1711,7 +1717,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
      }
      expose_assert(assert_array_approx_equals, "assert_array_approx_equals");
- 
+
      /**
       * Assert that ``actual`` is within ± ``epsilon`` of ``expected``.
       *
@@ -1729,7 +1735,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                 "assert_approx_equals", description,
                 "expected a number but got a ${type_actual}",
                 {type_actual:typeof actual});
- 
+
          // The epsilon math below does not place nice with NaN and Infinity
          // But in this case Infinity = Infinity and NaN = NaN
          if (isFinite(actual) || isFinite(expected)) {
@@ -1742,7 +1748,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
      }
      expose_assert(assert_approx_equals, "assert_approx_equals");
- 
+
      /**
       * Assert that ``actual`` is a number less than ``expected``.
       *
@@ -1759,14 +1765,14 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                 "assert_less_than", description,
                 "expected a number but got a ${type_actual}",
                 {type_actual:typeof actual});
- 
+
          assert(actual < expected,
                 "assert_less_than", description,
                 "expected a number less than ${expected} but got ${actual}",
                 {expected:expected, actual:actual});
      }
      expose_assert(assert_less_than, "assert_less_than");
- 
+
      /**
       * Assert that ``actual`` is a number greater than ``expected``.
       *
@@ -1783,14 +1789,14 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                 "assert_greater_than", description,
                 "expected a number but got a ${type_actual}",
                 {type_actual:typeof actual});
- 
+
          assert(actual > expected,
                 "assert_greater_than", description,
                 "expected a number greater than ${expected} but got ${actual}",
                 {expected:expected, actual:actual});
      }
      expose_assert(assert_greater_than, "assert_greater_than");
- 
+
      /**
       * Assert that ``actual`` is a number greater than ``lower`` and less
       * than ``upper`` but not equal to either.
@@ -1809,7 +1815,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                 "assert_between_exclusive", description,
                 "expected a number but got a ${type_actual}",
                 {type_actual:typeof actual});
- 
+
          assert(actual > lower && actual < upper,
                 "assert_between_exclusive", description,
                 "expected a number greater than ${lower} " +
@@ -1817,7 +1823,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                 {lower:lower, upper:upper, actual:actual});
      }
      expose_assert(assert_between_exclusive, "assert_between_exclusive");
- 
+
      /**
       * Assert that ``actual`` is a number less than or equal to ``expected``.
       *
@@ -1835,14 +1841,14 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                 "assert_less_than_equal", description,
                 "expected a number but got a ${type_actual}",
                 {type_actual:typeof actual});
- 
+
          assert(actual <= expected,
                 "assert_less_than_equal", description,
                 "expected a number less than or equal to ${expected} but got ${actual}",
                 {expected:expected, actual:actual});
      }
      expose_assert(assert_less_than_equal, "assert_less_than_equal");
- 
+
      /**
       * Assert that ``actual`` is a number greater than or equal to ``expected``.
       *
@@ -1860,14 +1866,14 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                 "assert_greater_than_equal", description,
                 "expected a number but got a ${type_actual}",
                 {type_actual:typeof actual});
- 
+
          assert(actual >= expected,
                 "assert_greater_than_equal", description,
                 "expected a number greater than or equal to ${expected} but got ${actual}",
                 {expected:expected, actual:actual});
      }
      expose_assert(assert_greater_than_equal, "assert_greater_than_equal");
- 
+
      /**
       * Assert that ``actual`` is a number greater than or equal to ``lower`` and less
       * than or equal to ``upper``.
@@ -1886,7 +1892,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                 "assert_between_inclusive", description,
                 "expected a number but got a ${type_actual}",
                 {type_actual:typeof actual});
- 
+
          assert(actual >= lower && actual <= upper,
                 "assert_between_inclusive", description,
                 "expected a number greater than or equal to ${lower} " +
@@ -1894,7 +1900,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                 {lower:lower, upper:upper, actual:actual});
      }
      expose_assert(assert_between_inclusive, "assert_between_inclusive");
- 
+
      /**
       * Assert that ``actual`` matches the RegExp ``expected``.
       *
@@ -1912,7 +1918,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                 {expected:expected, actual:actual});
      }
      expose_assert(assert_regexp_match, "assert_regexp_match");
- 
+
      /**
       * Assert that the class string of ``object`` as returned in
       * ``Object.prototype.toString`` is equal to ``class_name``.
@@ -1929,7 +1935,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                               {expected:expected, actual:actual});
      }
      expose_assert(assert_class_string, "assert_class_string");
- 
+
      /**
       * Assert that ``object`` has an own property with name ``property_name``.
       *
@@ -1943,7 +1949,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                 "expected property ${p} missing", {p:property_name});
      }
      expose_assert(assert_own_property, "assert_own_property");
- 
+
      /**
       * Assert that ``object`` does not have an own property with name ``property_name``.
       *
@@ -1957,7 +1963,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                 "unexpected property ${p} is found on object", {p:property_name});
      }
      expose_assert(assert_not_own_property, "assert_not_own_property");
- 
+
      function _assert_inherits(name) {
          return function (object, property_name, description)
          {
@@ -1967,23 +1973,23 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                     String(object) === "[object HTMLAllCollection]",
                     name, description,
                     "provided value is not an object");
- 
+
              assert("hasOwnProperty" in object,
                     name, description,
                     "provided value is an object but has no hasOwnProperty method");
- 
+
              assert(!object.hasOwnProperty(property_name),
                     name, description,
                     "property ${p} found on object expected in prototype chain",
                     {p:property_name});
- 
+
              assert(property_name in object,
                     name, description,
                     "property ${p} not found in prototype chain",
                     {p:property_name});
          };
      }
- 
+
      /**
       * Assert that ``object`` does not have an own property with name
       * ``property_name``, but inherits one through the prototype chain.
@@ -1996,7 +2002,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          return _assert_inherits("assert_inherits")(object, property_name, description);
      }
      expose_assert(assert_inherits, "assert_inherits");
- 
+
      /**
       * Alias for :js:func:`insert_inherits`.
       *
@@ -2008,8 +2014,8 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          return _assert_inherits("assert_idl_attribute")(object, property_name, description);
      }
      expose_assert(assert_idl_attribute, "assert_idl_attribute");
- 
- 
+
+
      /**
       * Assert that ``object`` has a property named ``property_name`` and that the property is readonly.
       *
@@ -2037,7 +2043,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
           }
      }
      expose_assert(assert_readonly, "assert_readonly");
- 
+
      /**
       * Assert a JS Error with the expected constructor is thrown.
       *
@@ -2051,7 +2057,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                "assert_throws_js");
      }
      expose_assert(assert_throws_js, "assert_throws_js");
- 
+
      /**
       * Like assert_throws_js but allows specifying the assertion type
       * (assert_throws_js or promise_rejects_js, in practice).
@@ -2067,18 +2073,18 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              if (e instanceof AssertionError) {
                  throw e;
              }
- 
+
              // Basic sanity-checks on the thrown exception.
              assert(typeof e === "object",
                     assertion_type, description,
                     "${func} threw ${e} with type ${type}, not an object",
                     {func:func, e:e, type:typeof e});
- 
+
              assert(e !== null,
                     assertion_type, description,
                     "${func} threw null, not an object",
                     {func:func});
- 
+
              // Basic sanity-check on the passed-in constructor
              assert(typeof constructor == "function",
                     assertion_type, description,
@@ -2096,7 +2102,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                     assertion_type, description,
                     "${constructor} is not an Error subtype",
                     {constructor:constructor});
- 
+
              // And checking that our exception is reasonable
              assert(e.constructor === constructor &&
                     e.name === constructor.name,
@@ -2107,7 +2113,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                      expected_name:constructor.name});
          }
      }
- 
+
      // TODO: Figure out how to document the overloads better.
      // sphinx-js doesn't seem to handle @variation correctly,
      // and only expects a single JSDoc entry per function.
@@ -2158,7 +2164,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          assert_throws_dom_impl(type, func, description, "assert_throws_dom", constructor)
      }
      expose_assert(assert_throws_dom, "assert_throws_dom");
- 
+
      /**
       * Similar to assert_throws_dom but allows specifying the assertion type
       * (assert_throws_dom or promise_rejects_dom, in practice).  The
@@ -2175,25 +2181,25 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              if (e instanceof AssertionError) {
                  throw e;
              }
- 
+
              // Basic sanity-checks on the thrown exception.
              assert(typeof e === "object",
                     assertion_type, description,
                     "${func} threw ${e} with type ${type}, not an object",
                     {func:func, e:e, type:typeof e});
- 
+
              assert(e !== null,
                     assertion_type, description,
                     "${func} threw null, not an object",
                     {func:func});
- 
+
              // Sanity-check our type
              assert(typeof type == "number" ||
                     typeof type == "string",
                     assertion_type, description,
                     "${type} is not a number or string",
                     {type:type});
- 
+
              var codename_name_map = {
                  INDEX_SIZE_ERR: 'IndexSizeError',
                  HIERARCHY_REQUEST_ERR: 'HierarchyRequestError',
@@ -2218,7 +2224,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  INVALID_NODE_TYPE_ERR: 'InvalidNodeTypeError',
                  DATA_CLONE_ERR: 'DataCloneError'
              };
- 
+
              var name_code_map = {
                  IndexSizeError: 1,
                  HierarchyRequestError: 3,
@@ -2242,7 +2248,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  TimeoutError: 23,
                  InvalidNodeTypeError: 24,
                  DataCloneError: 25,
- 
+
                  EncodingError: 0,
                  NotReadableError: 0,
                  UnknownError: 0,
@@ -2255,17 +2261,17 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  NotAllowedError: 0,
                  OptOutError: 0
              };
- 
+
              var code_name_map = {};
              for (var key in name_code_map) {
                  if (name_code_map[key] > 0) {
                      code_name_map[name_code_map[key]] = key;
                  }
              }
- 
+
              var required_props = {};
              var name;
- 
+
              if (typeof type === "number") {
                  if (type === 0) {
                      throw new AssertionError('Test bug: ambiguous DOMException code 0 passed to assert_throws_dom()');
@@ -2279,10 +2285,10 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  if (!(name in name_code_map)) {
                      throw new AssertionError('Test bug: unrecognized DOMException code name or name "' + type + '" passed to assert_throws_dom()');
                  }
- 
+
                  required_props.code = name_code_map[name];
              }
- 
+
              if (required_props.code === 0 ||
                 ("name" in e &&
                  e.name !== e.name.toUpperCase() &&
@@ -2290,14 +2296,14 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  // New style exception: also test the name property.
                  required_props.name = name;
              }
- 
+
              for (var prop in required_props) {
                  assert(prop in e && e[prop] == required_props[prop],
                         assertion_type, description,
                         "${func} threw ${e} that is not a DOMException " + type + ": property ${prop} is equal to ${actual}, expected ${expected}",
                         {func:func, e:e, prop:prop, actual:e[prop], expected:required_props[prop]});
              }
- 
+
              // Check that the exception is from the right global.  This check is last
              // so more specific, and more informative, checks on the properties can
              // happen in case a totally incorrect exception is thrown.
@@ -2305,10 +2311,10 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                     assertion_type, description,
                     "${func} threw an exception from the wrong global",
                     {func});
- 
+
          }
      }
- 
+
      /**
       * Assert the provided value is thrown.
       *
@@ -2322,7 +2328,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                     "assert_throws_exactly");
      }
      expose_assert(assert_throws_exactly, "assert_throws_exactly");
- 
+
      /**
       * Like assert_throws_exactly but allows specifying the assertion type
       * (assert_throws_exactly or promise_rejects_exactly, in practice).
@@ -2338,13 +2344,13 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              if (e instanceof AssertionError) {
                  throw e;
              }
- 
+
              assert(same_value(e, exception), assertion_type, description,
                     "${func} threw ${e} but we expected it to throw ${exception}",
                     {func:func, e:e, exception:exception});
          }
      }
- 
+
      /**
       * Asserts if called. Used to ensure that a specific codepath is
       * not taken e.g. that an error event isn't fired.
@@ -2356,14 +2362,14 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  "Reached unreachable code");
      }
      expose_assert(assert_unreached, "assert_unreached");
- 
+
      /**
       * @callback AssertFunc
       * @param {Any} actual
       * @param {Any} expected
       * @param {Any[]} args
       */
- 
+
      /**
       * Asserts that ``actual`` matches at least one value of ``expected``
       * according to a comparison defined by ``assert_func``.
@@ -2402,7 +2408,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      // not support nested assert calls (e.g. to assert_func). We need to
      // support bypassing assert_wrapper for the inner asserts here.
      expose(assert_any, "assert_any");
- 
+
      /**
       * Assert that a feature is implemented, based on a 'truthy' condition.
       *
@@ -2419,7 +2425,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          assert(!!condition, "assert_implements", description);
      }
      expose_assert(assert_implements, "assert_implements")
- 
+
      /**
       * Assert that an optional feature is implemented, based on a 'truthy' condition.
       *
@@ -2439,7 +2445,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
      }
      expose_assert(assert_implements_optional, "assert_implements_optional");
- 
+
      /**
       * @class
       *
@@ -2457,10 +2463,10 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          /** The test name. */
          this.name = name;
- 
+
          this.phase = (tests.is_aborted || tests.phase === tests.phases.COMPLETE) ?
              this.phases.COMPLETE : this.phases.INITIAL;
- 
+
          /** The test status code.*/
          this.status = this.NOTRUN;
          this.timeout_id = null;
@@ -2473,39 +2479,39 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          this.resp_host = null;
          this.resp_scheme = null;
          this.relation = null;
- 
+
          this.properties = properties || {};
          this.timeout_length = settings.test_timeout;
          if (this.timeout_length !== null) {
              this.timeout_length *= tests.timeout_multiplier;
          }
- 
+
          /** A message indicating the reason for test failure. */
          this.message = null;
          /** Stack trace in case of failure. */
          this.stack = null;
- 
+
          this.steps = [];
          this._is_promise_test = false;
- 
+
          this.cleanup_callbacks = [];
          this._user_defined_cleanup_count = 0;
          this._done_callbacks = [];
- 
+
          if (typeof AbortController === "function") {
              this._abortController = new AbortController();
          }
- 
+
          // Tests declared following harness completion are likely an indication
          // of a programming error, but they cannot be reported
          // deterministically.
          if (tests.phase === tests.phases.COMPLETE) {
              return;
          }
- 
+
          tests.push(this);
      }
- 
+
      /**
       * Enum of possible test statuses.
       *
@@ -2523,9 +2529,9 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          NOTRUN:3,
          PRECONDITION_FAILED:4
      };
- 
+
      Test.prototype = merge({}, Test.statuses);
- 
+
      Test.prototype.phases = {
          INITIAL:0,
          STARTED:1,
@@ -2533,7 +2539,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          CLEANING:3,
          COMPLETE:4
      };
- 
+
      Test.prototype.status_formats = {
          0: "Pass",
          1: "Fail",
@@ -2541,7 +2547,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          3: "Not Run",
          4: "Optional Feature Unsupported",
      }
- 
+
      Test.prototype.format_status = function() {
          return this.status_formats[this.status];
      }
@@ -2549,7 +2555,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      Test.prototype.format_outcome = function() {
         return JSON.stringify(this.outcome);
      }
- 
+
      Test.prototype.structured_clone = function()
      {
          if (!this._structured_clone) {
@@ -2595,7 +2601,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
         this.resp_host = u.hostname;
         this.relation = relation;
      }
- 
+
      /**
       * Run a single step of an ongoing test.
       *
@@ -2610,32 +2616,32 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          if (this.phase > this.phases.STARTED) {
              return;
          }
- 
+
          if (settings.debug && this.phase !== this.phases.STARTED) {
              console.log("TEST START", this.name);
          }
          this.phase = this.phases.STARTED;
          //If we don't get a result before the harness times out that will be a test timeout
          this.set_status(this.TIMEOUT, "Test timed out");
- 
+
          tests.started = true;
          tests.current_test = this;
          tests.notify_test_state(this);
- 
+
          if (this.timeout_id === null) {
              this.set_timeout();
          }
- 
+
          this.steps.push(func);
- 
+
          if (arguments.length === 1) {
              this_obj = this;
          }
- 
+
          if (settings.debug) {
              console.debug("TEST STEP", this.name);
          }
- 
+
          try {
              return func.apply(this_obj, Array.prototype.slice.call(arguments, 2));
          } catch (e) {
@@ -2645,7 +2651,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              var status = e instanceof OptionalFeatureUnsupportedError ? this.PRECONDITION_FAILED : this.FAIL;
              var message = String((typeof e === "object" && e !== null) ? e.message : e);
              var stack = e.stack ? e.stack : null;
- 
+
              this.set_status(status, message, stack);
              this.phase = this.phases.HAS_RESULT;
              this.done();
@@ -2653,7 +2659,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              this.current_test = null;
          }
      };
- 
+
      /**
       * Wrap a function so that it runs as a step of the current test.
       *
@@ -2677,18 +2683,18 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      Test.prototype.step_func = function(func, this_obj)
      {
          var test_this = this;
- 
+
          if (arguments.length === 1) {
              this_obj = test_this;
          }
- 
+
          return function()
          {
              return test_this.step.apply(test_this, [func, this_obj].concat(
                  Array.prototype.slice.call(arguments)));
          };
      };
- 
+
      /**
       * Wrap a function so that it runs as a step of the current test,
       * and automatically marks the test as complete if the function
@@ -2704,11 +2710,11 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      Test.prototype.step_func_done = function(func, this_obj)
      {
          var test_this = this;
- 
+
          if (arguments.length === 1) {
              this_obj = test_this;
          }
- 
+
          return function()
          {
              if (func) {
@@ -2718,7 +2724,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              test_this.done();
          };
      };
- 
+
      /**
       * Return a function that automatically sets the current test to
       * ``FAIL`` if it's called.
@@ -2733,7 +2739,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              assert_unreached(description);
          });
      };
- 
+
      /**
       * Run a function as a step of the test after a given timeout.
       *
@@ -2760,7 +2766,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              return func.apply(test_this, args);
          }), timeout * tests.timeout_multiplier);
      };
- 
+
      /**
       * Poll for a function to return true, and call a callback
       * function once it does, or assert if a timeout is
@@ -2786,7 +2792,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          var timeout_full = timeout * tests.timeout_multiplier;
          var remaining = Math.ceil(timeout_full / interval);
          var test_this = this;
- 
+
          var wait_for_inner = test_this.step_func(() => {
              if (cond()) {
                  func();
@@ -2799,10 +2805,10 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  setTimeout(wait_for_inner, interval);
              }
          });
- 
+
          wait_for_inner();
      };
- 
+
      /**
       * Poll for a function to return true, and invoke a callback
       * followed by this.done() once it does, or assert if a timeout
@@ -2845,7 +2851,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              this.done();
           }, description, timeout, interval);
      };
- 
+
      /**
       * Poll for a function to return true, and resolve a promise
       * once it does, or assert if a timeout is reached. This is
@@ -2876,7 +2882,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              this.step_wait_func(cond, resolve, description, timeout, interval);
          });
      }
- 
+
      /*
       * Private method for registering cleanup functions. `testharness.js`
       * internals should use this method instead of the public `add_cleanup`
@@ -2886,7 +2892,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      Test.prototype._add_cleanup = function(callback) {
          this.cleanup_callbacks.push(callback);
      };
- 
+
      /**
       * Schedule a function to be run after the test result is known, regardless
       * of passing or failing state.
@@ -2902,7 +2908,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          this._user_defined_cleanup_count += 1;
          this._add_cleanup(callback);
      };
- 
+
      Test.prototype.set_timeout = function()
      {
          if (this.timeout_length !== null) {
@@ -2913,14 +2919,14 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                           }, this.timeout_length);
          }
      };
- 
+
      Test.prototype.set_status = function(status, message, stack)
      {
          this.status = status;
          this.message = message;
          this.stack = stack ? stack : null;
      };
- 
+
      /**
       * Manually set the test status to ``TIMEOUT``.
       */
@@ -2931,7 +2937,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          this.phase = this.phases.HAS_RESULT;
          this.done();
      };
- 
+
      /**
       * Manually set the test status to ``TIMEOUT``.
       *
@@ -2940,7 +2946,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      Test.prototype.force_timeout = function() {
          return this.timeout();
      };
- 
+
      /**
       * Mark the test as complete.
       *
@@ -2956,34 +2962,34 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          if (this.phase >= this.phases.CLEANING) {
              return;
          }
- 
+
          if (this.phase <= this.phases.STARTED) {
              this.set_status(this.PASS, null);
          }
- 
+
          if (global_scope.clearTimeout) {
              clearTimeout(this.timeout_id);
          }
- 
+
          if (settings.debug) {
              console.log("TEST DONE",
                          this.status,
                          this.name);
          }
- 
+
          this.cleanup();
      };
- 
+
      function add_test_done_callback(test, callback)
      {
          if (test.phase === test.phases.COMPLETE) {
              callback();
              return;
          }
- 
+
          test._done_callbacks.push(callback);
      }
- 
+
      /*
       * Invoke all specified cleanup functions. If one or more produce an error,
       * the context is in an unpredictable state, so all further testing should
@@ -3000,34 +3006,34 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          var this_obj = this;
          var results = [];
- 
+
          this.phase = this.phases.CLEANING;
- 
+
          if (this._abortController) {
              this._abortController.abort("Test cleanup");
          }
- 
+
          forEach(this.cleanup_callbacks,
                  function(cleanup_callback) {
                      var result;
- 
+
                      try {
                          result = cleanup_callback();
                      } catch (e) {
                          on_error(e);
                          return;
                      }
- 
+
                      if (!is_valid_cleanup_result(this_obj, result)) {
                          bad_value_count += 1;
                          // Abort tests immediately so that tests declared
                          // within subsequent cleanup functions are not run.
                          tests.abort();
                      }
- 
+
                      results.push(result);
                  });
- 
+
          if (!this._is_promise_test) {
              cleanup_done(this_obj, errors, bad_value_count);
          } else {
@@ -3046,7 +3052,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                        });
          }
      };
- 
+
      /*
       * Determine if the return value of a cleanup function is valid for a given
       * test. Any test may return the value `undefined`. Tests created with
@@ -3056,41 +3062,41 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          if (result === undefined) {
              return true;
          }
- 
+
          if (test._is_promise_test) {
              return result && typeof result.then === "function";
          }
- 
+
          return false;
      }
- 
+
      function cleanup_done(test, errors, bad_value_count) {
          if (errors.length || bad_value_count) {
              var total = test._user_defined_cleanup_count;
- 
+
              tests.status.status = tests.status.ERROR;
              tests.status.stack = null;
              tests.status.message = "Test named '" + test.name +
                  "' specified " + total +
                  " 'cleanup' function" + (total > 1 ? "s" : "");
- 
+
              if (errors.length) {
                  tests.status.message += ", and " + errors.length + " failed";
                  tests.status.stack = ((typeof errors[0] === "object" &&
                                         errors[0].hasOwnProperty("stack")) ?
                                        errors[0].stack : null);
              }
- 
+
              if (bad_value_count) {
                  var type = test._is_promise_test ?
                     "non-thenable" : "non-undefined";
                  tests.status.message += ", and " + bad_value_count +
                      " returned a " + type + " value";
              }
- 
+
              tests.status.message += ".";
          }
- 
+
          test.phase = test.phases.COMPLETE;
          tests.result(test);
          forEach(test._done_callbacks,
@@ -3099,7 +3105,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  });
          test._done_callbacks.length = 0;
      }
- 
+
      /**
       * Gives an AbortSignal that will be aborted when the test finishes.
       */
@@ -3109,7 +3115,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          return this._abortController.signal;
      }
- 
+
      /**
       * A RemoteTest object mirrors a Test object on a remote worker. The
       * associated RemoteWorker updates the RemoteTest object in response to
@@ -3129,7 +3135,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          this._done_callbacks = [];
          tests.push(this);
      }
- 
+
      RemoteTest.prototype.structured_clone = function() {
          var clone = {};
          Object.keys(this).forEach(
@@ -3144,7 +3150,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                      if (key === '_done_callbacks' ) {
                          return;
                      }
- 
+
                      if (typeof value === "object" && value !== null) {
                          clone[key] = merge({}, value);
                      } else {
@@ -3154,7 +3160,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          clone.phases = merge({}, this.phases);
          return clone;
      };
- 
+
      /**
       * `RemoteTest` instances are objects which represent tests running in
       * another realm. They do not define "cleanup" functions (if necessary,
@@ -3179,17 +3185,17 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      };
      RemoteTest.prototype.done = function() {
          this.phase = this.phases.COMPLETE;
- 
+
          forEach(this._done_callbacks,
                  function(callback) {
                      callback();
                  });
      }
- 
+
      RemoteTest.prototype.format_status = function() {
          return Test.prototype.status_formats[this.status];
      }
- 
+
      /*
       * A RemoteContext listens for test events from a remote test context, such
       * as another window or a worker. These events are then used to construct
@@ -3204,7 +3210,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          this.started = false;
          this.tests = new Array();
          this.early_exception = null;
- 
+
          var this_obj = this;
          // If remote context is cross origin assigning to onerror is not
          // possible, so silently catch those errors.
@@ -3213,7 +3219,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          } catch (e) {
            // Ignore.
          }
- 
+
          // Keeping a reference to the remote object and the message handler until
          // remote_done() is seen prevents the remote object and its message channel
          // from going away before all the messages are dispatched.
@@ -3231,21 +3237,21 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  this_obj.message_handlers[message.data.type].call(this_obj, message.data);
              }
          };
- 
+
          if (self.Promise) {
              this.done = new Promise(function(resolve) {
                  this_obj.doneResolve = resolve;
              });
          }
- 
+
          this.message_target.addEventListener("message", this.message_handler);
      }
- 
+
      RemoteContext.prototype.remote_error = function(error) {
          if (error.preventDefault) {
              error.preventDefault();
          }
- 
+
          // Defer interpretation of errors until the testing protocol has
          // started and the remote test's `allow_uncaught_exception` property
          // is available.
@@ -3255,7 +3261,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              this.report_uncaught(error);
          }
      };
- 
+
      RemoteContext.prototype.report_uncaught = function(error) {
          var message = error.message || String(error);
          var filename = (error.filename ? " " + error.filename: "");
@@ -3265,16 +3271,16 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                           "Error in remote" + filename + ": " + message,
                           error.stack);
      };
- 
+
      RemoteContext.prototype.start = function(data) {
          this.started = true;
          this.allow_uncaught_exception = data.properties.allow_uncaught_exception;
- 
+
          if (this.early_exception && !this.allow_uncaught_exception) {
              this.report_uncaught(this.early_exception);
          }
      };
- 
+
      RemoteContext.prototype.test_state = function(data) {
          var remote_test = this.tests[data.test.index];
          if (!remote_test) {
@@ -3284,20 +3290,20 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          remote_test.update_state_from(data.test);
          tests.notify_test_state(remote_test);
      };
- 
+
      RemoteContext.prototype.test_done = function(data) {
          var remote_test = this.tests[data.test.index];
          remote_test.update_state_from(data.test);
          remote_test.done();
          tests.result(remote_test);
      };
- 
+
      RemoteContext.prototype.remote_done = function(data) {
          if (tests.status.status === null &&
              data.status.status !== data.status.OK) {
              tests.set_status(data.status.status, data.status.message, data.status.stack);
          }
- 
+
          for (let assert of data.asserts) {
              var record = new AssertRecord();
              record.assert_name = assert.assert_name;
@@ -3307,10 +3313,10 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              record.stack = assert.stack;
              tests.asserts_run.push(record);
          }
- 
+
          this.message_target.removeEventListener("message", this.message_handler);
          this.running = false;
- 
+
          // If remote context is cross origin assigning to onerror is not
          // possible, so silently catch those errors.
          try {
@@ -3318,25 +3324,25 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          } catch (e) {
            // Ignore.
          }
- 
+
          this.remote = null;
          this.message_target = null;
          if (this.doneResolve) {
              this.doneResolve();
          }
- 
+
          if (tests.all_done()) {
              tests.complete();
          }
      };
- 
+
      RemoteContext.prototype.message_handlers = {
          start: RemoteContext.prototype.start,
          test_state: RemoteContext.prototype.test_state,
          result: RemoteContext.prototype.test_done,
          complete: RemoteContext.prototype.remote_done
      };
- 
+
      /**
       * @class
       * Status of the overall harness
@@ -3350,7 +3356,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          /** Stack trace in case of an exception. */
          this.stack = null;
      }
- 
+
      /**
       * Enum of possible harness statuses.
       *
@@ -3366,16 +3372,16 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          TIMEOUT:2,
          PRECONDITION_FAILED:3
      };
- 
+
      TestsStatus.prototype = merge({}, TestsStatus.statuses);
- 
+
      TestsStatus.prototype.formats = {
          0: "OK",
          1: "Error",
          2: "Timeout",
          3: "Optional Feature Unsupported"
      };
- 
+
      TestsStatus.prototype.structured_clone = function()
      {
          if (!this._structured_clone) {
@@ -3389,11 +3395,11 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          return this._structured_clone;
      };
- 
+
      TestsStatus.prototype.format_status = function() {
          return this.formats[this.status];
      };
- 
+
      /**
       * @class
       * Record of an assert that ran.
@@ -3413,7 +3419,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          /** Status of the assert */
          this.status = null;
      }
- 
+
      AssertRecord.prototype.structured_clone = function() {
          return {
              assert_name: this.assert_name,
@@ -3422,12 +3428,12 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              status: this.status,
          };
      };
- 
+
      function Tests()
      {
          this.tests = [];
          this.num_pending = 0;
- 
+
          this.phases = {
              INITIAL:0,
              SETUP:1,
@@ -3436,35 +3442,35 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              COMPLETE:4
          };
          this.phase = this.phases.INITIAL;
- 
+
          this.properties = {};
- 
+
          this.wait_for_finish = false;
          this.processing_callbacks = false;
- 
+
          this.allow_uncaught_exception = false;
- 
+
          this.file_is_test = false;
          // This value is lazily initialized in order to avoid introducing a
          // dependency on ECMAScript 2015 Promises to all tests.
          this.promise_tests = null;
          this.promise_setup_called = false;
- 
+
          this.timeout_multiplier = 1;
          this.timeout_length = test_environment.test_timeout();
          this.timeout_id = null;
- 
+
          this.start_callbacks = [];
          this.test_state_callbacks = [];
          this.test_done_callbacks = [];
          this.all_done_callbacks = [];
- 
+
          this.hide_test_state = false;
          this.pending_remotes = [];
- 
+
          this.current_test = null;
          this.asserts_run = [];
- 
+
          // Track whether output is enabled, and thus whether or not we should
          // track asserts.
          //
@@ -3473,32 +3479,32 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          // resulting performance hit, we assume we are not meant to. This means
          // that assert tracking does not function on workers.
          this.output = settings.output && 'document' in global_scope;
- 
+
          this.status = new TestsStatus();
- 
+
          var this_obj = this;
- 
+
          test_environment.add_on_loaded_callback(function() {
              if (this_obj.all_done()) {
                  this_obj.complete();
              }
          });
- 
+
          this.set_timeout();
      }
- 
+
      Tests.prototype.setup = function(func, properties)
      {
          if (this.phase >= this.phases.HAVE_RESULTS) {
              return;
          }
- 
+
          if (this.phase < this.phases.SETUP) {
              this.phase = this.phases.SETUP;
          }
- 
+
          this.properties = properties;
- 
+
          for (var p in properties) {
              if (properties.hasOwnProperty(p)) {
                  var value = properties[p];
@@ -3528,7 +3534,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  }
              }
          }
- 
+
          if (func) {
              try {
                  func();
@@ -3541,7 +3547,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          this.set_timeout();
      };
- 
+
      Tests.prototype.set_file_is_test = function() {
          if (this.tests.length > 0) {
              throw new Error("Tried to set file as test after creating a test");
@@ -3551,14 +3557,14 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          // Create the test, which will add it to the list of tests
          tests.current_test = async_test();
      };
- 
+
      Tests.prototype.set_status = function(status, message, stack)
      {
          this.status.status = status;
          this.status.message = message;
          this.status.stack = stack ? stack : null;
      };
- 
+
      Tests.prototype.set_timeout = function() {
          if (global_scope.clearTimeout) {
              var this_obj = this;
@@ -3570,10 +3576,10 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              }
          }
      };
- 
+
      Tests.prototype.timeout = function() {
          var test_in_cleanup = null;
- 
+
          if (this.status.status === null) {
              forEach(this.tests,
                      function(test) {
@@ -3582,11 +3588,11 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                          if (test.phase === test.phases.CLEANING) {
                              test_in_cleanup = test;
                          }
- 
+
                          test.phase = test.phases.COMPLETE;
                          test.cleanup();
                      });
- 
+
              // Timeouts that occur while a test is in the "cleanup" phase
              // indicate that some global state was not properly reverted. This
              // invalidates the overall test execution, so the timeout should be
@@ -3601,10 +3607,10 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  this.status.status = this.status.TIMEOUT;
              }
          }
- 
+
          this.complete();
      };
- 
+
      Tests.prototype.end_wait = function()
      {
          this.wait_for_finish = false;
@@ -3612,7 +3618,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              this.complete();
          }
      };
- 
+
      Tests.prototype.push = function(test)
      {
          if (this.phase < this.phases.HAVE_TESTS) {
@@ -3622,7 +3628,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          test.index = this.tests.push(test);
          this.notify_test_state(test);
      };
- 
+
      Tests.prototype.notify_test_state = function(test) {
          var this_obj = this;
          forEach(this.test_state_callbacks,
@@ -3630,7 +3636,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                      callback(test, this_obj);
                  });
      };
- 
+
      Tests.prototype.all_done = function() {
          return (this.tests.length > 0 || this.pending_remotes.length > 0) &&
                  test_environment.all_loaded &&
@@ -3638,12 +3644,12 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  !this.processing_callbacks &&
                  !this.pending_remotes.some(function(w) { return w.running; });
      };
- 
+
      Tests.prototype.start = function() {
          this.phase = this.phases.HAVE_TESTS;
          this.notify_start();
      };
- 
+
      Tests.prototype.notify_start = function() {
          var this_obj = this;
          forEach (this.start_callbacks,
@@ -3652,7 +3658,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                       callback(this_obj.properties);
                   });
      };
- 
+
      Tests.prototype.result = function(test)
      {
          // If the harness has already transitioned beyond the `HAVE_RESULTS`
@@ -3663,7 +3669,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          this.num_pending--;
          this.notify_result(test);
      };
- 
+
      Tests.prototype.notify_result = function(test) {
          var this_obj = this;
          this.processing_callbacks = true;
@@ -3677,7 +3683,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              this_obj.complete();
          }
      };
- 
+
      Tests.prototype.complete = function() {
          if (this.phase === this.phases.COMPLETE) {
              return;
@@ -3691,7 +3697,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                  function(test) {
                                      return test.phase < test.phases.COMPLETE;
                                  });
- 
+
          /**
           * To preserve legacy behavior, overall test completion must be
           * signaled synchronously.
@@ -3700,7 +3706,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              all_complete();
              return;
          }
- 
+
          all_async(incomplete,
                    function(test, testDone)
                    {
@@ -3714,17 +3720,17 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                    },
                    all_complete);
      };
- 
+
      Tests.prototype.set_assert = function(assert_name, args) {
          this.asserts_run.push(new AssertRecord(this.current_test, assert_name, args))
      }
- 
+
      Tests.prototype.set_assert_status = function(index, status, stack) {
          let assert_record = this.asserts_run[index];
          assert_record.status = status;
          assert_record.stack = stack;
      }
- 
+
      /**
       * Update the harness status to reflect an unrecoverable harness error that
       * should cancel all further testing. Update all previously-defined tests
@@ -3733,7 +3739,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      Tests.prototype.abort = function() {
          this.status.status = this.status.ERROR;
          this.is_aborted = true;
- 
+
          forEach(this.tests,
                  function(test) {
                      if (test.phase === test.phases.INITIAL) {
@@ -3741,7 +3747,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                      }
                  });
      };
- 
+
      /*
       * Determine if any tests share the same `name` property. Return an array
       * containing the names of any such duplicates.
@@ -3749,7 +3755,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      Tests.prototype.find_duplicates = function() {
          var names = Object.create(null);
          var duplicates = [];
- 
+
          forEach (this.tests,
                   function(test)
                   {
@@ -3758,14 +3764,14 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                       }
                       names[test.name] = true;
                   });
- 
+
          return duplicates;
      };
- 
+
      function code_unit_str(char) {
          return 'U+' + char.charCodeAt(0).toString(16);
      }
- 
+
      function sanitize_unpaired_surrogates(str) {
          return str.replace(
              /([\ud800-\udbff]+)(?![\udc00-\udfff])|(^|[^\ud800-\udbff])([\udc00-\udfff]+)/g,
@@ -3778,32 +3784,32 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  return output;
              });
      }
- 
+
      function sanitize_all_unpaired_surrogates(tests) {
          forEach (tests,
                   function (test)
                   {
                       var sanitized = sanitize_unpaired_surrogates(test.name);
- 
+
                       if (test.name !== sanitized) {
                           test.name = sanitized;
                           delete test._structured_clone;
                       }
                   });
      }
- 
+
      Tests.prototype.notify_complete = function() {
          var this_obj = this;
          var duplicates;
- 
+
          if (this.status.status === null) {
              duplicates = this.find_duplicates();
- 
+
              // Some transports adhere to UTF-8's restriction on unpaired
              // surrogates. Sanitize the titles so that the results can be
              // consistently sent via all transports.
              sanitize_all_unpaired_surrogates(this.tests);
- 
+
              // Test names are presumed to be unique within test files--this
              // allows consumers to use them for identification purposes.
              // Duplicated names violate this expectation and should therefore
@@ -3818,20 +3824,20 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  this.status.status = this.status.OK;
              }
          }
- 
+
          forEach (this.all_done_callbacks,
                   function(callback)
                   {
                       callback(this_obj.tests, this_obj.status, this_obj.asserts_run);
                   });
      };
- 
+
      /*
       * Constructs a RemoteContext that tracks tests from a specific worker.
       */
      Tests.prototype.create_remote_worker = function(worker) {
          var message_port;
- 
+
          if (is_service_worker(worker)) {
              message_port = navigator.serviceWorker;
              worker.postMessage({type: "connect"});
@@ -3841,10 +3847,10 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          } else {
              message_port = worker;
          }
- 
+
          return new RemoteContext(worker, message_port);
      };
- 
+
      /*
       * Constructs a RemoteContext that tracks tests from a specific window.
       */
@@ -3858,17 +3864,17 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              }
          );
      };
- 
+
      Tests.prototype.fetch_tests_from_worker = function(worker) {
          if (this.phase >= this.phases.COMPLETE) {
              return;
          }
- 
+
          var remoteContext = this.create_remote_worker(worker);
          this.pending_remotes.push(remoteContext);
          return remoteContext.done;
      };
- 
+
      /**
       * Get test results from a worker and include them in the current test.
       *
@@ -3881,17 +3887,17 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          return tests.fetch_tests_from_worker(port);
      }
      expose(fetch_tests_from_worker, 'fetch_tests_from_worker');
- 
+
      Tests.prototype.fetch_tests_from_window = function(remote) {
          if (this.phase >= this.phases.COMPLETE) {
              return;
          }
- 
+
          var remoteContext = this.create_remote_window(remote);
          this.pending_remotes.push(remoteContext);
          return remoteContext.done;
      };
- 
+
      /**
       * Aggregate tests from separate windows or iframes
       * into the current document as if they were all part of the same test file.
@@ -3907,7 +3913,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          return tests.fetch_tests_from_window(window);
      }
      expose(fetch_tests_from_window, 'fetch_tests_from_window');
- 
+
      /**
       * Get test results from a shadow realm and include them in the current test.
       *
@@ -3925,7 +3931,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          return done;
      }
      expose(fetch_tests_from_shadow_realm, 'fetch_tests_from_shadow_realm');
- 
+
      /**
       * Begin running tests in this shadow realm test harness.
       *
@@ -3940,13 +3946,13 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          if (!(test_environment instanceof ShadowRealmTestEnvironment)) {
              throw new Error("begin_shadow_realm_tests called in non-Shadow Realm environment");
          }
- 
+
          test_environment.begin(function (msg) {
              postMessage(JSON.stringify(msg));
          });
      }
      expose(begin_shadow_realm_tests, 'begin_shadow_realm_tests');
- 
+
      /**
       * Timeout the tests.
       *
@@ -3960,7 +3966,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
      }
      expose(timeout, 'timeout');
- 
+
      /**
       * Add a callback that's triggered when the first :js:class:`Test` is created.
       *
@@ -3970,7 +3976,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      function add_start_callback(callback) {
          tests.start_callbacks.push(callback);
      }
- 
+
      /**
       * Add a callback that's triggered when a test state changes.
       *
@@ -3980,7 +3986,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      function add_test_state_callback(callback) {
          tests.test_state_callbacks.push(callback);
      }
- 
+
      /**
       * Add a callback that's triggered when a test result is received.
       *
@@ -3990,7 +3996,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      function add_result_callback(callback) {
          tests.test_done_callbacks.push(callback);
      }
- 
+
      /**
       * Add a callback that's triggered when all tests are complete.
       *
@@ -4007,62 +4013,62 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      function add_completion_callback(callback) {
          tests.all_done_callbacks.push(callback);
      }
- 
+
      expose(add_start_callback, 'add_start_callback');
      expose(add_test_state_callback, 'add_test_state_callback');
      expose(add_result_callback, 'add_result_callback');
      expose(add_completion_callback, 'add_completion_callback');
- 
+
      function remove(array, item) {
          var index = array.indexOf(item);
          if (index > -1) {
              array.splice(index, 1);
          }
      }
- 
+
      function remove_start_callback(callback) {
          remove(tests.start_callbacks, callback);
      }
- 
+
      function remove_test_state_callback(callback) {
          remove(tests.test_state_callbacks, callback);
      }
- 
+
      function remove_result_callback(callback) {
          remove(tests.test_done_callbacks, callback);
      }
- 
+
      function remove_completion_callback(callback) {
         remove(tests.all_done_callbacks, callback);
      }
- 
+
      /*
       * Output listener
      */
- 
+
      function Output() {
          this.output_document = document;
          this.output_node = null;
          this.enabled = settings.output;
          this.phase = this.INITIAL;
      }
- 
+
      Output.prototype.INITIAL = 0;
      Output.prototype.STARTED = 1;
      Output.prototype.HAVE_RESULTS = 2;
      Output.prototype.COMPLETE = 3;
- 
+
      Output.prototype.setup = function(properties) {
          if (this.phase > this.INITIAL) {
              return;
          }
- 
+
          //If output is disabled in testharnessreport.js the test shouldn't be
          //able to override that
          this.enabled = this.enabled && (properties.hasOwnProperty("output") ?
                                          properties.output : settings.output);
      };
- 
+
      Output.prototype.init = function(properties) {
          if (this.phase >= this.STARTED) {
              return;
@@ -4074,7 +4080,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          this.phase = this.STARTED;
      };
- 
+
      Output.prototype.resolve_log = function() {
          var output_document;
          if (this.output_node) {
@@ -4122,7 +4128,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          this.output_document = output_document;
          this.output_node = node;
      };
- 
+
      Output.prototype.show_status = function() {
          if (this.phase < this.STARTED) {
              this.init({});
@@ -4145,7 +4151,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              }
          }
      };
- 
+
      Output.prototype.show_results = function (tests, harness_status, asserts_run) {
          if (this.phase >= this.COMPLETE) {
              return;
@@ -4157,24 +4163,24 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              this.resolve_log();
          }
          this.phase = this.COMPLETE;
- 
+
          var log = this.output_node;
          if (!log) {
              return;
          }
          var output_document = this.output_document;
- 
+
          while (log.lastChild) {
              log.removeChild(log.lastChild);
          }
- 
+
          var stylesheet = output_document.createElementNS(xhtml_ns, "style");
          stylesheet.textContent = stylesheetContent;
          var heads = output_document.getElementsByTagName("head");
          if (heads.length) {
              heads[0].appendChild(stylesheet);
          }
- 
+
          var status_number = {};
          forEach(tests,
                  function(test) {
@@ -4185,12 +4191,12 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                          status_number[status] = 1;
                      }
                  });
- 
+
          function status_class(status)
          {
              return status.replace(/\s/g, '').toLowerCase();
          }
- 
+
          var summary_template = ["section", {"id":"summary"},
                                  ["h2", {}, "Summary"],
                                  function()
@@ -4209,7 +4215,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                                   "if (!canceled) { location.reload() }"},
                                                  "Rerun"]
                                                ]];
- 
+
                                      if (harness_status.status === harness_status.ERROR) {
                                          rv[0].push(["pre", {}, harness_status.message]);
                                          if (harness_status.stack) {
@@ -4236,9 +4242,9 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                      return rv;
                                  },
                                 ];
- 
+
          log.appendChild(render(summary_template, {num_tests:tests.length}, output_document));
- 
+
          forEach(output_document.querySelectorAll("section#summary label"),
                  function(element)
                  {
@@ -4262,7 +4268,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                   }
                               });
                  });
- 
+
          // This use of innerHTML plus manual escaping is not recommended in
          // general, but is necessary here for performance.  Using textContent
          // on each individual <td> adds tens of seconds of execution time for
@@ -4274,7 +4280,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  .replace(/"/g, "&quot;")
                  .replace(/'/g, "&#39;");
          }
- 
+
          function has_assertions()
          {
              for (var i = 0; i < tests.length; i++) {
@@ -4284,7 +4290,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              }
              return false;
          }
- 
+
          function get_assertion(test)
          {
              if (test.properties.hasOwnProperty("assert")) {
@@ -4295,7 +4301,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              }
              return '';
          }
- 
+
          var asserts_run_by_test = new Map();
          asserts_run.forEach(assert => {
              if (!asserts_run_by_test.has(assert.test)) {
@@ -4303,7 +4309,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              }
              asserts_run_by_test.get(assert.test).push(assert);
          });
- 
+
          function get_asserts_output(test) {
              var asserts = asserts_run_by_test.get(test);
              if (!asserts) {
@@ -4341,7 +4347,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              rv += "</table>";
              return rv;
          }
- 
+
          log.appendChild(document.createElementNS(xhtml_ns, "section"));
          var assertions = has_assertions();
          var html = "<h2>Details</h2><table id='results' " + (assertions ? "class='assertions'" : "" ) + ">" +
@@ -4383,7 +4389,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                 .textContent = html;
          }
      };
- 
+
      /*
       * Template code
       *
@@ -4416,12 +4422,12 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
       * make the variable substitutions and return the substituted template
       *
       */
- 
+
      function is_single_node(template)
      {
          return typeof template[0] === "string";
      }
- 
+
      function substitute(template, substitutions)
      {
          if (typeof template === "function") {
@@ -4429,23 +4435,23 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              if (!replacement) {
                  return null;
              }
- 
+
              return substitute(replacement, substitutions);
          }
- 
+
          if (is_single_node(template)) {
              return substitute_single(template, substitutions);
          }
- 
+
          return filter(map(template, function(x) {
                                return substitute(x, substitutions);
                            }), function(x) {return x !== null;});
      }
- 
+
      function substitute_single(template, substitutions)
      {
          var substitution_re = /\$\{([^ }]*)\}/g;
- 
+
          function do_substitution(input) {
              var components = input.split(substitution_re);
              var rv = [];
@@ -4457,7 +4463,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              }
              return rv;
          }
- 
+
          function substitute_attrs(attrs, rv)
          {
              rv[1] = {};
@@ -4469,7 +4475,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  }
              }
          }
- 
+
          function substitute_children(children, rv)
          {
              for (var i = 0; i < children.length; i++) {
@@ -4488,20 +4494,20 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              }
              return rv;
          }
- 
+
          var rv = [];
          rv.push(do_substitution(String(template[0])).join(""));
- 
+
          if (template[0] === "{text}") {
              substitute_children(template.slice(1), rv);
          } else {
              substitute_attrs(template[1], rv);
              substitute_children(template.slice(2), rv);
          }
- 
+
          return rv;
      }
- 
+
      function make_dom_single(template, doc)
      {
          var output_document = doc || document;
@@ -4528,26 +4534,26 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  }
              }
          }
- 
+
          return element;
      }
- 
+
      function make_dom(template, substitutions, output_document)
      {
          if (is_single_node(template)) {
              return make_dom_single(template, output_document);
          }
- 
+
          return map(template, function(x) {
                         return make_dom_single(x, output_document);
                     });
      }
- 
+
      function render(template, substitutions, output_document)
      {
          return make_dom(substitute(template, substitutions), output_document);
      }
- 
+
      /*
       * Utility functions
       */
@@ -4559,7 +4565,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              throw new AssertionError(msg);
          }
      }
- 
+
      /**
       * @class
       * Exception type that represents a failing assert.
@@ -4575,19 +4581,19 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          this.stack = get_stack();
      }
      expose(AssertionError, "AssertionError");
- 
+
      AssertionError.prototype = Object.create(Error.prototype);
- 
+
      const get_stack = function() {
          var stack = new Error().stack;
- 
+
          // 'Error.stack' is not supported in all browsers/versions
          if (!stack) {
              return "(Stack trace unavailable)";
          }
- 
+
          var lines = stack.split("\n");
- 
+
          // Create a pattern to match stack frames originating within testharness.js.  These include the
          // script URL, followed by the line/col (e.g., '/resources/testharness.js:120:21').
          // Escape the URL per http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
@@ -4595,34 +4601,34 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          var script_url = get_script_url();
          var re_text = script_url ? script_url.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') : "\\btestharness.js";
          var re = new RegExp(re_text + ":\\d+:\\d+");
- 
+
          // Some browsers include a preamble that specifies the type of the error object.  Skip this by
          // advancing until we find the first stack frame originating from testharness.js.
          var i = 0;
          while (!re.test(lines[i]) && i < lines.length) {
              i++;
          }
- 
+
          // Then skip the top frames originating from testharness.js to begin the stack at the test code.
          while (re.test(lines[i]) && i < lines.length) {
              i++;
          }
- 
+
          // Paranoid check that we didn't skip all frames.  If so, return the original stack unmodified.
          if (i >= lines.length) {
              return stack;
          }
- 
+
          return lines.slice(i).join("\n");
      }
- 
+
      function OptionalFeatureUnsupportedError(message)
      {
          AssertionError.call(this, message);
      }
      OptionalFeatureUnsupportedError.prototype = Object.create(AssertionError.prototype);
      expose(OptionalFeatureUnsupportedError, "OptionalFeatureUnsupportedError");
- 
+
      function make_message(function_name, description, error, substitutions)
      {
          for (var p in substitutions) {
@@ -4636,7 +4642,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                                            substitutions));
          return node_form.slice(1).join("");
      }
- 
+
      function filter(array, callable, thisObj) {
          var rv = [];
          for (var i = 0; i < array.length; i++) {
@@ -4649,7 +4655,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          return rv;
      }
- 
+
      function map(array, callable, thisObj)
      {
          var rv = [];
@@ -4661,12 +4667,12 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          return rv;
      }
- 
+
      function extend(array, items)
      {
          Array.prototype.push.apply(array, items);
      }
- 
+
      function forEach(array, callback, thisObj)
      {
          for (var i = 0; i < array.length; i++) {
@@ -4675,7 +4681,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              }
          }
      }
- 
+
      /**
       * Immediately invoke a "iteratee" function with a series of values in
       * parallel and invoke a final "done" function when all of the "iteratee"
@@ -4704,11 +4710,11 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      function all_async(values, iter_callback, done_callback)
      {
          var remaining = values.length;
- 
+
          if (remaining === 0) {
              done_callback();
          }
- 
+
          forEach(values,
                  function(element) {
                      var invoked = false;
@@ -4716,19 +4722,19 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                          if (invoked) {
                              return;
                          }
- 
+
                          invoked = true;
                          remaining -= 1;
- 
+
                          if (remaining === 0) {
                              done_callback();
                          }
                      };
- 
+
                      iter_callback(element, elDone);
                  });
      }
- 
+
      function merge(a,b)
      {
          var rv = {};
@@ -4741,7 +4747,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          return rv;
      }
- 
+
      function expose(object, name)
      {
          var components = name.split(".");
@@ -4754,7 +4760,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          target[components[components.length - 1]] = object;
      }
- 
+
      function is_same_origin(w) {
          try {
              'random_prop' in w;
@@ -4763,14 +4769,14 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              return false;
          }
      }
- 
+
      /** Returns the 'src' URL of the first <script> tag in the page to include the file 'testharness.js'. */
      function get_script_url()
      {
          if (!('document' in global_scope)) {
              return undefined;
          }
- 
+
          var scripts = document.getElementsByTagName("script");
          for (var i = 0; i < scripts.length; i++) {
              var src;
@@ -4780,7 +4786,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  //SVG case
                  src = scripts[i].href.baseVal;
              }
- 
+
              var matches = src && src.match(/^(.*\/|)testharness\.js$/);
              if (matches) {
                  return src;
@@ -4788,7 +4794,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          return undefined;
      }
- 
+
      /** Returns the <title> or filename or "Untitled" */
      function get_title()
      {
@@ -4807,13 +4813,13 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
          }
          return "Untitled";
      }
- 
+
      /**
       * Setup globals
       */
- 
+
      var tests = new Tests();
- 
+
      if (global_scope.addEventListener) {
          var error_handler = function(error, message, stack) {
              var optional_unsupported = error instanceof OptionalFeatureUnsupportedError;
@@ -4831,7 +4837,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  tests.status.message = message;
                  tests.status.stack = stack;
              }
- 
+
              // Do not transition to the "complete" phase if the test has been
              // configured to allow uncaught exceptions. This gives the test an
              // opportunity to define subtests based on the exception reporting
@@ -4840,7 +4846,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
                  done();
              }
          };
- 
+
          addEventListener("error", function(e) {
              var message = e.message;
              var stack;
@@ -4851,7 +4857,7 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              }
              error_handler(e.error, message, stack);
          }, false);
- 
+
          addEventListener("unhandledrejection", function(e) {
              var message;
              if (e.reason && e.reason.message) {
@@ -4866,9 +4872,9 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
              error_handler(e.reason, message, stack);
          }, false);
      }
- 
+
      test_environment.on_tests_ready();
- 
+
      /**
       * Stylesheet
       */
@@ -4972,6 +4978,6 @@ test_timeout = parseInt(urlParams.get("timeout"), 10) * 1000 || 5000;
      white-space:pre;\
  }\
  ";
- 
+
  })(self);
  // vim: set expandtab shiftwidth=4 tabstop=4:

@@ -32,8 +32,5 @@ source ~/.install-conf
 poetry env use 3.11
 poetry install
 
-# (Alternative) Run with pip
-# pip install --user -r requirements.txt
-
 # Grant WPT ability to bind to port 80 and 443
 sudo setcap CAP_NET_BIND_SERVICE=+eip /home/ubuntu/.pyenv/versions/3.11.5/bin/python3.11

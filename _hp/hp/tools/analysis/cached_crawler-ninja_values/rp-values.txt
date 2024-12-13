@@ -1,0 +1,144 @@
+Values for referrer-policy:
+same-origin 53,596
+strict-origin-when-cross-origin 26,159
+no-referrer-when-downgrade 23,863
+no-referrer 4,195
+strict-origin 3,103
+origin-when-cross-origin 2,448
+unsafe-url 1,733
+origin 1,572
+950
+no-referrer, strict-origin-when-cross-origin 654
+no-referrer-when-downgrade, strict-origin-when-cross-origin 295
+origin-when-cross-origin, strict-origin-when-cross-origin 132
+origin, strict-origin-when-cross-origin 73
+no-referrer, same-origin 41
+SAMEORIGIN 29
+strict-origin-when-cross-origin, no-referrer-when-downgrade 15
+strict-origin-when-cross-origin, origin-when-cross-origin 15
+never, no-referrer 15
+same-origin,no-referrer-when-downgrade 13
+same-origin, strict-origin-when-cross-origin 12
+strict-origin-when-cross-origin, origin 11
+strict-origin, no-referrer-when-downgrade 11
+no-referrer, origin, same-origin 8
+origin, strict-origin, strict-origin-when-cross-origin 8
+origin-when-cross-origin,strict-origin-when-cross-origin 7
+origin,strict-origin-when-cross-origin 7
+no-referrer,strict-origin-when-cross-origin 7
+strict-origin, strict-origin-when-cross-origin 7
+value 6
+origin,unsafe-url 6
+origin, no-referrer, no-referrer-when-downgrade, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url 6
+same-origin, no-referrer, strict-origin-when-cross-origin 5
+default, no-referrer-when-downgrade 5
+no-referrer, origin, origin-when-cross-origin 5
+no-referrer, same-origin, strict-origin 4
+origin; origin-when-cross-origin; same-origin; no-referrer; no-referrer-when-downgrade 4
+strict-origin-when-cross-origin, strict-origin-when-cross-origin 4
+no-referrer-when-downgrade, origin-when-cross-origin, strict-origin-when-cross-origin 4
+no-referrer, no-referrer-when-downgrade 3
+strict-origin-when-cross-origin,origin 3
+no-referrer-when-downgrade, no-referrer-when-downgrade 3
+no-referrer-when-downgrade; 3
+no-referrer, origin-when-cross-origin 3
+no-referrer | same-origin | origin | strict-origin | no-origin-when-downgrading 3
+none 3
+no-referrer-when-downgrade, strict-origin-when-cross-origin, no-referrer, strict-origin-when-cross-origin 3
+same origin 3
+origin, origin-when-cross-origin, strict-origin, strict-origin-when-cross-origin, no-referrer 3
+no-referrer, never 2
+origin, origin-when-cross-origin, strict-origin-when-cross-origin 2
+no-referrer, no-referrer-when-downgrade, strict-origin-when-cross-origin 2
+same-origin, no-referrer-when-downgrade 2
+origin, unsafe-url 2
+add_header Referrer-Policy "origin" always; 2
+'same-origin' 2
+origin, origin-when-cross-origin 2
+“no-referrer-when-downgrade” 2
+https://*.pvrcinemas.com 2
+same-origin-when-cross-origin 2
+origin,no-referrer-when-downgrade 2
+no-referrer, strict-origin-when-cross-origin, no-referrer-when-downgrade 2
+no-referrer-when-downgrade,strict-origin-when-cross-origin 2
+"origin" always 2
+“same-origin” 2
+no-referrer-when-downgrade, strict-origin-when-cross-origin, no-referrer-when-downgrade, strict-origin-when-cross-origin 2
+no-referrer-when-downgrade, same-origin 2
+strict 2
+strict-origin-when-cross-origin 2
+: no-referrer 2
+no-store 2
+Deny 2
+“strict-origin” 2
+strict-origin-when-cross-origin; 2
+origin-when-cross-origin 1
+strict-origin, strict-origin-when-cross-origin, origin-when-cross-origin 1
+"same-origin" 1
+Access-Control-Allow-Origin 1
+strict-origin-when-cross-origin, strict-origin 1
+no-referrer, same-origin, origin, strict-origin, no-origin-when-downgrading 1
+no-referrer, strict-origin 1
+origin-when-cross-originno-referrer 1
+origin-when-crossorigin 1
+fullscreen=() 1
+noreferrer-when-downgrade 1
+no-referer-when-downgrade 1
+no-referrer-when-downgrade, origin-when-cross-origin 1
+strict-origin-when-cross-origin,same-origin 1
+sctrict-origin 1
+no-referer 1
+your-policy-value 1
+referrer 1
+strict-origin-when-cross-origin; no-referrer-when-downgrade 1
+"no-referrer-when-downgrade" 1
+same-orgin 1
+no-referrer, strict-origin-when-cross-origin, unsafe-url 1
+No Referrer 1
+origin-when-cross-origin, origin 1
+same-site 1
+geolocation=self, microphone=(), camera=() 1
+"no-referrer" 1
+add_header Referrer-Policy "same-origin" always; 1
+no-referrer-when-downgrade, strict-origin-when-cross-origin, no-referrer, strict-origin 1
+origin, no-referrer-when-downgrade 1
+strict-origin-when-cross-origin,origin-when-cross-origin 1
+same-origin- 1
+"no-referrer-when-downgrade" always 1
+no-refferer 1
+unsafe-none 1
+same-origin always 1
+same-origin, no-referrer 1
+: origin 1
+: no-referrer-when-downgrade 1
+frame-ancestors 'self'; 1
+no-referrer-when-downgrade, strict-origin, strict-origin-when-cross-origin 1
+unsafe-url; 1
+noreferrer 1
+strict-origin; no-refferer 1
+no-referrer-when-downgrade  permissions-policy: geolocation=self 1
+no-referrer, same-origin, strict-origin-when-cross-origin 1
+"same-origin", Access-Control-Allow-Origin "api.mapbox.com/*" 1
+origin,strict-origin 1
+same-origin,strict-origin 1
+cross-origin 1
+"strict-origin"; 1
+media-src 'self' http://player.vimeo.com; 1
+: strict-origin-when-cross-origin 1
+no-referrer,same-origin 1
+same-originstrict-origin 1
+no-referrer; 1
+no-referrer; no-referrer-when-downgrade; origin; origin-when-cross-origin; 1
+no-referrer, no-referrer-when-downgrade, same-origin, origin, origin-when-cross-origin, strict-origin, strict-origin-when-cross-origin 1
+no-referrer,no-referrer-when-downgrade,origin,origin-when-cross-origin,same-origin 1
+no-referrer no-referrer-when-downgrade strict-origin strict-origin-when-cross-origin same-origin 1
+no-referrer-when-downgrade" 1
+fullscreen=(), geolocation=() 1
+1; mode=block 1
+no-referrer | same-origin 1
+domain 1
+no-referrer-when-downgrade; origin 1
+origin-when-cross-origin: 1
+strict-origin-when-cross-origin,no-referrer-when-downgrade 1
+yes 1
+no-refferer-when-downgrade 1
