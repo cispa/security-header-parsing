@@ -356,6 +356,7 @@ if __name__ == '__main__':
             # Released 2024-05-13 (17.5 (19618.2.12))
             ("safari", "17.5", None, [], get_or_create_browser("safari", "17.5", "macOS 14.5", "real", "selenium", "")),
 
+
             # Brave without updates on MacOS
             # Download .dmg from https://github.com/brave/brave-browser/releases and install
             # E.g., https://github.com/brave/brave-browser/releases/tag/v1.60.118, rename the file, run with --disable-brave-updage
@@ -363,6 +364,11 @@ if __name__ == '__main__':
             # ("brave", "119", "/Applications/Brave Browser 1.60.118.app/Contents/MacOS/Brave Browser",
             # ["--headless=new", "--disable-brave-update"], get_or_create_browser("brave", "1.60.118 (119.0.6045.163)", "macOS 14.2.1", "headless-new", "selenium", "")),
         ]
+        if args.new_browsers:
+            config = [
+                # Released 2024-12-11 (18.2 (20620.1.16.11.8))
+                ("safari", "18.2", None, [], get_or_create_browser("safari", "18.2", "macOS 15.2", "real", "selenium", "")),
+            ]
     # Linux Ubuntu
     else:
         # Headless (new)
