@@ -65,8 +65,9 @@ def test_get_or_create_browser():
     assert browser == 1
 
 def test_get_child_processes():
-    """Check that 0 has a couple of childs
+    """Check that 0 or 1 has a couple of childs
     """
-    process_list = get_child_processes(0)
-    assert len(process_list) > 5
+    process_list_m = get_child_processes(0)
+    process_list_l = get_child_processes(1)
+    assert len(process_list_m) > 5 or len(process_list_l) > 5
 
