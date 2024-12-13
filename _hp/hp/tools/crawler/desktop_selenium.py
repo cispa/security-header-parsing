@@ -455,7 +455,7 @@ if __name__ == '__main__':
                     test_urls = get_tests(resp_type=args.resp_type, browser_id=browser_id, scheme=scheme, max_resps=args.max_resps, max_popups=args.max_popups)
                     page_timeout = TIMEOUT
                 elif args.run_mode == "repeat":
-                    with open("../repeat.json", "r") as f:
+                    with open("repeat.json", "r") as f:
                         test_urls = json.load(f).get(str(browser_id), [])
                         test_urls = list(filter(lambda s: s.startswith(f"{scheme}://"), test_urls))
                         # Increased timeout for repeat tests
