@@ -37,6 +37,8 @@ By slightly adapting the configuration and updating the used browsers, it is als
   - It can happen that some tests do not have 5 results after the above commands due to timeouts and similar, to ensure that all tests have at least 5 results run the below commands.
   - Run missing basic tests: `poetry run python create_repeat.py --selection_str "\"Response\".resp_type = 'basic' and \"Browser\".os = 'Ubuntu 22.04'` and `poetry run python desktop_selenium.py --num_browsers 50 --run_mode repeat --max_urls_until_restart 50`
   - Run missing parsing tests: `poetry run python create_repeat.py --selection_str "\"Response\".resp_type = 'parsing' and \"Browser\".os = 'Ubuntu 22.04'` and `poetry run python desktop_selenium.py --num_browsers 50 --run_mode repeat --max_urls_until_restart 50`
+  - To reproduce the results of the second experiment run with newer browsers, add `--new_browsers`
+  - To run our tests on newer browsers, adjust the browser config in `desktop_selenium.py`
 - Optional configuration to debug headfull browsers on the Ubuntu container:
 ```bash
 Xvfb :99 -screen 0 1920x1080x24 &
