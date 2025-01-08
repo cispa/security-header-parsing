@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTPS Upgrade tests</title>
+</head>
+
+
+<body>
+
+<script>
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(() => resolve(), ms));
+    }
+
+    async function upgrade_test() {
+        let urlParams = new URLSearchParams(decodeURIComponent(window.location.search));
+        // Set HSTS
+        await fetch(`https://${location.host}/_hp/common/empty.html?pipe=header(strict-transport-security,max-age=60)|status(200)`, { mode: "no-cors" }).catch(() => reject(new Error("Cleanup failed")))
+        // Sleep for `sleep` ms.
+        let = sleep_time = urlParams.get('sleep') | 0;
+        await sleep(sleep_time);
+        // Request URL
+        r1 = await fetch(`http://${location.host}/_hp/common/empty.html`, { "method": "GET" });
+        // Request URL again
+        r2 = await fetch(`http://${location.host}/_hp/common/empty.html`, { "method": "GET" });
+        // Clean HSTS
+        await fetch(`https://${location.host}/_hp/common/empty.html?pipe=header(strict-transport-security,max-age=0)|status(200)`, { mode: "no-cors" }).catch(() => reject(new Error("Cleanup failed")))
+        // Report results
+        alert(`Sleep: ${sleep_time}ms, R1 redirected: ${r1.redirected}, R2 redirected: ${r2.redirected}`);
+    }
+
+    if (location.protocol == "http:") {
+        upgrade_test();
+    } else {
+        // Due to mixed content blocking we cannot fetch http on https
+        // These tests only are meaningful if we visit the test site on http
+        alert("Only works from HTTP!");
+    }
+
+</script>
+</body> 
+
+</html>
