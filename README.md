@@ -4,7 +4,7 @@ This repository contains all code for our paper `Head(er)s Up! Detecting Securit
 
 This repository is a fork of [WPT](https://github.com/web-platform-tests/wpt), the original README can be found [here](./README_original.md).
 All test and analysis code for our paper can be found in the [_hp](./_hp/README.md) directory.
-Our modified version of the wptserve HTTP server implementation can be found in the `tools/serve` and `tools/wptserve` directories. All other directories are untouched and required for `wptserve` to run, we removed the other WPT test directories for better clarity.
+Our modified version of the wptserve HTTP server implementation can be found in the `tools/serve` and `tools/wptserve` directories. All other directories are untouched and required for `wptserve` to run, we removed the other WPT directories for clarity.
 
 ## Setup and Start the Header Testing Server
 - Create a fresh Ubuntu22 container/VM: `lxc launch ubuntu:22.04 <name>` and connect to it `lxc exec <name> bash` (Other environments might also work but are not tested)
@@ -19,7 +19,7 @@ Our modified version of the wptserve HTTP server implementation can be found in 
 -  Start the WPT server first (from the top-most folder): `poetry run -C _hp python wpt serve --config _hp/wpt-config.json`
 - Manually check if the server and the tests are working: Visit http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html and confirm that tests are loaded and executed.
 - Optional: Run tests to check that everything is working correctly: `poetry run -C _hp pytest _hp`
-- (TODO Optional: Change the used domains in [_hp/wpt-config.json](_hp/wpt-config.json) and [_hp/host-config.txt](_hp/host-config.txt); domains are hardcoded at several places and thus this is not enough at the moment.)
+- (Optional: Change the used domains in [_hp/wpt-config.json](_hp/wpt-config.json) and [_hp/host-config.txt](_hp/host-config.txt); domains are hardcoded at several places and thus this is not enough at the moment.)
 
 
 ## Reproduce or Enhance our Results
@@ -69,7 +69,7 @@ export DISPLAY=:99 && fluxbox -log fluxbox.log &
 ### Mobile Browsers (Android)
 - Execute `cd _hp/hp/tools/crawler`
 - To run the tests on Android devices, first some emulators have to be set up and the browsers have to be installed and configured:
-  - Download the Android SDK Command-Line Tools (command line tools only) form the Android Studio downloads page and unpack it in a folder called `AndroidSDK` (see https://developer.android.com/tools/sdkmanager).
+  - Download the Android SDK Command-Line Tools (command line tools only) form the Android Studio downloads page and unpack it in a folder called `AndroidSDK` (see https://developer.android.com/tools/sdkmanager ).
   - Add `cmdline-tools` to the path: e.g., `export PATH=<path-to-AndroidSDK>/cmdline-tools/latest/bin/:$PATH`
   - Install `platform-tools` and `emulator`: `sdkmanager platform-tools emulator`
   - Add `platform-tools` to the path: e.g., `export PATH=<path-to-AndroidSDK>/platform-tools/:$PATH`
@@ -94,11 +94,10 @@ export DISPLAY=:99 && fluxbox -log fluxbox.log &
       - Open brave: By default, Pop-ups and redirects are blocked. To allow, go to `Settings/Site Settings/ Turn on the Pop-Ups and Redirects option`
       - Open firefox_beta: To allow popups, go to `about:config`, and then set `dom.disable_open_during_load` to false.
     - Stop the emulator: `adb -s emulator-5554 emu kill`
-  - @Tin check if all the info here is accurate/correct
 - The emulators also need to be able to reach the Header Testing server.
 - Issue: currently does not work with the self-signed certs, make sure to have correct certs setup
 - Full run:
-  - Run the basic tests: `for i in {1..5}; do timeout 15m poetry run python android_intent.py -browsers chrome -repeat 1 -num_devices 30 -type basic -auto_restart; done` (@Tin can we simply use `-browsers all` or do we have to run it three times?)
+  - Run the basic tests: `for i in {1..5}; do timeout 15m poetry run python android_intent.py -browsers chrome -repeat 1 -num_devices 30 -type basic -auto_restart; done`
   - Run the parsing tests: `for i in {1..5}; do timeout 6h poetry run python android_intent.py -browsers chrome -repeat 1 -num_devices 30 -type parsing -auto_restart; done`
   - Similarly to the other tests, it could happen that not all tests collected 5 results, thus run the following to rerun some tests.
   - Create the repeat file for the basic tests: `poetry run python create_repeat.py --selection_str "\"Response\".resp_type = 'basic' and \"Browser\".os = 'Android 11'"`
@@ -129,9 +128,8 @@ export DISPLAY=:99 && fluxbox -log fluxbox.log &
 
 ### Analysis:
   - Execute `cd _hp/hp/tools/analysis && poetry run jupyter-lab`
-  - Open and run `_hp/hp/tools/analysis/analysis_may_2024.ipynb`
-  - Note that the analysis is tailored towards our results from May 2024 and some small changes might be required if run on new data
-  - TODO: update with updated browser analysis (e.g., `analysis_august_2024_new_chrome.ipynb`)
+  - Open and run `_hp/hp/tools/analysis/analysis_may_2024.ipynb` or `_hp/hp/tools/analysis/analysis_december_2024.ipynb`
+  - Note that the analysis is tailored towards our results from May or December 2024 and some small changes might be required if run on new data
 
 ## Inventory
 - `_hp/`: All test and analysis code for the paper:
