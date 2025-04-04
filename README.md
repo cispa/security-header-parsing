@@ -19,11 +19,11 @@ Our modified version of the wptserve HTTP server implementation can be found in 
 -  Start the WPT server first (from the top-most folder): `poetry run -C _hp python wpt serve --config _hp/wpt-config.json`
 - Manually check if the server and the tests are working: Visit http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html and confirm that tests are loaded and executed.
 - Optional: Run tests to check that everything is working correctly: `poetry run -C _hp pytest _hp`
-- (Optional: Change the used domains in [_hp/wpt-config.json](_hp/wpt-config.json) and [_hp/host-config.txt](_hp/host-config.txt); domains are hardcoded at several places and thus this is not enough at the moment.)
+- Optional: Change the used domains in [_hp/wpt-config.json](_hp/wpt-config.json) and [_hp/host-config.txt](_hp/host-config.txt)
 
 
 ## Reproduce or Enhance our Results
-In the following, we describe our to reproduce all our results from the paper.
+In the following, we describe how to reproduce all our results from the paper.
 By slightly adapting the configuration and updating the used browsers, it is also possible to run our tool chain on new/other browser configurations.
 
 ### Desktop Browsers (Linux Ubuntu)
