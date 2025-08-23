@@ -20,6 +20,7 @@ Our modified version of the wptserve HTTP server implementation can be found in 
 - Manually check if the server and the tests are working: Visit http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html and confirm that tests are loaded and executed.
 - Optional: Run tests to check that everything is working correctly: `poetry run -C _hp pytest _hp`
 - Optional: Change the used domains in [_hp/wpt-config.json](_hp/wpt-config.json) and [_hp/host-config.txt](_hp/host-config.txt)
+- To run it inside a Docker container: `docker compose up --build`. This should spin up the server.
 
 
 ## Reproduce or Enhance our Results

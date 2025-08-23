@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: http_header_demo
+      POSTGRES_USER: header_user
+      POSTGRES_PASSWORD: header_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U header_user -d http_header_demo"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  header-testing-server:
+    build: .
+    extra_hosts:
+      - "headers.websec.saarland:0.0.0.0"
+      - "sub.headers.websec.saarland:0.0.0.0"
+      - "sub.sub.headers.websec.saarland:0.0.0.0"
+      - "headers.webappsec.eu:0.0.0.0"
+      - "sub.headers.webappsec.eu:0.0.0.0"
+      - "sub.sub.headers.webappsec.eu:0.0.0.0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: header_user
+      DB_PASSWORD: header_password
+      DB_NAME: http_header_demo
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8443:8443"
+      - "9000:9000"
+    volumes:
+      - .:/app
+      - ./_hp/hp/tools/certs:/app/_hp/hp/tools/certs
+    cap_add:
+      - NET_BIND_SERVICE
+    restart: unless-stopped
+    command: [
+      "poetry", "run", "-C", "/app/_hp", "python", "/app/wpt", "serve", "--config", "/app/_hp/wpt-config.json"
+    ]
+
+volumes:
+  postgres_data:
