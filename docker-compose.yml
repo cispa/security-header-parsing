@@ -17,6 +17,7 @@ services:
 
   header-testing-server:
     platform: linux/amd64  # This is required for running desktop linux browsers; It is possible to run on arm Macs, but it will be slow
+    shm_size: 2g
     build: .
     extra_hosts:
       - "headers.websec.saarland:0.0.0.0"

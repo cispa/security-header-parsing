@@ -6,6 +6,53 @@ This repository is a fork of [WPT](https://github.com/web-platform-tests/wpt), t
 All test and analysis code for our paper can be found in the [_hp](./_hp/README.md) directory.
 Our modified version of the wptserve HTTP server implementation can be found in the `tools/serve` and `tools/wptserve` directories. All other directories are untouched and required for `wptserve` to run, we removed the other WPT directories for clarity.
 
+The project is made out of 6 parts:
+1. Modified WPT server
+  - Dockerized and works on MacOS and Linux
+  - Optional: Configure settings: in `docker-compose.yml` and TODO, e.g., setup working certificates
+  - Start with `(sudo) docker compose up`, this starts a database, configures the HTTP responses, and starts our modified WPT server
+  - (Optional) Run tests to verify server is setup correctly: `sudo docker compose exec header-testing-server bash -c "poetry run -C _hp pytest /app/_hp"`
+  - The server is now serving all the tests pages and reponses for our paper. Depending on the configuration the server is now available within and outside the Docker network. E.g., by default it should bind to port 80 and 443 and `curl -I http://localhost/_hp/common/empty.html` and `curl -I -k https://localhost/_hp/common/empty.html` (our dummy certificates are not valid, thus `-k`/insecure is required) on the host should return a response from `BaseHTTP/0.6 Python/3.11.5`
+2. (Optional) Analysis scripts
+   - Dockerized jupyter-lab and works on MacOS and Linux
+   - Run: `(sudo) docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/analysis && poetry run jupyter-lab --allow-root --ip 0.0.0.0"` and access the URL printed on your local browser
+   - Open `analysis_ae.ipynb` and run it to analyze the browser runs; If none of the test runners were executed yet, no 
+   - The files `analysis_may_2024.ipynb` and `analysis_december_2024.ipynb` contain the full analysis for the original browser run and the updated browser run experiments described in the paper, including the output of the analysis. Re-running them requires access to our originally collected data.
+3. (Optional) Test runner for desktop linux browsers
+   - Dockerized and only work on Linux (issues with the MacOS Linux emulation)
+   - Run: `(sudo) docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/crawler/ && poetry run python desktop_selenium.py --debug_browsers --resp_type debug --ignore_certs"` for a quick check that data can be collected
+     - This should take around 2-3m
+     - Check `_hp/hp/tools/crawler/logs/desktop-selenium/` for logs, there should be two rows with `Start chrome (128)` and two with `Finish chrome (128)` and no additional rows. The results of these tests can also be seen in the database or checked with the `analysis_ae.ipynb` script
+   - Reproduce the basic experiment:
+     - TODO (copy from below + verify, there are some issues with dockerized setup e.g. `--no-sandbox`?)
+     - Run `(sudo) docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/crawler/ && for i in {1..5}; do poetry run python desktop_selenium.py --num_browsers 50 --resp_type basic --ignore_certs; done"`
+   - Reproduce the parsing experiment:
+     - TODO
+   - Reproduce the updated browser experiment and other notes:
+     - TODO
+   - The test runner can be also used outside of the docker container for efficiency:
+     - Requires `python 3.11.5`, `poetry`, various browser dependencies and if run on a server without a screen `Xvfb` installed. Check `setup.bash` on how to install them (verified to work on Ubuntu 22.04)
+     - Then install all dependencies: `cd _hp && poetry install`
+     - Lastly, the modified WPT server needs to be reachable. One option is to modify `/etc/hosts/` to point the required hosts to the docker container  (see `_hp/host-config.txt`)
+     - Then `poetry run python desktop_selenium.py --help` can be used to see all settings of the test runner and then executed as wanted
+4. (Optional) Test runner for macOS browser
+   - Requires access to a macOS device with a display 
+   - The Safari version is bound to the operating system, for an exact reproduction of our results, macOS devices in the correct version are required. To test the test runner on macOS, the used version can be updated in `desktop_selenium.py`
+   - Requirements: `python=3.11.5`, `poetry` (see `setup.bash`) and access to the modified WPT server
+   - Install `poetry install`
+   - Run: TODO, copy from below (some manual steps in Safari are required) (Note: the device is not fully usable during the testing)
+5. (Optional) Test runner for iPadOS browser
+  - Requires access to iPadOS devices (in the correct version)
+  - Only works in a setup where the server is setup to be reachable from the iPadOS (e.g., via public internet) and the server needs valid certificates
+  - Run: TODO, copy from below
+6. (Optional) Test runner for emulated Android browsers
+   - Requires access to a linux machine
+   - TODO: copy from below, install and run
+
+
+----
+Old review below:
+
 ## Setup and Start the Header Testing Server
 - Create a fresh Ubuntu22 container/VM: `lxc launch ubuntu:22.04 <name>` and connect to it `lxc exec <name> bash` (Other environments might also work but are not tested)
   - Switch to the ubuntu user: `su - ubuntu`

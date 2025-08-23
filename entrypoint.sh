@@ -11,7 +11,7 @@ if grep -qi "VirtualApple" /proc/cpuinfo; then
   echo "Running under Rosetta emulation – skipping Xvfb"
 else
   echo "Starting Xvfb and x11vnc available at port 5900 with passwd abc"
-  rm /tmp/.X99-lock
+  rm -f /tmp/.X99-lock
   Xvfb :99 -screen 0 1920x1080x24 &
   # Wait until Xvfb is listening
   for i in $(seq 1 20); do
