@@ -409,14 +409,15 @@ if __name__ == '__main__':
                 ("chrome", "131", None, ["--headless=new"], get_or_create_browser("chrome", "131", "Ubuntu 22.04", "headless-new", "selenium", "")),
                 # Released 2024-11-26
                 ("firefox", "133", None, ["-headless"], get_or_create_browser("firefox", "133", "Ubuntu 22.04", "headless", "selenium", "")),
-                # Released 2024-12-11 
+                # Released 2024-12-11
                 ("brave", "131", "/home/ubuntu/brave-versions/v1.73.101/brave-browser",
                 ["--headless=new"], get_or_create_browser("brave", "v1.73.101 (Chromium 131.0.6778.139)", "Ubuntu 22.04", "headless-new", "selenium", "")),
             ]
     if args.debug_browsers:
         config = [
             # Configure browsers to use for debug runs manually here
-            ("chrome", "128", None, ["--headless=new"], get_or_create_browser("chrome", "128", "Ubuntu 22.04", "headless-new", "selenium", "")),
+            # --no-sandbox required in the current docker setup
+            ("chrome", "128", None, ["--headless=new", "--no-sandbox"], get_or_create_browser("chrome", "128", "Ubuntu 22.04", "headless-new", "selenium", "")),
         ]
 
     # Use the debug Unknown browser if generating the page-runner json File

@@ -23,14 +23,14 @@ echo 'export PYENV_ROOT="$HOME/.pyenv"' | tee -a  ~/.bashrc ~/.install-conf
 echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' | tee -a  ~/.bashrc ~/.install-conf
 echo 'eval "$(pyenv init -)"' | tee -a  ~/.bashrc ~/.install-conf
 source ~/.install-conf
-pyenv install 3.11
+pyenv install 3.11.5
 
 # Install poetry and requirements (with python 3.11)
 curl -sSL https://install.python-poetry.org | python3 -
 echo 'export PATH="$HOME/.local/bin:$PATH"' | tee -a  ~/.bashrc ~/.install-conf
 source ~/.install-conf
-poetry env use 3.11
+poetry env use 3.11.5
 poetry install
 
 # Grant WPT ability to bind to port 80 and 443
-sudo setcap CAP_NET_BIND_SERVICE=+eip /home/ubuntu/.pyenv/versions/3.11.5/bin/python3.11
+sudo setcap CAP_NET_BIND_SERVICE=+eip /root/.pyenv/versions/3.11.5/bin/python3.11

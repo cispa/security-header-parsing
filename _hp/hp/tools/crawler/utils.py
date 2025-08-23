@@ -26,7 +26,7 @@ TIMEOUT = BROWSER_START_TIMEOUT + GLOBAL_TEST_TIMEOUT + FINAL_REQ_TIMEOUT
 
 # Load the WPT Config
 try:
-	wpt_config = json.load(open("_hp/wpt-config.json"))
+	wpt_config = json.load(open("/app/_hp/wpt-config.json"))
 except OSError:
 	try:
 		wpt_config = json.load(open("../../wpt-config.json"))

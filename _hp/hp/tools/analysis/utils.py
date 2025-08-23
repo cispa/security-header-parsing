@@ -8,10 +8,10 @@ import re
 
 @dataclass
 class Config:
-    DB_HOST: str="localhost"
+    DB_HOST: str="postgres"
     DB_NAME: str="http_header_demo"
-    DB_USER: str=""
-    DB_PASSWORD: str=""
+    DB_USER: str="header_user"
+    DB_PASSWORD: str="header_password"
     DB_PORT: str="5432"
 
 def get_data(config: Config, select_query: str, quiet=False) -> pd.DataFrame:
@@ -64,17 +64,17 @@ def postgresql_to_dataframe(conn, select_query, non_cat=None):
         print("Error: %s" % error)
         cursor.close()
         return 1
-    
+
     # Naturally we get a list of tuples
     tuples = cursor.fetchall()
     cursor.close()
-    
+
     # We just need to turn it into a pandas dataframe
     df = pd.DataFrame(tuples, columns=column_names)
-    
+
     # Convert all string (object) columns to categorical to speed things up
     # df[df.select_dtypes(['object']).columns] = df.select_dtypes(['object']).apply(to_cat, non_cat=non_cat)
-    
+
     return df
 
 def to_cat(column, non_cat=[]):
@@ -105,7 +105,7 @@ def clickable(title=None, url=None):
 
 def add_columns(df):
     """Create extra columns: e.g., clean_url and filtered outcome_str"""
-    
+
     df["outcome_str"] = df["outcome_value"].fillna("None").astype(str)
     df["clean_url"] = df["full_url"].apply(clean_url)
     @lru_cache(maxsize=None)
@@ -115,16 +115,16 @@ def add_columns(df):
     df["browser"] = df["browser_id"].apply(id_to_browser)
     df["org_origin"] = df["org_scheme"] + "://" + df["org_host"]
     df["resp_origin"] = df["resp_scheme"] + "://" + df["resp_host"]
-    
+
     # Unify outcomes that are semantically the same (only the exact error string is different in different browsers)
-    
+
     # Fetch fails:
     # Firefox: {'error': 'object "TypeError: NetworkError when attempting to fetch resource."', 'headers': ''}
     # Chromium: {'error': 'object "TypeError: Failed to fetch"', 'headers': ''}
     # Safari: {'error': 'object "TypeError: Load failed"', 'headers': ''}
     df["outcome_str"] = df["outcome_str"].replace("TypeError: Load failed", "TypeError: Failed to fetch", regex=True)
     df["outcome_str"] = df["outcome_str"].replace("TypeError: NetworkError when attempting to fetch resource.", "TypeError: Failed to fetch", regex=True)
-    
+
     # Fetch is aborted:
     # Firefox: AbortError: The operation was aborted.<space>
     # Safari: AbortError: Fetch is aborted
@@ -137,7 +137,7 @@ def add_columns(df):
     # Firefox: {'window.open.opener': 'object "TypeError: w is null"'}
     df["outcome_str"] = df["outcome_str"].replace("TypeError: w is null", "No window-reference. Probably popup blocked", regex=True)
     df["outcome_str"] = df["outcome_str"].replace("TypeError: Cannot read properties of null (reading \'opener\')", "No window-reference. Probably popup blocked", regex=True)
-    
+
     # For document referrer we only want to know whether it is a origin or the full URl?
     df['outcome_str'] = df['outcome_str'].apply(lambda x: 'document.referrer: full_url' if 'responses.py?feature_group' in x else x)
     # The differences always only are between http-origin, https-origin, full-url, none, timeout; there is never a difference between the various origins, thus we can merge them to make our live easier

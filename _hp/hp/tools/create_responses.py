@@ -10,7 +10,7 @@ import json
 # Common area
 # Redirect to empty response, has ACAO *, other than that no special headers!
 try:
-	wpt_config = json.load(open("_hp/wpt-config.json"))
+	wpt_config = json.load(open("/app/_hp/wpt-config.json"))
 except OSError:
 	try:
 		wpt_config = json.load(open("../../wpt-config.json"))

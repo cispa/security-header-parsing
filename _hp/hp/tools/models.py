@@ -14,7 +14,7 @@ try:
 	proj_config = json.load(open("config.json"))
 except OSError:
 	try:
-		proj_config = json.load(open("_hp/hp/tools/config.json"))
+		proj_config = json.load(open("/app/_hp/hp/tools/config.json"))
 	except OSError:
 		proj_config = json.load(open("../config.json"))
 

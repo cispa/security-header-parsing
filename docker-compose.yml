@@ -16,6 +16,7 @@ services:
       retries: 10
 
   header-testing-server:
+    platform: linux/amd64  # This is required for running desktop linux browsers; It is possible to run on arm Macs, but it will be slow
     build: .
     extra_hosts:
       - "headers.websec.saarland:0.0.0.0"
@@ -38,6 +39,8 @@ services:
       - "443:443"
       - "8443:8443"
       - "9000:9000"
+      - "8888:8888"
+      - "5900:5900"
     volumes:
       - .:/app
       - ./_hp/hp/tools/certs:/app/_hp/hp/tools/certs

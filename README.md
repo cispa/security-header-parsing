@@ -20,7 +20,7 @@ Our modified version of the wptserve HTTP server implementation can be found in 
 - Manually check if the server and the tests are working: Visit http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html and confirm that tests are loaded and executed.
 - Optional: Run tests to check that everything is working correctly: `poetry run -C _hp pytest _hp`
 - Optional: Change the used domains in [_hp/wpt-config.json](_hp/wpt-config.json) and [_hp/host-config.txt](_hp/host-config.txt)
-- To run it inside a Docker container: `docker compose up --build`. This should spin up the server.
+- To run it inside a Docker container: `docker compose up --build`. This should spin up the server (as we use the same docker for the linux desktop browsers, the container is configured as `platform: linux/amd64` meaning it is emulated and slow on AppleSilicon)
 
 
 ## Reproduce or Enhance our Results
@@ -28,6 +28,7 @@ In the following, we describe how to reproduce all our results from the paper.
 By slightly adapting the configuration and updating the used browsers, it is also possible to run our tool chain on new/other browser configurations.
 
 ### Desktop Browsers (Linux Ubuntu)
+- Note: if running in the docker container on AppleSilicon only headless browser will work as Xvfb cannot be emulated
 - Execute `cd _hp/hp/tools/crawler`
 - If using self-signed certs, add `--ignore_certs` to all commands.
 - Run the following for a quick test run to check that everything is working: `poetry run python desktop_selenium.py --debug_browsers --resp_type debug`

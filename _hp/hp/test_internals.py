@@ -6,7 +6,7 @@ from hp.tools.crawler.utils import generate_short_uuid, get_tests, get_resp_ids,
 from hp.tools.create_responses import create_responses
 from hp.tools.crawler.desktop_selenium import get_child_processes
 
-with open("_hp/wpt-config.json", "r") as f:
+with open("/app/_hp/wpt-config.json", "r") as f:
     wpt_config = json.load(f)
 
 

@@ -32,3 +32,7 @@ RUN chmod +x /app/entrypoint.sh
 EXPOSE 80 443 8443 9000
 
 # WORKDIR /app
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+# CMD is default command if not overridden in docker-compose
+CMD ["poetry", "run", "-C", "/app/_hp", "python", "/app/wpt", "serve", "--config", "/app/_hp/wpt-config.json"]

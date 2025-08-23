@@ -2,7 +2,7 @@ import pytest
 import json
 import httpx
 
-with open("_hp/wpt-config.json", "r") as f:
+with open("/app/_hp/wpt-config.json", "r") as f:
     wpt_config = json.load(f)
 
 def test_get_resp_ids():

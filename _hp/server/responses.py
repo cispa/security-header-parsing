@@ -42,30 +42,30 @@ def get_body(feature_group, resp):
           threading.current_thread().ident)
 
     if feature_group in ['pp']:
-        file = open(f"_hp/common/frame-fullscreen-pp.html", "rb")
+        file = open(f"/app/_hp/common/frame-fullscreen-pp.html", "rb")
     elif feature_group in ['coop']:
-        file = open("_hp/common/swag.jpg", "rb") # Empty file triggers download in FF
+        file = open("/app/_hp/common/swag.jpg", "rb") # Empty file triggers download in FF
     elif feature_group in ['hsts', "cors"]:
         return ""  # Empty body
     elif feature_group in ["rp"]:
-        file = open("_hp/common/frame-referrer.html", "rb")
+        file = open("/app/_hp/common/frame-referrer.html", "rb")
     elif feature_group in ['corp']:
         if resp == 1:
-            file = open("_hp/common/swag.jpg", "rb")
+            file = open("/app/_hp/common/swag.jpg", "rb")
         else:
-            file = open("_hp/common/frame-corp.html", "rb")
+            file = open("/app/_hp/common/frame-corp.html", "rb")
     elif feature_group in ["tao"]:
-        file = open("_hp/common/swag.jpg", "rb")
+        file = open("/app/_hp/common/swag.jpg", "rb")
     elif feature_group in ["framing"]:
-        file = open("_hp/common/iframes.html", "rb")
+        file = open("/app/_hp/common/iframes.html", "rb")
     elif feature_group in ["csp-script"]:
-        file = open("_hp/common/frame-script-csp.html", "rb")
+        file = open("/app/_hp/common/frame-script-csp.html", "rb")
     elif feature_group in ["csp-img"]:
-        file = open("_hp/common/frame-img-csp.html", "rb")
+        file = open("/app/_hp/common/frame-img-csp.html", "rb")
     elif feature_group in ["coep"]:
-        file = open("_hp/common/frame-coep.html", "rb")
+        file = open("/app/_hp/common/frame-coep.html", "rb")
     elif feature_group in ["xcto"]:
-        file = open("_hp/common/script-xcto.js", "rb")
+        file = open("/app/_hp/common/script-xcto.js", "rb")
     else:
         print(f"Invalid feature_group: {feature_group}")
         return ""

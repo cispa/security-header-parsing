@@ -3,12 +3,12 @@ import psycopg
 import json
 
 # Setup the config
-proj_config = json.load(open("_hp/hp/tools/config.json"))
+proj_config = json.load(open("/app/_hp/hp/tools/config.json"))
 DB_URL = proj_config['DB_URL'].replace("postgresql+psycopg2://", "postgresql://")
 
 @json_handler
 def main(request, response):
-    """Notify runner clients via postgres pg_notify that their run is doen.
+    """Notify runner clients via postgres pg_notify that their run is done.
 
     Args:
         request: GET request with run_id
