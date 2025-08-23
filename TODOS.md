@@ -1,0 +1,11 @@
+- [x] Dockerize
+- [x] Add DB to setup
+- [x] Fix dockerized setup!
+- [ ] Move all configs in one place/less places?
+- [ ] Remove hardcoded stuff
+- [ ] Test, test, test! + fix bugs/remove manual steps (e.g., brave is currently manually managed?)
+- [ ] New readme
+- [ ] analysis_ae.ipynb basic analysis script that simply works
+- [ ] Improve readme/documentation! What is where and so on
+- [ ] Create artifact eval document
+- [ ] ...
