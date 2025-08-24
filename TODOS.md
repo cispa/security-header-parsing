@@ -4,7 +4,8 @@
 - [ ] Move all configs in one place/less places?
 - [ ] Remove hardcoded stuff
 - [ ] Test, test, test! + fix bugs/remove manual steps (e.g., brave is currently manually managed?)
-- [ ] analysis_ae.ipynb basic analysis script that simply works
+- [x] analysis_demo.py basic analysis script that simply works
+- [ ] original data archive + import to recreate analysis
 - [ ] Improve and update REAMDE! What is where and so on
 - [ ] Create artifact eval document
 - [ ] ...

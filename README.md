@@ -14,15 +14,19 @@ The project is made out of 6 parts:
   - (Optional) Run tests to verify server is setup correctly: `sudo docker compose exec header-testing-server bash -c "poetry run -C _hp pytest /app/_hp"`
   - The server is now serving all the tests pages and reponses for our paper. Depending on the configuration the server is now available within and outside the Docker network. E.g., by default it should bind to port 80 and 443 and `curl -I http://localhost/_hp/common/empty.html` and `curl -I -k https://localhost/_hp/common/empty.html` (our dummy certificates are not valid, thus `-k`/insecure is required) on the host should return a response from `BaseHTTP/0.6 Python/3.11.5`
 2. (Optional) Analysis scripts
-   - Dockerized jupyter-lab and works on MacOS and Linux
-   - Run: `(sudo) docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/analysis && poetry run jupyter-lab --allow-root --ip 0.0.0.0"` and access the URL printed on your local browser
-   - Open `analysis_ae.ipynb` and run it to analyze the browser runs; If none of the test runners were executed yet, no 
-   - The files `analysis_may_2024.ipynb` and `analysis_december_2024.ipynb` contain the full analysis for the original browser run and the updated browser run experiments described in the paper, including the output of the analysis. Re-running them requires access to our originally collected data.
+   - Dockerized and works on MacOS and Linux
+   - Run: `(sudo) docker compose exec header-testing-server bash -c "cd _hp/hp/tools/analysis && poetry run python analysis_demo.py"` to get some basic statistics about the test runs executed by the unit tests and running browser-test-runners.
+   - We also provide the data and the analysis scripts used for the paper:
+    - Download the database from **TODO**
+    - Import the database into your local postgres: `(sudo) docker compose exec -T postgres pg_restore -U header_user -d http_header_original -v /tmp/data/http_header_original.dump`
+    - Start the jupyter-lab: `(sudo) docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/analysis && poetry run jupyter-lab --allow-root --ip 0.0.0.0"` and access the URL printed on your local browser
+    - The files `analysis_may_2024.ipynb` and `analysis_december_2024.ipynb` contain the full analysis for the original browser run and the updated browser run experiments described in the paper, including the output of the analysis and can be executed to reproduce the analysis. Note: re-executing these scripts require a large amount of RAM on the docker container >20GB.
 3. (Optional) Test runner for desktop linux browsers
-   - Dockerized and only work on Linux (issues with the MacOS Linux emulation)
-   - Run: `(sudo) docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/crawler/ && poetry run python desktop_selenium.py --debug_browsers --resp_type debug --ignore_certs"` for a quick check that data can be collected
+   - Dockerized demo works on Linux and macOS; For a full run, the browser runner needs to be installed outside of docker on a linux system.
+   - Demo run:
+     - Run: `(sudo) docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/crawler/ && poetry run python desktop_selenium.py --debug_browsers --resp_type debug --ignore_certs"` for a quick check that data can be collected
      - This should take around 2-3m
-     - Check `_hp/hp/tools/crawler/logs/desktop-selenium/` for logs, there should be two rows with `Start chrome (128)` and two with `Finish chrome (128)` and no additional rows. The results of these tests can also be seen in the database or checked with the `analysis_ae.ipynb` script
+     - Check `_hp/hp/tools/crawler/logs/desktop-selenium/` for logs, there should be two rows with `Start chrome (128)` and two with `Finish chrome (128)` and no additional rows. The results of these tests can also be seen in the database or checked with the `analysis_demo.py` script
    - Reproduce the basic experiment:
      - TODO (copy from below + verify, there are some issues with dockerized setup e.g. `--no-sandbox`?)
      - Run `(sudo) docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/crawler/ && for i in {1..5}; do poetry run python desktop_selenium.py --num_browsers 50 --resp_type basic --ignore_certs; done"`
@@ -36,7 +40,7 @@ The project is made out of 6 parts:
      - Lastly, the modified WPT server needs to be reachable. One option is to modify `/etc/hosts/` to point the required hosts to the docker container  (see `_hp/host-config.txt`)
      - Then `poetry run python desktop_selenium.py --help` can be used to see all settings of the test runner and then executed as wanted
 4. (Optional) Test runner for macOS browser
-   - Requires access to a macOS device with a display 
+   - Requires access to a macOS device with a display
    - The Safari version is bound to the operating system, for an exact reproduction of our results, macOS devices in the correct version are required. To test the test runner on macOS, the used version can be updated in `desktop_selenium.py`
    - Requirements: `python=3.11.5`, `poetry` (see `setup.bash`) and access to the modified WPT server
    - Install `poetry install`

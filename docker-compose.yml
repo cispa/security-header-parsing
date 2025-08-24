@@ -1,12 +1,13 @@
 services:
   postgres:
-    image: postgres:15
+    image: postgres:17
     environment:
       POSTGRES_DB: http_header_demo
       POSTGRES_USER: header_user
       POSTGRES_PASSWORD: header_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./data:/tmp/data
     ports:
       - "5432:5432"
     healthcheck:
