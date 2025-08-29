@@ -17,10 +17,10 @@ The project is made out of 6 parts:
    - Dockerized and works on MacOS and Linux
    - Run: `(sudo) docker compose exec header-testing-server bash -c "cd _hp/hp/tools/analysis && poetry run python analysis_demo.py"` to get some basic statistics about the test runs executed by the unit tests and running browser-test-runners.
    - We also provide the data and the analysis scripts used for the paper:
-    - Download the database from **TODO**
-    - Import the database into your local postgres: `(sudo) docker compose exec -T postgres pg_restore -U header_user -d http_header_original -v /tmp/data/http_header_original.dump`
+    - Download the database: `curl https://zenodo.org/records/16996059/files/http_header_original.dump\?download\=1 --output data/http_header_original.dump` (https://zenodo.org/records/16996059)
+    - Import the database into your local postgres: `(sudo) docker compose exec postgres psql -U header_user -d http_header_demo -c "CREATE DATABASE http_header_original;"` and `(sudo) docker compose exec -T postgres pg_restore -U header_user -d http_header_original -v /tmp/data/http_header_original.dump`
     - Start the jupyter-lab: `(sudo) docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/analysis && poetry run jupyter-lab --allow-root --ip 0.0.0.0"` and access the URL printed on your local browser
-    - The files `analysis_may_2024.ipynb` and `analysis_december_2024.ipynb` contain the full analysis for the original browser run and the updated browser run experiments described in the paper, including the output of the analysis and can be executed to reproduce the analysis. Note: re-executing these scripts require a large amount of RAM on the docker container >20GB.
+    - The files `analysis_may_2024.ipynb` and `analysis_december_2024.ipynb` contain the full analysis for the original browser run and the updated browser run experiments described in the paper, including the output of the analysis and can be executed to reproduce the analysis. Note: re-executing these scripts require a large amount of RAM for the docker container (~60GB, execution time: ~30m).
 3. (Optional) Test runner for desktop linux browsers
    - Dockerized demo works on Linux and macOS; For a full run, the browser runner needs to be installed outside of docker on a linux system.
    - Demo run:
