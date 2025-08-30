@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: If you use this software, please cite both the article from preferred-citation and the software itself.
+authors:
+  - family-names: Rautenstrauch
+    given-names: Jannis
+  - family-names: Nguyen
+    given-names: Trung Tin
+  - family-names: Ramakrishnan
+    given-names: Karthik
+  - family-names: Stock
+    given-names: Ben
+title: Head(er)s Up! Detecting Security Header Inconsistencies in Browsers
+version: 1.0.0
+url: TODO
+doi: TODO
+date-released: '2025-09-01'
+preferred-citation:
+  authors:
+    - family-names: Rautenstrauch
+      given-names: Jannis
+    - family-names: Nguyen
+      given-names: Trung Tin
+    - family-names: Ramakrishnan
+      given-names: Karthik
+    - family-names: Stock
+      given-names: Ben
+  title: Head(er)s Up! Detecting Security Header Inconsistencies in Browsers
+  doi: TODO
+  url: TODO
+  type: conference-paper
+  pages: TODO
+  year: 'TODO'
+  isbn: 'TODO'
+  collection-title: Proceedings of the 32nd ACM Conference on Computer and Communications Security
+  conference:
+    name: CCS '25
+  publisher:
+    name: Association for Computing Machinery
+    address: New York, NY, USA

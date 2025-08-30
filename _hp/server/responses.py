@@ -5,6 +5,15 @@ from functools import lru_cache
 import os
 import threading
 
+try:
+	wpt_config = json.load(open("/app/_hp/wpt-config.json"))
+except OSError:
+	try:
+		wpt_config = json.load(open("../../wpt-config.json"))
+	except OSError:
+		wpt_config = json.load(open("../../../wpt-config.json"))
+
+base_host = wpt_config["browser_host"]
 
 @lru_cache(maxsize=500000)
 def get_response(resp_id):
@@ -60,6 +69,11 @@ def get_body(feature_group, resp):
         file = open("/app/_hp/common/iframes.html", "rb")
     elif feature_group in ["csp-script"]:
         file = open("/app/_hp/common/frame-script-csp.html", "rb")
+        content = file.read()
+        file.close()
+        # decode -> replace -> encode back to bytes
+        content = content.decode("utf-8").replace("{base_host}", base_host).encode("utf-8")
+        return content
     elif feature_group in ["csp-img"]:
         file = open("/app/_hp/common/frame-img-csp.html", "rb")
     elif feature_group in ["coep"]:

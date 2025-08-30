@@ -20,6 +20,17 @@ except OSError:
 
 DB_URL = proj_config['DB_URL']
 
+try:
+	wpt_config = json.load(open("/app/_hp/wpt-config.json"))
+except OSError:
+	try:
+		wpt_config = json.load(open("../../wpt-config.json"))
+	except OSError:
+		wpt_config = json.load(open("../../../wpt-config.json"))
+
+base_host = wpt_config['browser_host']
+alt_host = wpt_config['alternate_hosts']['alt']
+
 # DB
 Base = declarative_base()
 
@@ -126,12 +137,12 @@ class Result(BaseModel):
 
     # Origin relations
     org_scheme = Column(Enum('http', 'https', 'http2', name='scheme'))
-    # Should always be sub.headers.websec.saarland!
-    org_host = Column(Enum('sub.headers.websec.saarland', '', name='ohost'))
+    # Should always be sub.{base_host}!
+    org_host = Column(Enum(f'sub.{base_host}', '', name='ohost'))
     resp_scheme = Column(Enum('http', 'https', 'http2', name='scheme'))
-    # Should be one of sub.headers.websec.saarland (same-orgin), headers.websec.saarland (parent-domain; same-site), sub.sub.headers.websec.saarland (sub-domain; same-site), or headers.webappsec.eu (cross-site)
-    resp_host = Column(Enum('sub.headers.websec.saarland', 'sub.sub.headers.websec.saarland',
-                       'headers.websec.saarland', 'headers.webappsec.eu', name='rhost'))
+    # Should be one of sub.{base_host} (same-orgin), {base_host} (parent-domain; same-site), sub.sub.{base_host} (sub-domain; same-site), or {alt_host} (cross-site)
+    resp_host = Column(Enum(f'sub.{base_host}', f'sub.sub.{base_host}',
+                       f'{base_host}', f'{alt_host}', name='rhost'))
     # E.g., direct, sandbox/srcdoc, nested (chain), nested (parent), nested (top-level), or something else
     relation_info = Column(String)
 

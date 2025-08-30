@@ -64,24 +64,24 @@ def test_store_results():
     body = {
         "tests": [
             {
-                "name": "referrer_iframe|false|window.open|http://sub.headers.websec.saarland|199",
-                "outcome": "document.referrer: http://sub.headers.websec.saarland/_hp/server/responses.py?feature_group=rp&resp_id=199&count=1&nest=1&origin=http://sub.headers.websec.saarland&element=window.open&resp=1",
+                "name": f"referrer_iframe|false|window.open|http://{base_host}|199",
+                "outcome": f"document.referrer: http://{base_host}/_hp/server/responses.py?feature_group=rp&resp_id=199&count=1&nest=1&origin=http://{base_host}&element=window.open&resp=1",
                 "status": 0,
                 "message": None,
                 "stack": None,
                 "resp_scheme": "http",
-                "resp_host": "sub.headers.websec.saarland",
+                "resp_host": f"{base_host}",
                 "relation": "window.open",
             }
         ],
         "browser_id": "1",
-        "test": "http://sub.headers.websec.saarland/_hp/tests/referrer-access-rp.sub.html?resp_type=basic&browser_id=1&label=RP&first_id=199&last_id=199&scheme=http&t_resp_id=199&t_element_relation=iframe_window.open&t_resp_origin=http://sub.headers.websec.saarland",
+        "test": f"http://{base_host}/_hp/tests/referrer-access-rp.sub.html?resp_type=basic&browser_id=1&label=RP&first_id=199&last_id=199&scheme=http&t_resp_id=199&t_element_relation=iframe_window.open&t_resp_origin=http://{base_host}",
         "status": 0,
         "message": None,
         "stack": None,
         "org_scheme": "http",
-        "org_host": "sub.headers.websec.saarland",
-        "full_url": "http://sub.headers.websec.saarland/_hp/tests/referrer-access-rp.sub.html?resp_type=basic&browser_id=1&label=RP&first_id=199&last_id=199&scheme=http&t_resp_id=199&t_element_relation=iframe_window.open&t_resp_origin=http://sub.headers.websec.saarland",
+        "org_host": f"{base_host}",
+        "full_url": f"http://{base_host}/_hp/tests/referrer-access-rp.sub.html?resp_type=basic&browser_id=1&label=RP&first_id=199&last_id=199&scheme=http&t_resp_id=199&t_element_relation=iframe_window.open&t_resp_origin=http://{base_host}",
     }
 
     resp = httpx.post(

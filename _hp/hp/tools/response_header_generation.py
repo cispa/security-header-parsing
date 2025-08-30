@@ -330,23 +330,32 @@ class HeaderTestsMultHeader(HeaderTests):
 
 # In[7]:
 
+try:
+	wpt_config = json.load(open("/app/_hp/wpt-config.json"))
+except OSError:
+	try:
+		wpt_config = json.load(open("../../wpt-config.json"))
+	except OSError:
+		wpt_config = json.load(open("../../../wpt-config.json"))
 
-redirect_empty = ("location", "https://sub.headers.websec.saarland/_hp/common/empty.html")
-site = "sub.headers.websec.saarland"
-origin_s = "https://sub.headers.websec.saarland"
-origin_s_upper = "HTTPS://SUB.HEADERS.WEBSEC.SAARLAND"
+base_host = wpt_config["browser_host"]
+alt_host = wpt_config["alternate_hosts"]["alt"]
+redirect_empty = ("location", f"https://sub.{base_host}/_hp/common/empty.html")
+site = f"sub.{base_host}"
+origin_s = f"https://sub.{base_host}"
+origin_s_upper = f"HTTPS://SUB.{base_host}".upper()
 origin_s_path = f"{origin_s}/abc/"
 origin_s_query = f"{origin_s}/?a=a"
-origin = "http://sub.headers.websec.saarland"
+origin = f"http://sub.{base_host}"
 origin_sp = f"{origin_s}:443"
 home = f"{origin_s}/"
 home_p = f"{origin_sp}/"
-parent = "https://headers.websec.saarland"
-child = "https://sub.sub.headers.websec.saarland"
-parent_childs = "*.headers.websec.saarland"
-self_childs = "*.sub.headers.websec.saarland"
-self_childs_https = "https://*.sub.headers.websec.saarland"
-cross_site_origin = "https://headers.webappsec.eu"
+parent = f"https://{base_host}"
+child = f"https://sub.sub.{base_host}"
+parent_childs = f"*.{base_host}"
+self_childs = f"*.sub.{base_host}"
+self_childs_https = f"https://*.sub.{base_host}"
+cross_site_origin = f"https://{alt_host}"
 all_replacements = [site, origin_s, origin_s_upper, origin_s_path, origin_s_query, origin, origin_sp, home, home_p, parent, child, parent_childs, self_childs, self_childs_https, cross_site_origin]
 URL_REP = "<!URL!>"
 
@@ -361,7 +370,6 @@ def expand_urls(other_values):
         if not URL_REP in value:
             return_values.append(value)
         else:
-            # TODO: use combinations if more than one URL in value!
             # Only if less than 2 occurrences? Else chose a random value for each?
 
             # Currently: replace all occurrences of URL_REP with the same url_like

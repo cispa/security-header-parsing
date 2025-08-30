@@ -29,7 +29,7 @@ COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
 # Expose ports
-EXPOSE 80 443 8443 9000
+EXPOSE 80 443
 
 # WORKDIR /app
 

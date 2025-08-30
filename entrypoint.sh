@@ -8,7 +8,7 @@ done
 
 # Does not work on arm emulation
 if grep -qi "VirtualApple" /proc/cpuinfo; then
-  echo "Running under Rosetta emulation – skipping Xvfb"
+  echo "Running under Rosetta emulation - skipping Xvfb"
 else
   echo "Starting Xvfb and x11vnc available at port 5900 with passwd abc"
   rm -f /tmp/.X99-lock

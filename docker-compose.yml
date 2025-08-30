@@ -10,6 +10,7 @@ services:
       - ./data:/tmp/data
     ports:
       - "5432:5432"
+    command: ["postgres", "-c", "max_connections=500", "-c", "shared_buffers=512MB"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U header_user -d http_header_demo"]
       interval: 10s
@@ -17,16 +18,12 @@ services:
       retries: 10
 
   header-testing-server:
-    platform: linux/amd64  # This is required for running desktop linux browsers; It is possible to run on arm Macs, but it will be slow
-    shm_size: 2g
+    # This is required for running desktop linux browsers
+    # It is possible to run on arm Macs, but the performance is not good
+    # If only the WPT-HeaderTesting backend server is required, comment this line out on other platforms
+    platform: linux/amd64  
+    shm_size: 2g # Required for running desktop browsers
     build: .
-    extra_hosts:
-      - "headers.websec.saarland:0.0.0.0"
-      - "sub.headers.websec.saarland:0.0.0.0"
-      - "sub.sub.headers.websec.saarland:0.0.0.0"
-      - "headers.webappsec.eu:0.0.0.0"
-      - "sub.headers.webappsec.eu:0.0.0.0"
-      - "sub.sub.headers.webappsec.eu:0.0.0.0"
     depends_on:
       postgres:
         condition: service_healthy
@@ -37,20 +34,19 @@ services:
       DB_PASSWORD: header_password
       DB_NAME: http_header_demo
     ports:
-      - "80:80"
-      - "443:443"
-      - "8443:8443"
-      - "9000:9000"
-      - "8888:8888"
-      - "5900:5900"
+      - "80:80" # WPT-HeaderTesting server on HTTP: change port or disable if port is blocked
+      - "443:443" # WPT-HeaderTesting server on HTTPS: change port or disable if port is blocked
+      - "8888:8888" # Jupyter Lap for analysis: change port or disable if port is blocked
+      # - "5900:5900" # VNC viewer, enable to watch headful browsers in the Docker container
     volumes:
       - .:/app
-      - ./_hp/hp/tools/certs:/app/_hp/hp/tools/certs
     cap_add:
       - NET_BIND_SERVICE
     restart: unless-stopped
     command: [
       "poetry", "run", "-C", "/app/_hp", "python", "/app/wpt", "serve", "--config", "/app/_hp/wpt-config.json"
+      # Alternative server that restarts the server every 600s (required if server is internet-reachable)
+      # "poetry", "run", "-C", "/app/_hp", "python", "/app/server.py"
     ]
 
 volumes:

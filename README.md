@@ -1,188 +1,178 @@
-# Head(er)s Up! Detecting Security Header Inconsistencies in Browsers
+# Software for: Head(er)s Up! Detecting Security Header Inconsistencies in Browsers
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16890359.svg)](https://doi.org/10.5281/zenodo.16890359)
 
-This repository contains all code for our paper `Head(er)s Up! Detecting Security Header Inconsistencies in Browsers`.
+## General Info
+This repository contains all code for our paper: "Head(er)s Up! Detecting Security Header Inconsistencies in Browsers" published at [ACM CCS 2025](TODO).
+
+**The software consists of three main parts:**
+- A server component serving HTML test pages (e.g., framing test-page) and many HTTP responses for each tested security header.
+- Browser runners visiting the HTML test pages. Browser runners for Linux, macOS, Android (Emulators on Linux), and iPadOS (native) exist.
+- Jupyter analysis scripts analysing the collected data
+
+**Table of Contents:**
+- [Quickstart](#quickstart): Minimal setup of server component and browser runner
+- [Usage](#usage): Reference on how to use and adapt the code to run security header consistency tests in browsers
+- [Reproduction](#reproduction): Instructions on how to reproduce the results presented in the paper
+- [Inventory](#inventory): List of the contents of this repository
+
+**Additional Notes:**
 
 This repository is a fork of [WPT](https://github.com/web-platform-tests/wpt), the original README can be found [here](./README_original.md).
 All test and analysis code for our paper can be found in the [_hp](./_hp/README.md) directory.
-Our modified version of the wptserve HTTP server implementation can be found in the `tools/serve` and `tools/wptserve` directories. All other directories are untouched and required for `wptserve` to run, we removed the other WPT directories for clarity.
+Our modified version of the wptserve HTTP server implementation can be found in the `tools/serve` and `tools/wptserve` directories. All other directories are untouched and are required for `wptserve` to run, we removed the other WPT directories for clarity.
 
-The project is made out of 6 parts:
-1. Modified WPT server
-  - Dockerized and works on MacOS and Linux
-  - Optional: Configure settings: in `docker-compose.yml` and TODO, e.g., setup working certificates
-  - Start with `(sudo) docker compose up`, this starts a database, configures the HTTP responses, and starts our modified WPT server
-  - (Optional) Run tests to verify server is setup correctly: `sudo docker compose exec header-testing-server bash -c "poetry run -C _hp pytest /app/_hp"`
-  - The server is now serving all the tests pages and reponses for our paper. Depending on the configuration the server is now available within and outside the Docker network. E.g., by default it should bind to port 80 and 443 and `curl -I http://localhost/_hp/common/empty.html` and `curl -I -k https://localhost/_hp/common/empty.html` (our dummy certificates are not valid, thus `-k`/insecure is required) on the host should return a response from `BaseHTTP/0.6 Python/3.11.5`
-2. (Optional) Analysis scripts
-   - Dockerized and works on MacOS and Linux
-   - Run: `(sudo) docker compose exec header-testing-server bash -c "cd _hp/hp/tools/analysis && poetry run python analysis_demo.py"` to get some basic statistics about the test runs executed by the unit tests and running browser-test-runners.
-   - We also provide the data and the analysis scripts used for the paper:
-    - Download the database: `curl https://zenodo.org/records/16996059/files/http_header_original.dump\?download\=1 --output data/http_header_original.dump` (https://zenodo.org/records/16996059)
-    - Import the database into your local postgres: `(sudo) docker compose exec postgres psql -U header_user -d http_header_demo -c "CREATE DATABASE http_header_original;"` and `(sudo) docker compose exec -T postgres pg_restore -U header_user -d http_header_original -v /tmp/data/http_header_original.dump`
-    - Start the jupyter-lab: `(sudo) docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/analysis && poetry run jupyter-lab --allow-root --ip 0.0.0.0"` and access the URL printed on your local browser
-    - The files `analysis_may_2024.ipynb` and `analysis_december_2024.ipynb` contain the full analysis for the original browser run and the updated browser run experiments described in the paper, including the output of the analysis and can be executed to reproduce the analysis. Note: re-executing these scripts require a large amount of RAM for the docker container (~60GB, execution time: ~30m).
-3. (Optional) Test runner for desktop linux browsers
-   - Dockerized demo works on Linux and macOS; For a full run, the browser runner needs to be installed outside of docker on a linux system.
-   - Demo run:
-     - Run: `(sudo) docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/crawler/ && poetry run python desktop_selenium.py --debug_browsers --resp_type debug --ignore_certs"` for a quick check that data can be collected
-     - This should take around 2-3m
-     - Check `_hp/hp/tools/crawler/logs/desktop-selenium/` for logs, there should be two rows with `Start chrome (128)` and two with `Finish chrome (128)` and no additional rows. The results of these tests can also be seen in the database or checked with the `analysis_demo.py` script
-   - Reproduce the basic experiment:
-     - TODO (copy from below + verify, there are some issues with dockerized setup e.g. `--no-sandbox`?)
-     - Run `(sudo) docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/crawler/ && for i in {1..5}; do poetry run python desktop_selenium.py --num_browsers 50 --resp_type basic --ignore_certs; done"`
-   - Reproduce the parsing experiment:
-     - TODO
-   - Reproduce the updated browser experiment and other notes:
-     - TODO
-   - The test runner can be also used outside of the docker container for efficiency:
-     - Requires `python 3.11.5`, `poetry`, various browser dependencies and if run on a server without a screen `Xvfb` installed. Check `setup.bash` on how to install them (verified to work on Ubuntu 22.04)
-     - Then install all dependencies: `cd _hp && poetry install`
-     - Lastly, the modified WPT server needs to be reachable. One option is to modify `/etc/hosts/` to point the required hosts to the docker container  (see `_hp/host-config.txt`)
-     - Then `poetry run python desktop_selenium.py --help` can be used to see all settings of the test runner and then executed as wanted
-4. (Optional) Test runner for macOS browser
-   - Requires access to a macOS device with a display
-   - The Safari version is bound to the operating system, for an exact reproduction of our results, macOS devices in the correct version are required. To test the test runner on macOS, the used version can be updated in `desktop_selenium.py`
-   - Requirements: `python=3.11.5`, `poetry` (see `setup.bash`) and access to the modified WPT server
-   - Install `poetry install`
-   - Run: TODO, copy from below (some manual steps in Safari are required) (Note: the device is not fully usable during the testing)
-5. (Optional) Test runner for iPadOS browser
-  - Requires access to iPadOS devices (in the correct version)
-  - Only works in a setup where the server is setup to be reachable from the iPadOS (e.g., via public internet) and the server needs valid certificates
-  - Run: TODO, copy from below
-6. (Optional) Test runner for emulated Android browsers
-   - Requires access to a linux machine
-   - TODO: copy from below, install and run
+## Quickstart
+In this section, we explain how to setup our custom WPT-HeaderTesting backend server and run some small tests with it.
+- Prequistes:  Working installation of [Docker](https://docs.docker.com/get-started/get-docker/) on Linux or macOS. Ports 80, 443, 5432, and 8888 have to be available on the host machine or these exposed ports in [docker-compose.yml](docker-compose.yml) have to be disabled or changed.
+- Installation: Run `docker compose up` this starts a database, configures the HTTP responses, and starts our modified WPT-HeaderTesting server (the initial startup takes a couple of minutes)
+- Verify setup: Run `docker compose exec header-testing-server bash -c "poetry run -C _hp pytest /app/_hp"`: All tests should pass and the output should look similar to: `11 passed in 23.73s`
+- Manual checks:
+  - The server is now serving all the test pages and responses and should be available on the host (by default it binds to port 80 and 443). 
+  - Visit: http://localhost/_hp/common/frame-script-csp.js in a browser
+  - Run `curl -I http://localhost/_hp/common/empty.html` and `curl -I --insecure https://localhost/_hp/common/empty.html` (our dummy certificates are not valid, thus `--insecure` is required) on the host should return a response from `BaseHTTP/0.6 Python/3.11.5`
+- Demo run of the desktop linux test-runner in docker:
+  - Run: `docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/crawler/ && poetry run python desktop_selenium.py --debug_browsers --resp_type debug --ignore_certs"` for a quick check that data can be collected, this should take around 2-3m.
+  - Run: `docker compose exec header-testing-server bash -c 'cd /app/_hp/hp/tools/crawler/logs/desktop-selenium/; cat "$(ls -t | head -n1)"'` to verfiy the log file, there should be two rows with `Start chrome (128)` and two with `Finish chrome (128)` and no additional rows.
+- Analysis:
+  - Run: `docker compose exec header-testing-server bash -c "cd _hp/hp/tools/analysis && poetry run python analysis_demo.py"` to get some basic statistics about the test runs executed by the unit tests and running browser-test-runners.
+- For a productive use of the server and the test runners, we refer to the [usage section](#usage).
 
+## Usage
+In the following, we explain how to use this software to collect security header inconsistencies for (new) browsers and headers. This section assumes the [quickstart](#quickstart) was followed and first explains how to run and modify the WPT-HeaderTesting server and then how to use the various browser-runners.
 
-----
-Old review below:
+### WPT-HeaderTesting Server
+- Starting the server: Run `docker compose up -d` to start the server. Optionally modify the [docker-compose.yml](docker-compose.yml) for your needs, e.g., make the database available on the outside, disable the platform mode on non `linux/amd64` platforms for increased efficiency, or change ports.
+- (Optional) Adding responses:  modify [create_responses](_hp/hp/tools/create_responses.py) to add `basic` responses, modify [response_header_generation.py](_hp/hp/tools/response_header_generation.py) to add `parsing` responses
+- (Optional) Add new HTML tests: 
+  - If you want to add a test to an existing feature, you only need to open a test file in [_hp/tests/](_hp/tests/), add the testcode and add the test to `test_declarations`
+  - If you want to add a new test feature: add a new test file in [_hp/tests/](_hp/tests/), add supporting files in [_hp/common/](_hp/common/), add the server logic in [_hp/server/responses.py](_hp/server/responses.py), add responses for this feature (see above `adding responses`)
+- (Optional) Change the `host` domain of the server:
+  - By default the server is available at `(sub.)(sub.)headers.websec.saarland` and `(sub.)(sub.)headers.webappsec.eu` within the docker network and exposed to the host at port 80 and 443 (with a self-signed certificate)
+  - When running browser runners outside of the docker network, it is possible to keep this default config by mapping these hosts to the docker container running the server: e.g., if the dockerized WPT-HeaderTesting server runs on the same host where you want to run some browser test runners, you can add append the config of [host-config.txt](_hp/host-config.txt) to your `/etc/hosts` file such that the browser runners resolve these hosts to the docker container. Additionally, all browser runners have to be configured to accept the self-signed certificate (e.g., `--ignore_certs` for the linux browser runner).
+  - If the tested browser has no option to accept self-signed certificates or adapting the network to point these hosts to the WPT-HeaderTesting server is not possible or difficult (e.g., on iPadOS), it is also possible to change the hosts:
+    - Requirements: two domains (A, B) with subdomains `sub.[A|B]` and `sub.sub.[A|B]` pointing to the host where the WPT-HeaderTesting server is running
+    - Change the `browser_host` and `alt_host` in [wpt-config.json](_hp/wpt-config.json)
+    - Change the hosts in [host-config.txt](_hp/host-config.txt)
+    - Place your certificate and key that is valid for your domains in [_hp/hp/tools/certs/](_hp/hp/tools/certs/) and update the certificate and key path in [wpt-config.json](_hp/wpt-config.json)
+    - Lastly, recreate the dockerized server to take your updated config into account. Note that responses also have to be recreated. Running `docker compose down -v --rmi all`, `docker compose build --no-cache`, and `docker compose up -d` should ensure that everything was deleted and your new config is taken.
+    - If the host is accessible from the web: Note that while the WPT-HeaderTesting server is good at sending invalid HTTP responses for testing, it is not very robust when receiving invalid requests which you will receive from time to time when it is web accessible. It can be that the server get stuck when receiving such requests, we thus provide an alternative entrypoint script in [docker-compose.yml](docker-compose.yml) that automatically restarts the server every 600 seconds.
 
-## Setup and Start the Header Testing Server
-- Create a fresh Ubuntu22 container/VM: `lxc launch ubuntu:22.04 <name>` and connect to it `lxc exec <name> bash` (Other environments might also work but are not tested)
-  - Switch to the ubuntu user: `su - ubuntu`
-  - Clone this repository: `git clone git@github.com:header-testing/header-testing.git`
-  - Run the setup file: `cd header-testing/_hp`, `./setup.bash` (reopen all terminals or run `source ~/.bashrc` afterwards)
-  - Start a postgres instance somewhere that is reachable from this container.
-  - Configure DB settings in [config.json](_hp/hp/tools/config.json); Make sure that a database with the correct name already exists
-  - Setup the database: `cd _hp/hp/tools && poetry run python models.py`
-  - Setup certs: either remove `.demo` from the files in `_hp/hp/tools/certs/` to use self-signed certs or add your own certs here
-- Create the basic and parsing responses: Run `cd _hp/hp/tools && poetry run python create_responses.py` (basic), run `cd analysis && poetry run jupyter-lab` and execute `response_header_generation.ipynb` to generate the parsing responses.
--  Start the WPT server first (from the top-most folder): `poetry run -C _hp python wpt serve --config _hp/wpt-config.json`
-- Manually check if the server and the tests are working: Visit http://sub.headers.websec.saarland:80/_hp/tests/framing.sub.html and confirm that tests are loaded and executed.
-- Optional: Run tests to check that everything is working correctly: `poetry run -C _hp pytest _hp`
-- Optional: Change the used domains in [_hp/wpt-config.json](_hp/wpt-config.json) and [_hp/host-config.txt](_hp/host-config.txt)
-- To run it inside a Docker container: `docker compose up --build`. This should spin up the server (as we use the same docker for the linux desktop browsers, the container is configured as `platform: linux/amd64` meaning it is emulated and slow on AppleSilicon)
+### Browser Runners
+Our WPT-HeaderTesting server can be used with any browser runner that is able to reach the server and it is also possible to manually execute the tests in the browser.
+In the following, we provide instructions on how to use the browser runners we developed for our experiments.
 
+#### Linux
+The demo in [quickstart](#quickstart) used our Linux desktop test runner. It is possible to run the test runners in docker, but we observed multiple issues with it and thus recommend running the browsers outside of docker and have not tested more than the demo runs in docker.
+- Prerequisites: Linux installation (native, VM, lxc); tested with Ubuntu22.04, similar installation likely also work
+  - We recommend to use a fresh Ubuntu22 container: Run `lxc launch ubuntu:22.04 <name>`
+  - Connect to the container: Run `lxc exec <name> bash`
+  - Switch to the Ubuntu user: Run `su - ubuntu`
+  - The machine needs to be able to reach the database: if running the WPT-HeaderTesting on the same machine, change the DB connection string in [config.json](_hp/hp/tools/config.json) to `postgresql+psycopg2://header_user:header_password@localhost:5432/http_header_demo` otherwise adapt as necessary (port forwards, expose your db, ...)
+- Installation steps (should not be run as root user):
+  - Clone this repository: Run `git clone git@github.com:header-testing/header-testing.git`
+  - Install the necessary components:
+    - We recommend running `cd header-testing/_hp`, `./setup.bash` (reopen all terminals or run `source ~/.bashrc` afterwards)
+    - Alternativly the necessary tools can be installed manually (Browser dependencies, Xfvb and x11vnc, poetry, python3.11.5, ...) and then run `poetry install`
+- Use the browser runner:
+  - Go to the correct location: Run `cd _hp/hp/tools/crawler`
+  - Check the options to run the tool: `poetry run python desktop_selenium.py --help`
+  - Notes:
+    - Most browsers are managed automatically by selenium and downloaded automatically when first used. Brave is not managed by selenium and has to be downloaded manually: for instructions on how to download the correct brave versions, check the comments in [desktop_selenium.py](_hp/hp/tools/crawler/desktop_selenium.py)
+    - The used browser (versions) are specified in the `config` variable in [desktop_selenium.py](_hp/hp/tools/crawler/desktop_selenium.py) and can be changed there.
+    - If using self-signed certs, add `--ignore_certs` to all commands.
+    - For running headful browsers on a machine without a real display:
+      - Run `Xvfb :99 -screen 0 1920x1080x24 & && export DISPLAY=:99 && fluxbox -log fluxbox.log &`
+      - To be able to observe the browser, additionally run: `x11vnc -display :99 -bg -shared -forever -passwd abc -xkb -rfbport 5900` and then connect to it with any VNC viewer on port 5900
+  - Example commands:
+    - Run the debug test responses with the debug browsers: `poetry run python desktop_selenium.py --debug_browsers --resp_type debug --ignore_certs` (2-3m)
+    - Run the basic test responses with the browsers of the second browser run with 10 parallel browsers: `poetry run python desktop_selenium.py --new_browsers --resp_type basic --ignore_certs --num_browsers 10` (~15m)
 
-## Reproduce or Enhance our Results
-In the following, we describe how to reproduce all our results from the paper.
-By slightly adapting the configuration and updating the used browsers, it is also possible to run our tool chain on new/other browser configurations.
+#### macOS
+The test runner on macOS is in general the same as the one on Ubuntu.
+- Prerequisites:
+  - Real macOS device with a display
+  - Poetry: [poetry installation instructions](https://python-poetry.org/docs/#installing-with-the-official-installer) and Python 3.11 (we recommend to use pyenv for that `brew install pyenv` and `pyenv install 3.11`)
+  - The macOS devices needs to reach the WPT-HeaderTesting server at the specified host. When running the WPT-HeaderTesting server with the default config on the same macOS machine, you can append the entries from [host-config.txt](_hp/host-config.txt) to `/etc/hosts`, otherwise adapt them as necessary.
+  - The macOS device needs to be able to reach the database: if running the WPT-HeaderTesting on the same machine, change the DB connection string in [config.json](_hp/hp/tools/config.json) to `postgresql+psycopg2://header_user:header_password@localhost:5432/http_header_demo` otherwise adapt as necessary (port forwards, expose your db, ...).
+  - Configure Safari to be usable with Selenium: In Safari click on `Develop`, then on `Developer Settings`, then again on `Developer/Developer Settings` and then activate `Allow remote automation`
+- Use the browser runner:
+  - The usage of the browser runner is identical to on linux.
+  - Run `poetry python desktop_selenium.py --help` to see all options.
+  - Notes:
+    - The `--ignore_certs` option is not working in Safari, thus either setup the WPT-HeaderTesting server with a valid certificate or trust the self-signed certificate in macOS Keychain.
+    - The Safari version is bound to the OS version and the version has to be updated in [desktop_selenium.py](_hp/hp/tools/crawler/desktop_selenium.py), e.g., set it to `18.6` for macOS 17.6.
+    - Selenium can only automate a single Safari instance at a time (this is a Safari restriction), thus one always needs to set `--num_browsers 1`
+    - Everytime a new test is loaded, the Safari instance is receiving focus on MacOS. We try to minimize the annoyance by moving the Safari window (almost)out of the visible screen. However, one might still accidentally click or send other events to the automated Safari window. If that happens, the automation pauses (this is another Safari restriction) and one has to click on `Continue automation`. We recommend to use testing devices that only run the tests and are not otherwise used. 
+  - Example run: `poetry run python desktop_selenium.py --resp_type debug --num_browsers 1`
 
-### Desktop Browsers (Linux Ubuntu)
-- Note: if running in the docker container on AppleSilicon only headless browser will work as Xvfb cannot be emulated
-- Execute `cd _hp/hp/tools/crawler`
-- If using self-signed certs, add `--ignore_certs` to all commands.
-- Run the following for a quick test run to check that everything is working: `poetry run python desktop_selenium.py --debug_browsers --resp_type debug`
-- Full run:
-  - If the test environment cannot support 50 parallel browsers, reduce the `num_browsers` parameter.
-  - Run all basic tests: `for i in {1..5}; do poetry run python desktop_selenium.py --num_browsers 50 --resp_type basic; done`
-  - Run all parsing tests: `for i in {1..5}; do poetry run python desktop_selenium.py --num_browsers 50 --resp_type parsing; done`
-  - It can happen that some tests do not have 5 results after the above commands due to timeouts and similar, to ensure that all tests have at least 5 results run the below commands.
-  - Run missing basic tests: `poetry run python create_repeat.py --selection_str "\"Response\".resp_type = 'basic' and \"Browser\".os = 'Ubuntu 22.04'"` and `poetry run python desktop_selenium.py --num_browsers 50 --run_mode repeat --max_urls_until_restart 50`
-  - Run missing parsing tests: `poetry run python create_repeat.py --selection_str "\"Response\".resp_type = 'parsing' and \"Browser\".os = 'Ubuntu 22.04'"` and `poetry run python desktop_selenium.py --num_browsers 50 --run_mode repeat --max_urls_until_restart 50`
-  - To reproduce the results of the second experiment run with newer browsers, add `--new_browsers`
-  - To run our tests on newer browsers, adjust the browser config in `desktop_selenium.py`
-- Optional configuration to debug headfull browsers on the Ubuntu container:
-```bash
-Xvfb :99 -screen 0 1920x1080x24 &
-x11vnc -display :99 -bg -shared -forever -passwd abc -xkb -rfbport 5900
-export DISPLAY=:99 && fluxbox -log fluxbox.log &
-```
-
-### Desktop Browsers (MacOS)
-- Have to be run on a real MacOS device, we used version 17.3, 17.5, and 18.2 (adjust the browser configuration in `desktop_selenium.py` if using another version).
-- On MacOS the `setup.bash` script does not work. Instead manually install [poetry](https://python-poetry.org/docs/#installing-with-the-official-installer) and run `poetry install` in the `_hp` directory and append the entries from [host-config.txt](_hp/host-config.txt) to `/etc/hosts`.
-- Make sure that the MacOS device can reach the Header Testing server. (Alternatively it could also work to run the header testing server and the database locally on the MacOS device).
-- To be able to use Selenium with Safari, one needs to activate remote automation. In Safari: develop -> developer settings -> developer settings -> allow remote automation.
-- If using self-signed certs, add `--ignore_certs` to all commands.
-- Execute `cd _hp/hp/tools/crawler`
-- Full run:
-  - On the Header Testing Server:
-    - Create test-page-runner pages for basic tests: `poetry run python desktop_selenium.py --resp_type basic --gen_page_runner --max_urls_until_restart 100`
-    - Create test-page-runner pages for parsing tests: `poetry run python desktop_selenium.py --resp_type parsing --gen_page_runner --max_urls_until_restart 1000`
-    - The above two commands output a path similar to `basic-MaxURLs100-MaxResps10-MaxPopups100-53332b.json`, make sure to copy the files to the MacOS device and replace the file name in the following commands.
-  - On the MacOS device:
-    - Run the basic tests: `for i in {1..5}; do poetry run python desktop_selenium.py --num_browsers 1 --page_runner_json <basic-test-json> --timeout_task 1000; done`
-    - Run the parsing tests: `for i in {1..5}; do poetry run python desktop_selenium.py --num_browsers 1 --page_runner_json <parsing-test-json> --timeout_task 10000; done`
-    - Add `--new_browsers` for running on 18.2
-  - It can happen that not all tests recorded 5 results, thus run the following to ensure that all tests are executed at least 5 times:
-    - For the basic tests: `poetry run python create_repeat.py --selection_str "\"Response\".resp_type = 'basic' and \"Browser\".os != 'Android 11'"` and `poetry run python desktop_selenium.py --num_browsers 1 --run_mode repeat --timeout_task 10000`
-    - For the parsing tests: `poetry run python create_repeat.py --selection_str "\"Response\".resp_type = 'parsing' and \"Browser\".os != 'Android 11'"` and `poetry run python desktop_selenium.py --num_browsers 1 --run_mode repeat --timeout_task 10000`
-
-### Mobile Browsers (Android)
-- Execute `cd _hp/hp/tools/crawler`
-- To run the tests on Android devices, first some emulators have to be set up and the browsers have to be installed and configured:
-  - Download the Android SDK Command-Line Tools (command line tools only) form the Android Studio downloads page and unpack it in a folder called `AndroidSDK` (see https://developer.android.com/tools/sdkmanager ).
-  - Add `cmdline-tools` to the path: e.g., `export PATH=<path-to-AndroidSDK>/cmdline-tools/latest/bin/:$PATH`
-  - Install `platform-tools` and `emulator`: `sdkmanager platform-tools emulator`
-  - Add `platform-tools` to the path: e.g., `export PATH=<path-to-AndroidSDK>/platform-tools/:$PATH`
-  - Add `emulator` to the path: e.g., `export PATH=<path-to-AndroidSDK/emulator/:$PATH`
-  - Install and create a Pixel 3 Device with Android 11 installed:
-    - Run `sdkmanager --install "platforms;android-30" "system-images;android-30;google_apis;x86_64`
+#### Android (Emulated)
+We provide a test runner that can be used with emulated Android devices to efficiently run the tests in parallel.
+- Prerequisites:
+  - A powerful server to run the emulated android devices on, in particular hardware accelaration has to be available on the system. We tested it on Ubuntu 22.04, but other host operating systems should also work.
+  - The WPT-HeaderTesting server has to be setup to be reachible from the emulators via public DNS and the server needs valid certificates. Note: it is recommended to configure your firewall such that it only allows local access.
+  - The machine where the emulators are started also needs to have the poetry project installed 
+  - Download the Android SDK Command-Line Tools (command line tools only) and set it up (see https://developer.android.com/tools/sdkmanager for full documentation):
+    - Run `wget <link-from-downloads-page>` [Android Studio downloads page](https://developer.android.com/studio#command-line-tools-only)
+    - Unzip it: `unzip cmdlinetools-linux-<version_latest>.zip`
+    - Create a folder and move it there: `mkdir -p androidsdk/cmdline-tools/latest/ && mv cmdline-tools androidsdk/cmdline-tools/latest`
+    - Add `cmdline-tools` to the path: Run `export PATH=$(pwd)/androidsdk/cmdline-tools/latest/bin/:$PATH`
+    - Install `platform-tools` and `emulator`: Run `sdkmanager platform-tools emulator`
+    - Add `platform-tools` to the path: e.g., `export PATH=$(pwd)/androidsdk/platform-tools/:$PATH`
+    - Add `emulator` to the path: e.g., `export PATH=$(pwd)/androidsdk/emulator/:$PATH`
+  - Install and create a Pixel 3 Device with Android 11 installed (for efficient runs, create multiple devices such that the tests can be run in parallel):
+    - Run `sdkmanager --install "platforms;android-30" "system-images;android-30;google_apis;x86_64"`
     - Run `avdmanager create avd -n device_1 -k "system-images;android-30;google_apis;x86_64" --device "pixel_3" --force`
-  - Install `scrcpy` to be able to interact with the Android Device: `apt install scrcpy`
+  - Install `scrcpy` to be able to interact with the Android Device: `sudo apt install scrcpy`
   - Browser Installation and Setup:
-    - Start the emulator: `emulator @device_1 -screen multi-touch -no-window -port 5554&`
-    - Attach with `scrcpy`
+    - Start the emulator: Run `emulator @device_1 -screen multi-touch -no-window -port 5554&`
+    - Attach to the device: Run `scrcpy`
     - Setup required browsers:
-      - Download the corresponding APKs:
-        - Chrome: https://www.apkmirror.com/apk/google-inc/chrome/chrome-121-0-6167-180-release/ (x86 APK)
-        - Brave: https://www.apkmirror.com/apk/brave-software/brave-browser/brave-browser-1-62-165-release/ (x86 APK)
-        - Firefox Beta: https://www.apkmirror.com/apk/mozilla/firefox-beta/firefox-beta-123-0b9-release/ (universal APK)
-      - Install the APKs:
-        - Run `adb -s emulator-5554 install -r -g <path to apk>` for all three APKs
+      - Download the corresponding APKs, for example manually from apkmirror:
+        - Chrome 121: https://www.apkmirror.com/apk/google-inc/chrome/chrome-121-0-6167-180-release/` (x86 APK)
+        - Brave 1.62.165: https://www.apkmirror.com/apk/brave-software/brave-browser/brave-browser-1-62-165-release/ (x86 APK)
+        - Firefox Beta 123: https://www.apkmirror.com/apk/mozilla/firefox-beta/firefox-beta-123-0b9-release/ (universal APK)
+      - Install the APKs: Run `adb -s emulator-5554 install -r -g <path to apk>` for all APKs
     - Additional browser config (popups need to be allowed):
       - Open all browsers and go through their setup screen, then allow popups in all of them:
       - Open chrome: By default, Pop-ups and redirects are blocked. To allow, go to `Settings/Site Settings/ Turn on the Pop-Ups and Redirects option`
       - Open brave: By default, Pop-ups and redirects are blocked. To allow, go to `Settings/Site Settings/ Turn on the Pop-Ups and Redirects option`
       - Open firefox_beta: To allow popups, go to `about:config`, and then set `dom.disable_open_during_load` to false.
-    - Stop the emulator: `adb -s emulator-5554 emu kill`
-- The emulators also need to be able to reach the Header Testing server.
-- Issue: currently does not work with the self-signed certs, make sure to have correct certs setup
-- Full run:
-  - Run the basic tests: `for i in {1..5}; do timeout 15m poetry run python android_intent.py -browsers chrome -repeat 1 -num_devices 30 -type basic -auto_restart; done`
-  - Run the parsing tests: `for i in {1..5}; do timeout 6h poetry run python android_intent.py -browsers chrome -repeat 1 -num_devices 30 -type parsing -auto_restart; done`
-  - Similarly to the other tests, it could happen that not all tests collected 5 results, thus run the following to rerun some tests.
-  - Create the repeat file for the basic tests: `poetry run python create_repeat.py --selection_str "\"Response\".resp_type = 'basic' and \"Browser\".os = 'Android 11'"`
-  - Run them: `poetry run python android_intent.py -browsers all -repeat 1 -num_devices 30 -url_json repeat.json -auto_restart`
-  - Create the repeat file for the parsing tests: `poetry run python create_repeat.py --selection_str "\"Response\".resp_type = 'parsing' and \"Browser\".os = 'Android 11'"`
-  - Run them: `poetry run python android_intent.py -browsers all -repeat 1 -num_devices 30 -url_json repeat.json -auto_restart`
+- Run browser test in them:
+  - Run `cd _hp/hp/tools/crawler`
+  - If you install other apks, update [android_config.json](_hp/hp/tools/crawler/android_config.json)
+  - Change the DB config [config.json](_hp/hp/tools/config.json) such that the script can reach the DB. If the WPT-HeaderTesting server is running on the same device, change `postgres` to `localhost`.
+  - Run `poetry run python android_intent.py --help` to see all available settings
+  - Run `poetry run python android_intent.py -browser chrome -num_devices 1 -type debug -auto_restart` for a quick demo
+- If you want to stop the emulator: Run `adb -s emulator-5554 emu kill`
 
+#### ipadOS/generic Runner
+In addition to the above browser runners that require Selenium, AndroidSDK, and similar, we also provide a generic browser runner that only requires to visit a single orchestration URL that then uses popups to execute each test. We used this test runner for the ipadOS runs, where we manually entered the URL in the browser.
+- Notes:
+  - The browser where the test page is opened needs to be able to reach the WPT-HeaderTesting server.
+  - If the server has not valid certificates, the browser needs to be configured to ignore certificate errors or the self-signed certificate has to be trusted.
+  - Popups needs to be allowed in the browser. For our iPad runs, we used the Chrome browser (currently still uses WebKit). On the iPad, open Chrome and go to `Open Settings` -> `Content-Settings` -> `Block Pop-Ups` and toggle it `off`.
+- Usage instructions:
+  - On the WPT-HeaderTesting server:
+    - Adjust [create_generic_browser.py](_hp/hp/tools/crawler/create_generic_browser.py) to fit to the browser/os version info, you are using and then run `docker compose exec header-testing-server bash -c "cd _hp/hp/tools/crawler && poetry run python create_generic_browser.py"` and note down the `browser_id` printed. 
+    - Run: `docker compose exec header-testing-server bash -c "cd _hp/hp/tools/crawler && poetry run python desktop_selenium.py --gen_page_runner --resp_type debug --max_urls_until_restart 10000 --gen_multiplier 1"` and note the returned URLs (they are also saved ina file in the `crawler` folder)
+      - `--resp_type` specifies the response type that should be tested `debug, basic, parsing`
+      - `--max_urls_until_restart` specifies how many URLs are opened on maximum on one top-level test page. If this is high you only need to visit a single URL in the browser, but there could be issues with state accumulation. If this is low, many URLs that you have to visit somehow are generated. Note that there are always at least two URLs to visit, as we do not mix tests on HTTP and HTTPS.
+      - `--gen_multiplier` specifies how often the same test is executed, to deal with noise it is recommened to run all tests several times
+  - On your device: Finally visit the URLs printed (e.g., by manually pasting them into the browser URL bar) and append `?browser_id=<browser_id>` to the URL. Example: `https://sub.headers.websec.saarland/_hp/tests/test-page-runner-1_ed4f3b-0.html?browser_id=16`
 
-### Mobile Browsers (iPadOS)
-- To run the tests on iPadOS a real iPad is required. The iPad also needs to be able to reach the Header Testing Server.
-- Issue: currently does not work with the self-signed certs, make sure tho have correct certs setup
-- On the iPad install Chrome (uses WebKit) and allow popups (Open Settings -> Content-Settings -> Block Pop-Ups -> Off)
-- Full run:
-  - On the Header Testing server:
-    - Execute `cd _hp/hp/tools/crawler`
-    - Add the DB entry: adjust the browser/os version info and then run `poetry run python create_ipados_browser.py` and note the returned browser_id
-    - Generate URLs to visit:
-      - Basic: `poetry run python desktop_selenium.py --resp_type basic --gen_page_runner --max_urls_until_restart 10000 --gen_multiplier 5`
-      - Parsing: `poetry run python desktop_selenium.py --resp_type parsing --gen_page_runner --max_urls_until_restart 100000 --gen_multiplier 5`
-  - On the iPad:
-    - Visit the URLs generated by the above commands and add `?browser_id=<browser_id>` to the URL, example: `https://sub.headers.websec.saarland/_hp/tests/test-page-runner-1_ed4f3b-0.html?browser_id=16`
-  - To ensure that all tests have at least 5 results run the following:
-    - On the server:
-      - Generate the repeats: `poetry run python create_repeat.py --selection_str "\"Response\".resp_type = 'parsing' and \"Browser\".os != 'Android 11'"`
-      - Create a page-runner URL containing all URLs: `poetry run python create_page_runner_repeats.py --browser_id <browser_id>`
-    - On the iPad:
-      - Visit the page-runner URL
+## Reproduction
+We provide the full analysis scripts (including the output), the collected dataset [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16996059.svg)](https://doi.org/10.5281/zenodo.16996059), and instructions on how to rerun the analysis scripts and how we collected the data to enable full reproduction of this work.
+We note that a full reproduction of this work is a significant effort and refer most readers to the [usage section](#usage) instead and encourage them to use our test runners and WPT-HeaderTesting server to test new browser versions and new security headers.
 
-### Analysis:
-  - Execute `cd _hp/hp/tools/analysis && poetry run jupyter-lab`
-  - Open and run `_hp/hp/tools/analysis/analysis_may_2024.ipynb` or `_hp/hp/tools/analysis/analysis_december_2024.ipynb`
-  - Note that the analysis is tailored towards our results from May or December 2024 and some small changes might be required if run on new data
+The files [analysis_may_2024.ipynb](_hp/hp/tools/analysis/analysis_may_2024.ipynb) (original analysis) and [analysis_december_2024.ipynb](_hp/hp/tools/analysis/analysis_december_2024.ipynb) (updated with additional browser versions) contain the full analysis used in our paper, including the output of the analysis. They can be viewed directly on GitHub or a jupyter server can be started to view them in Jupyter Lab. Note that the clustering output uses Jupyter Widgets that cannot be saved fully.
+
+We also provide instructions to rerun the analysis scripts such that the clustering output can be seen and to verify that the output is correct. Note that re-executing the analysis scripts require a large amount of RAM available for the docker container (~60GB per script; they can be run indepedently) and take around 30m to execute. 
+- Download the database: `curl https://zenodo.org/records/16996059/files/http_header_original.dump\?download\=1 --output data/http_header_original.dump` [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16996059.svg)](https://doi.org/10.5281/zenodo.16996059)
+- Import the database into your local postgres: `docker compose exec postgres psql -U header_user -d http_header_demo -c "CREATE DATABASE http_header_original;"` and `docker compose exec -T postgres pg_restore -U header_user -d http_header_original -v /tmp/data/http_header_original.dump`
+- Start the jupyter-lab: `docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/analysis && poetry run jupyter-lab --allow-root --ip 0.0.0.0"` and access the URL printed on your local browser
+- Run the analysis scripts in jupyter lab and analyze the outputs
+
+For instructions on the commands we used to collect the above dataset and on how to reproduce it, we refer to the [Artifact Appendix](TODO).
 
 ## Inventory
 - `_hp/`: All test and analysis code for the paper:
@@ -196,6 +186,30 @@ export DISPLAY=:99 && fluxbox -log fluxbox.log &
     - `analysis/`: Analysis code (.ipynb files) + utils
     - `certs/`: Put your certs here to enable testing of HTTPS
     - `crawler/`:  Intent (Android), Selenium (Mac + Ubuntu), and Browser Page Runner (iOS) test runners + utils
-  - `pyproject.toml`, `wpt-config.json`, and more: Various config files for the project
+  - `pyproject.toml`, `wpt-config.json`, `host-config.txt`, `setup.bash`: Various config files for the project
 - `tools/`: Contains modified `wptserve`
+- `data/`: Directory to download the original database dump to
+- `README.md`: This file
+- `README_original.md`: The original WPT README
+- `Dockerfile`, `docker-compose.yml`, `entrypoint.sh`: Docker files for a quick setup of this project
+- `server.py`: Script to run the `wptserve` with automatic restarts
 - Other directories are used by `wptserve` internally but are not modified
+
+## Contact
+
+If there are questions about our tools or paper, please either file an issue or contact `jannis.rautenstrauch (AT) cispa.de`.
+
+## Research Paper
+
+The paper is available at the [ACM Digital Library](TODO). 
+You can cite our work with the following BibTeX entry:
+```latex
+@inproceedings{rautenstrauch2025header,
+ author = {Rautenstrauch, Jannis and Nguyen, Trung Tin and Ramakrishnan, Karthik and Stock, Ben},
+ booktitle = {ACM CCS},
+ title = {{Head(er)s Up! Detecting Security Header Inconsistencies in Browsers}},
+ year = {2025},
+ doi = {TODO},
+}
+```
+

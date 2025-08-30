@@ -41,10 +41,6 @@
         async_test(t => {
             t.set_test_info(url, test_info);
             let final_url = url + response_id + `&resp=1`;
-            let asis_id = urlParams.get("asis_id");
-            if (asis_id) {
-                final_url = "https://" + "headers.webappsec.eu" + "/_hp/asis/" + asis_id;
-            }
             fetchDataWithTimeout(final_url, 0.9*test_timeout, { "mode": "cors", "method": method, "credentials": credentials, "headers": headers })
             .then((r) => test_fetch(t, r, null)).catch((e) => test_fetch(t, null, e))
             // Cleanup function (not called for tests that time out?)

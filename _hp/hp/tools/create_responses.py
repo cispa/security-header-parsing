@@ -1,6 +1,6 @@
 """
 Generates all debug and basic responses.
-Parsing responses are generated in analysis/response_header_generation.ipynb
+Parsing responses are generated in response_header_generation.py
 """
 from hp.tools.models import Response, Session
 
@@ -310,7 +310,6 @@ header_list = [[(header_name, "*")], [],
                [(header_name, f"{v1}, {v2}, {v3}, {v4}, {v5}, {v6}, {v7}")],
                [(header_name, f"abc, {v1}")]
             ]
-# TODO
 # [["Strict-Transport-Security", "max-age=20"], ["Strict-Transport-Security", "max-age=20; includeSubDomains"], ["Strict-Transport-Security", "includeSubDomains"], ["Strict-Transport-Security", ""], ["Strict-Transport-Security", "max-age=20; includeSubDomains; preload"], ["Strict-Transport-Security", "max-age=0"], ["Strict-Transport-Security", "max-age=-5"]]
 create_responses(header_list, label, resp_type="basic")
 # Some basic headers with redirect

@@ -20,10 +20,6 @@
         test_name = `accesswindow_${test_info}|${origin}|${response_id}`;
         async_test(t => {
             t.set_test_info(url, test_info);
-            let asis_id = urlParams.get("asis_id");
-            if (asis_id) {
-                url = "https://" + "sub.headers.websec.saarland" + "/_hp/asis/" + asis_id + "?";
-            }
             let w = window.open(url + response_id, "_blank");
             t.step_timeout(() => {
                 let outcome;
@@ -42,7 +38,7 @@
                 try {
                     w.close();
                 } catch (e) {
-                    // TODO: Challenge we cannot close the windows that set COOP!
+                    // Challenge we cannot close the windows that set COOP!
                 }
             });
         }, test_name);

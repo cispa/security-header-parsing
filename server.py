@@ -4,7 +4,7 @@ import subprocess
 import time
 
 # Configurable parameters
-command = ["poetry", "run", "-C", "_hp", "python", "wpt", "serve", "--config", "_hp/wpt-config.json"]
+command = ["poetry", "run", "-C", "/app/_hp", "python", "/app/wpt", "serve", "--config", "/app/_hp/wpt-config.json"]
 restart_interval = 600  # Time in seconds before restarting
 max_retries = 4  # Max number of restart attempts (in an row)
 

@@ -40,13 +40,7 @@
             // No-CORS request such that we do not have to care about ACAO
             try {
                 // The initial fetch should be fast
-                let asis_id = urlParams.get("asis_id");
-                let r;
-                if (asis_id) {
-                    r = await fetchDataWithTimeout("https://" + u.host + "/_hp/asis/" + asis_id, test_timeout/5);
-                } else {
-                    r = await fetchDataWithTimeout(url + response_id, test_timeout/5);
-                }
+                let r = await fetchDataWithTimeout(url + response_id, test_timeout/5);
                 assert_equals(r.bodyUsed, false, "Initial request succeeded");
                 // Visit http://(sub.)host to check for HSTS/redirect
                 let test_url;
