@@ -170,9 +170,9 @@ We also provide instructions to rerun the analysis scripts such that the cluster
 - Download the database: `curl https://zenodo.org/records/16996059/files/http_header_original.dump\?download\=1 --output data/http_header_original.dump` [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16996059.svg)](https://doi.org/10.5281/zenodo.16996059)
 - Import the database into your local postgres: `docker compose exec postgres psql -U header_user -d http_header_demo -c "CREATE DATABASE http_header_original;"` and `docker compose exec -T postgres pg_restore -U header_user -d http_header_original -v /tmp/data/http_header_original.dump`
 - Start the jupyter-lab: `docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/analysis && poetry run jupyter-lab --allow-root --ip 0.0.0.0"` and access the URL printed on your local browser
-- Run the analysis scripts in jupyter lab and analyze the outputs
+- Run the analysis scripts in jupyter lab and analyze the outputs: the `analysis_december_2024.ipynb` notebook contains the full analysis including the original and the updated browser runs, thus usually it should be enough to use that.
 
-For instructions on the commands we used to collect the above dataset and on how to reproduce it, we refer to the [Artifact Appendix](TODO).
+For instructions on the commands we used to collect the above dataset and on how to reproduce it, we refer to the [Artifact Appendix](TODO) and the [reproduction instructions](REPRODUCTION.md).
 
 ## Inventory
 - `_hp/`: All test and analysis code for the paper:
@@ -191,6 +191,7 @@ For instructions on the commands we used to collect the above dataset and on how
 - `data/`: Directory to download the original database dump to
 - `README.md`: This file
 - `README_original.md`: The original WPT README
+- `REPRODUCTION.md`: Lists the commands used to collect the data for the paper
 - `Dockerfile`, `docker-compose.yml`, `entrypoint.sh`: Docker files for a quick setup of this project
 - `server.py`: Script to run the `wptserve` with automatic restarts
 - Other directories are used by `wptserve` internally but are not modified
