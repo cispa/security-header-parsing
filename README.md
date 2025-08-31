@@ -2,7 +2,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16890359.svg)](https://doi.org/10.5281/zenodo.16890359)
 
 ## General Info
-This repository contains all code for our paper: "Head(er)s Up! Detecting Security Header Inconsistencies in Browsers" published at [ACM CCS 2025](TODO).
+This repository contains all code for our paper: "Head(er)s Up! Detecting Security Header Inconsistencies in Browsers" published at [ACM CCS 2025](https://doi.org/10.1145/3719027.3765119).
 
 **The software consists of three main parts:**
 - A server component serving HTML test pages (e.g., framing test-page) and many HTTP responses for each tested security header.
@@ -202,7 +202,7 @@ If there are questions about our tools or paper, please either file an issue or 
 
 ## Research Paper
 
-The paper is available at the [ACM Digital Library](TODO). 
+The paper is available at the [ACM Digital Library](https://doi.org/10.1145/3719027.3765119). 
 You can cite our work with the following BibTeX entry:
 ```latex
 @inproceedings{rautenstrauch2025header,
@@ -210,7 +210,7 @@ You can cite our work with the following BibTeX entry:
  booktitle = {ACM CCS},
  title = {{Head(er)s Up! Detecting Security Header Inconsistencies in Browsers}},
  year = {2025},
- doi = {TODO},
+ doi = {https://doi.org/10.1145/3719027.3765119},
 }
 ```
 

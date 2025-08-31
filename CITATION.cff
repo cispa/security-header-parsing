@@ -12,7 +12,7 @@ authors:
 title: Head(er)s Up! Detecting Security Header Inconsistencies in Browsers
 version: 1.0.0
 url: TODO
-doi: TODO
+doi: 10.1145/3719027.3765119
 date-released: '2025-09-01'
 preferred-citation:
   authors:
@@ -25,13 +25,13 @@ preferred-citation:
     - family-names: Stock
       given-names: Ben
   title: Head(er)s Up! Detecting Security Header Inconsistencies in Browsers
-  doi: TODO
+  doi: 10.1145/3719027.3765119
   url: TODO
   type: conference-paper
   pages: TODO
-  year: 'TODO'
-  isbn: 'TODO'
-  collection-title: Proceedings of the 32nd ACM Conference on Computer and Communications Security
+  year: '2025'
+  isbn: '979-8-4007-1525-9/2025/10'
+  collection-title: Proceedings of the 2025 ACM SIGSAC Conference on Computer and Communications Security
   conference:
     name: CCS '25
   publisher:
