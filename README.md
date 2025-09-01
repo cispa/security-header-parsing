@@ -1,5 +1,5 @@
 # Software for: Head(er)s Up! Detecting Security Header Inconsistencies in Browsers
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16890359.svg)](https://doi.org/10.5281/zenodo.16890359)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16890358.svg)](https://doi.org/10.5281/zenodo.16890358)
 
 ## General Info
 This repository contains all code for our paper: "Head(er)s Up! Detecting Security Header Inconsistencies in Browsers" published at [ACM CCS 2025](https://doi.org/10.1145/3719027.3765119).
@@ -161,13 +161,13 @@ In addition to the above browser runners that require Selenium, AndroidSDK, and 
   - On your device: Finally visit the URLs printed (e.g., by manually pasting them into the browser URL bar) and append `?browser_id=<browser_id>` to the URL. Example: `https://sub.headers.websec.saarland/_hp/tests/test-page-runner-1_ed4f3b-0.html?browser_id=16`
 
 ## Reproduction
-We provide the full analysis scripts (including the output), the collected dataset [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16996059.svg)](https://doi.org/10.5281/zenodo.16996059), and instructions on how to rerun the analysis scripts and how we collected the data to enable full reproduction of this work.
+We provide the full analysis scripts (including the output), the collected dataset [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16996058.svg)](https://doi.org/10.5281/zenodo.16996058), and instructions on how to rerun the analysis scripts and how we collected the data to enable full reproduction of this work.
 We note that a full reproduction of this work is a significant effort and refer most readers to the [usage section](#usage) instead and encourage them to use our test runners and WPT-HeaderTesting server to test new browser versions and new security headers.
 
 The files [analysis_may_2024.ipynb](_hp/hp/tools/analysis/analysis_may_2024.ipynb) (original analysis) and [analysis_december_2024.ipynb](_hp/hp/tools/analysis/analysis_december_2024.ipynb) (updated with additional browser versions) contain the full analysis used in our paper, including the output of the analysis. They can be viewed directly on GitHub or a jupyter server can be started to view them in Jupyter Lab. Note that the clustering output uses Jupyter Widgets that cannot be saved fully.
 
 We also provide instructions to rerun the analysis scripts such that the clustering output can be seen and to verify that the output is correct. Note that re-executing the analysis scripts require a large amount of RAM available for the docker container (~60GB per script; they can be run indepedently) and take around 30m to execute. 
-- Download the database: `curl https://zenodo.org/records/16996059/files/http_header_original.dump\?download\=1 --output data/http_header_original.dump` [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16996059.svg)](https://doi.org/10.5281/zenodo.16996059)
+- Download the database: `curl https://zenodo.org/records/16996059/files/http_header_original.dump\?download\=1 --output data/http_header_original.dump` [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16996058.svg)](https://doi.org/10.5281/zenodo.16996058)
 - Import the database into your local postgres: `docker compose exec postgres psql -U header_user -d http_header_demo -c "CREATE DATABASE http_header_original;"` and `docker compose exec -T postgres pg_restore -U header_user -d http_header_original -v /tmp/data/http_header_original.dump`
 - Start the jupyter-lab: `docker compose exec header-testing-server bash -c "cd /app/_hp/hp/tools/analysis && poetry run jupyter-lab --allow-root --ip 0.0.0.0"` and access the URL printed on your local browser
 - Run the analysis scripts in jupyter lab and analyze the outputs: the `analysis_december_2024.ipynb` notebook contains the full analysis including the original and the updated browser runs, thus usually it should be enough to use that.
